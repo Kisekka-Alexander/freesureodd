@@ -5,13 +5,11 @@ export function Hero() {
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="mb-6 text-5xl font-bold leading-tight md:text-6xl lg:text-7xl">
             <span className="bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-transparent">
-              Next.js Starter
-            </span>{" "}
-            Template
+              Football Predictions
+            </span>
           </h1>
           <p className="mb-8 text-xl text-primary-foreground/90 md:text-2xl">
-            A comprehensive starter template with TypeScript, Tailwind CSS, and
-            full-stack features
+            Mathematical football predictions /forebets/ and football statistics
           </p>
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
             <button className="rounded-lg bg-background px-8 py-3 font-semibold text-foreground transition-colors hover:bg-background/90">

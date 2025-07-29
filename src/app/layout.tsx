@@ -9,7 +9,7 @@ import PlausibleProvider from "next-plausible";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Next.js Starter Template",
+  title: "Football Predictions",
   description:
     "A comprehensive Next.js starter template with TypeScript, Tailwind CSS, and full-stack features",
 };

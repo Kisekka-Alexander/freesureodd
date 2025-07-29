@@ -1,6 +1,6 @@
-# Next.js Starter Template
+# Football Predictions
 
-A comprehensive Next.js starter template built with TypeScript, Tailwind CSS, and a full-stack tech stack for rapid development. Perfect as a foundation for any modern web application.
+Mathematical football predictions /forebets/ and football statistics. Perfect as a foundation for any modern web application.
 
 ## Tech Stack
 
