@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount the entire project except node_modules
+      - .:/app:cached
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=your-super-secret-key-here-change-this-in-production
+      # Next.js specific settings for Docker
+      - WATCHPACK_POLLING=true
+    command: sh -c "npm install && npm run dev -- -H 0.0.0.0"
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000/api/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

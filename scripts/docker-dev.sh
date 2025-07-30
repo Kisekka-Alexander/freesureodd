@@ -19,41 +19,51 @@ case "$1" in
       --rm \
       surewin:latest
     ;;
-  "compose")
-    echo "🐳 Starting with Docker Compose..."
-    docker compose up --build
-    ;;
-  "compose-dev")
-    echo "🔧 Starting development with Docker Compose..."
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+  "dev")
+    echo "🔧 Starting development environment..."
+    echo "📁 Source code mounted for hot reload"
+    echo "🚀 Access your app at http://localhost:3000"
+    echo ""
+    
+    # Stop any existing containers first
+    docker compose -f docker-compose.dev.yml down --remove-orphans 2>/dev/null || true
+    
+    # Start development environment
+    docker compose -f docker-compose.dev.yml up --build
     ;;
   "stop")
     echo "🛑 Stopping containers..."
-    docker compose down
+    docker compose -f docker-compose.dev.yml down 2>/dev/null || true
     docker stop surewin-app 2>/dev/null || true
     ;;
   "clean")
     echo "🧹 Cleaning up Docker resources..."
-    docker compose down --rmi all --volumes --remove-orphans
+    docker compose -f docker-compose.dev.yml down --rmi all --volumes --remove-orphans
     docker rmi surewin:latest 2>/dev/null || true
     echo "✅ Cleanup complete!"
+    ;;
+  "logs")
+    echo "📋 Showing development logs..."
+    docker compose -f docker-compose.dev.yml logs -f
     ;;
   *)
     echo "🐳 SureWin Docker Helper"
     echo ""
-    echo "Usage: $0 {build|run|compose|compose-dev|stop|clean}"
+    echo "Usage: $0 {build|run|dev|stop|clean|logs}"
     echo ""
     echo "Commands:"
-    echo "  build      - Build the Docker image"
-    echo "  run        - Run the container (after building)"
-    echo "  compose    - Start with Docker Compose"
-    echo "  compose-dev- Start in development mode"
+    echo "  build      - Build the production Docker image"
+    echo "  run        - Run the production container"
+    echo "  dev        - Start development with HOT RELOAD ✨"
     echo "  stop       - Stop running containers"
     echo "  clean      - Remove all containers and images"
+    echo "  logs       - Show development container logs"
     echo ""
-    echo "Examples:"
+    echo "💡 For development with hot reload:"
+    echo "  $0 dev"
+    echo ""
+    echo "🚀 For production:"
     echo "  $0 build && $0 run"
-    echo "  $0 compose"
     exit 1
     ;;
 esac 

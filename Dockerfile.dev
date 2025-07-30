@@ -1,0 +1,21 @@
+# Use Node.js LTS
+FROM node:20-alpine
+
+# Install necessary tools
+RUN apk add --no-cache wget curl
+
+WORKDIR /app
+
+# Install dependencies only when needed
+COPY package.json package-lock.json ./
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PATH /app/node_modules/.bin:$PATH
+
+# Expose port
+EXPOSE 3000
+
+# Start development server
+CMD ["npm", "run", "dev"] 
