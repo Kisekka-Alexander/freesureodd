@@ -9,9 +9,9 @@ import PlausibleProvider from "next-plausible";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Football Predictions",
+  title: "SureWin - AI Football Predictions & Analysis",
   description:
-    "A comprehensive Next.js starter template with TypeScript, Tailwind CSS, and full-stack features",
+    "Get the most accurate football predictions with 85%+ success rate. AI-powered match analysis covering Premier League, La Liga, Champions League and 15+ major leagues. Join thousands of winning football fans.",
 };
 
 export default function RootLayout({
