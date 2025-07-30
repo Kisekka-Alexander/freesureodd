@@ -13,7 +13,6 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
     probabilities,
     model_info,
     features_used,
-    predicted_at,
   } = prediction;
 
   const formatDate = (dateString: string) => {

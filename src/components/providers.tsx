@@ -15,8 +15,9 @@ export function Providers({ children }: ProvidersProps) {
 
   useEffect(() => {
     const initMSW = async () => {
-      // Only start MSW if explicitly enabled via environment variable
+      // Only initialize MSW in the browser and in development mode
       if (
+        typeof window !== "undefined" &&
         process.env.NODE_ENV === "development" &&
         process.env.NEXT_PUBLIC_USE_MSW === "true"
       ) {
@@ -30,7 +31,7 @@ export function Providers({ children }: ProvidersProps) {
           console.error("Failed to start MSW:", error);
         }
       } else {
-        console.log("Using real backend - MSW disabled");
+        console.log("Using real backend - MSW disabled or not in browser");
       }
       setMswReady(true);
     };
@@ -38,8 +39,9 @@ export function Providers({ children }: ProvidersProps) {
     initMSW();
   }, []);
 
-  // Don't render children until MSW is ready in development (only if MSW is enabled)
+  // Don't render children until MSW is ready in development (only if MSW is enabled and in browser)
   if (
+    typeof window !== "undefined" &&
     process.env.NODE_ENV === "development" &&
     process.env.NEXT_PUBLIC_USE_MSW === "true" &&
     !mswReady

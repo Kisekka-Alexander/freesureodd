@@ -36,6 +36,8 @@ npm install
 yarn install
 # or
 pnpm install
+# or
+bun install
 ```
 
 3. Set up environment variables:
@@ -56,6 +58,8 @@ npm run dev
 yarn dev
 # or
 pnpm dev
+# or
+bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -162,6 +166,58 @@ NEXT_PUBLIC_PLAUSIBLE_DOMAIN=yourdomain.com
 - `npm run build` - Build production application
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+
+### Docker Scripts
+
+- `npm run docker:build` - Build Docker image
+- `npm run docker:run` - Run Docker container
+- `npm run docker:compose` - Start with Docker Compose
+- `npm run docker:stop` - Stop Docker containers
+
+## 🐳 Docker Deployment
+
+This application is fully dockerized and uses **Bun** for ultra-fast dependency installation and builds.
+
+### Quick Start with Docker
+
+**Option 1: Using Docker Compose (Recommended)**
+
+```bash
+docker compose up --build
+```
+
+**Option 2: Using Docker directly**
+
+```bash
+docker build -t surewin:latest .
+docker run -p 3000:3000 surewin:latest
+```
+
+**Option 3: Using the helper script**
+
+```bash
+./scripts/docker-dev.sh compose
+```
+
+### Docker Features
+
+✅ **Multi-stage build** for optimized image size  
+✅ **Bun runtime** for faster installation and execution  
+✅ **Non-root user** for security  
+✅ **Standalone output** for minimal production image  
+✅ **Environment variable support**  
+✅ **Docker Compose** ready for development
+
+### Environment Variables for Docker
+
+Make sure to set these environment variables in your deployment:
+
+```bash
+NEXTAUTH_URL=https://yourdomain.com
+NEXTAUTH_SECRET=your-super-secret-production-key
+```
+
+The Docker setup automatically handles all other configurations!
 
 ## Contributing
 
