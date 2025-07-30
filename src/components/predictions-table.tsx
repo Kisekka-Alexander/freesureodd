@@ -1,0 +1,217 @@
+import { Prediction } from "@/types";
+
+interface PredictionsTableProps {
+  predictions: Prediction[];
+}
+
+export function PredictionsTable({ predictions }: PredictionsTableProps) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "live":
+        return "text-red-600 font-semibold";
+      case "upcoming":
+        return "text-blue-600";
+      case "completed":
+        return "text-gray-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  const getPredictionNumber = (outcome: string) => {
+    switch (outcome) {
+      case "Home":
+        return "1";
+      case "Draw":
+        return "X";
+      case "Away":
+        return "2";
+      default:
+        return "-";
+    }
+  };
+
+  const getPredictionColor = (outcome: string) => {
+    switch (outcome) {
+      case "Home":
+        return "bg-green-100 text-green-800";
+      case "Draw":
+        return "bg-yellow-100 text-yellow-800";
+      case "Away":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getLeagueIcon = (league: string) => {
+    if (league.includes("Champions") || league.includes("UCL")) return "⚽";
+    if (league.includes("Premier")) return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
+    if (league.includes("La Liga")) return "🇪🇸";
+    if (league.includes("Bundesliga")) return "🇩🇪";
+    if (league.includes("Serie A")) return "🇮🇹";
+    if (league.includes("Ligue 1")) return "🇫🇷";
+    return "⚽";
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[1000px]">
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              <th className="text-left p-4 font-semibold text-gray-700 min-w-[250px]">
+                Home team
+                <br />
+                <span className="text-sm font-normal text-gray-500">
+                  Away team
+                </span>
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
+                Probability %<br />
+                <div className="flex justify-center space-x-4 text-sm font-normal text-gray-500 mt-1">
+                  <span>1</span>
+                  <span>X</span>
+                  <span>2</span>
+                </div>
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700 min-w-[80px]">
+                Pred
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700 min-w-[100px]">
+                Confidence
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
+                Model Info
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700 min-w-[80px]">
+                Status
+              </th>
+              <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
+                Date/Time
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {predictions.map((prediction, index) => (
+              <tr
+                key={prediction.match_id}
+                className={`border-b hover:bg-gray-50 ${
+                  index % 2 === 0 ? "bg-white" : "bg-gray-25"
+                }`}
+              >
+                {/* Teams */}
+                <td className="p-4">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-lg">
+                      {getLeagueIcon(prediction.match_info.league)}
+                    </span>
+                    <div>
+                      <div className="font-semibold text-gray-900 text-sm">
+                        {prediction.match_info.home_team}
+                      </div>
+                      <div className="text-gray-600 text-sm">
+                        {prediction.match_info.away_team}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {prediction.match_info.league}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                {/* Probabilities */}
+                <td className="p-4">
+                  <div className="flex justify-center space-x-3 text-sm">
+                    <div className="text-center min-w-[30px]">
+                      <div className="font-medium">
+                        {Math.round(prediction.probabilities.home * 100)}
+                      </div>
+                    </div>
+                    <div className="text-center min-w-[30px]">
+                      <div className="font-medium">
+                        {Math.round(prediction.probabilities.draw * 100)}
+                      </div>
+                    </div>
+                    <div className="text-center min-w-[30px]">
+                      <div className="font-medium">
+                        {Math.round(prediction.probabilities.away * 100)}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                {/* Prediction */}
+                <td className="p-4">
+                  <div className="flex justify-center">
+                    <span
+                      className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${getPredictionColor(
+                        prediction.predicted_outcome
+                      )}`}
+                    >
+                      {getPredictionNumber(prediction.predicted_outcome)}
+                    </span>
+                  </div>
+                </td>
+
+                {/* Confidence */}
+                <td className="p-4 text-center">
+                  <div className="text-sm font-medium">
+                    {Math.round(prediction.confidence * 100)}%
+                  </div>
+                </td>
+
+                {/* Model Info */}
+                <td className="p-4 text-center">
+                  <div className="text-xs">
+                    <div className="font-medium text-gray-900">
+                      {prediction.model_info.model_name.replace("_", " ")}
+                    </div>
+                    <div className="text-gray-500">
+                      v{prediction.model_info.model_version}
+                    </div>
+                    <div className="text-gray-400">
+                      {Math.round(
+                        prediction.model_info.training_accuracy * 100
+                      )}
+                      % acc
+                    </div>
+                  </div>
+                </td>
+
+                {/* Status */}
+                <td className="p-4 text-center">
+                  <span
+                    className={`inline-flex px-2 py-1 rounded-full text-xs font-medium uppercase ${getStatusColor(
+                      prediction.match_info.match_status
+                    )}`}
+                  >
+                    {prediction.match_info.match_status}
+                  </span>
+                </td>
+
+                {/* Date/Time */}
+                <td className="p-4 text-center">
+                  <div className="text-xs text-gray-600">
+                    {formatDate(prediction.match_info.match_date)}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

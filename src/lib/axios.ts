@@ -1,7 +1,7 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 export const api = axios.create({
   baseURL,
@@ -50,5 +50,22 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Prediction API functions
+import { ApiResponse, Prediction, PredictionsResponse } from "@/types";
+
+export const predictionsApi = {
+  // Get all predictions
+  getAllPredictions: async (): Promise<ApiResponse<PredictionsResponse>> => {
+    const response = await api.get("/v1/predictions/all");
+    return response.data;
+  },
+
+  // Get single prediction by ID
+  getPrediction: async (id: string): Promise<ApiResponse<Prediction>> => {
+    const response = await api.get(`/v1/predictions/${id}`);
+    return response.data;
+  },
+};
 
 export default api;
