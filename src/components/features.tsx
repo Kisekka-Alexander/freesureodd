@@ -75,7 +75,7 @@ export function Features() {
             <h3 className="text-2xl font-bold mb-4">Ready to Start Winning?</h3>
             <p className="text-lg mb-6 text-blue-100">
               Join our community of smart football fans and get access to
-              today's best predictions
+              today&apos;s best predictions
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors">

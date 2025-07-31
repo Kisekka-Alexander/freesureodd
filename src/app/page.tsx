@@ -6,7 +6,6 @@ import { PredictionsTable } from "@/components/predictions-table";
 import { predictionsApi } from "@/lib/axios";
 import { Prediction } from "@/types";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
 export default function Home() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -57,7 +56,7 @@ export default function Home() {
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              📊 Today's Football Intelligence
+              📊 Today&apos;s Football Intelligence
             </h2>
             <p className="text-gray-600">
               Real-time statistics and insights from the world of football
@@ -69,7 +68,7 @@ export default function Home() {
               <div className="text-3xl font-bold text-green-600 mb-2">
                 {predictions.length || 24}
               </div>
-              <div className="text-sm text-green-700">Today's Tips</div>
+              <div className="text-sm text-green-700">Today&apos;s Tips</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
               <div className="text-3xl font-bold text-blue-600 mb-2">87%</div>
@@ -229,7 +228,8 @@ export default function Home() {
                 No predictions available at the moment.
               </p>
               <p className="text-gray-500">
-                Check back later for today's fresh predictions and analysis.
+                Check back later for today&apos;s fresh predictions and
+                analysis.
               </p>
             </div>
           )}
