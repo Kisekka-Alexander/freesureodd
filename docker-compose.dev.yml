@@ -23,9 +23,3 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:3000/api/health"]
-      interval: 20s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
