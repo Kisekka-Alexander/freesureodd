@@ -12,6 +12,59 @@ export const metadata: Metadata = {
   title: "SureWin - AI Football Predictions & Analysis",
   description:
     "Get the most accurate football predictions with 85%+ success rate. AI-powered match analysis covering Premier League, La Liga, Champions League and 15+ major leagues. Join thousands of winning football fans.",
+  icons: {
+    icon: [
+      {
+        url: "/icons/icons8-football-pastel-color-16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icons8-football-pastel-color-32.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icons8-football-pastel-color-96.png",
+        sizes: "96x96",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: "/icons/icons8-football-pastel-color-76.png",
+        sizes: "76x76",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icons8-football-pastel-color-72.png",
+        sizes: "72x72",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icons8-football-pastel-color-60.png",
+        sizes: "60x60",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icons8-football-pastel-color-57.png",
+        sizes: "57x57",
+        type: "image/png",
+      },
+    ],
+    other: [
+      {
+        url: "/icons/icons8-football-pastel-color-96.png",
+        sizes: "96x96",
+        type: "image/png",
+      },
+      {
+        url: "/icons/icons8-football-pastel-color-70.png",
+        sizes: "70x70",
+        type: "image/png",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

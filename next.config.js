@@ -18,13 +18,12 @@ const nextConfig = {
     }
     return config;
   },
-  // Disable type checking during development for better performance
+  // Only ignore type checking and eslint during development
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: process.env.NODE_ENV === "development",
   },
-  // Disable eslint during development for better performance
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: process.env.NODE_ENV === "development",
   },
   // Enable standalone output for Docker
   output: "standalone",

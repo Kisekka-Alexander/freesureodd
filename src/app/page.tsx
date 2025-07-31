@@ -23,9 +23,6 @@ export default function Home() {
 
         if (response.success) {
           setPredictions(response.data.predictions); // Extract predictions from nested data
-          toast.success(
-            `${response.data.total_returned} predictions loaded successfully!`
-          );
         } else {
           throw new Error(response.message || "Failed to fetch predictions");
         }
