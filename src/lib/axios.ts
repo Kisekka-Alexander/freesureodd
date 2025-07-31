@@ -1,7 +1,12 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// In production, the API calls will be proxied through Vercel
+// In development, we'll use the direct URL
+const baseURL =
+  process.env.NODE_ENV === "production"
+    ? "" // Empty string means use relative URLs, which will be handled by Vercel rewrites
+    : process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const api = axios.create({
   baseURL,
