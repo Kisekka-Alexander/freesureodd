@@ -64,42 +64,140 @@ export interface FormikHelpers<Values> {
 }
 
 // Football Prediction Types (Updated for real backend)
-export interface MatchInfo {
-  home_team: string;
-  away_team: string;
-  league: string;
-  match_date: string;
-  match_status: "upcoming" | "live" | "completed";
-}
-
-export interface ModelInfo {
-  model_version: string;
-  model_name: string;
-  training_accuracy: number;
-  last_trained: string;
-}
-
 export interface Probabilities {
   home: number;
   draw: number;
   away: number;
 }
 
+export interface ModelInfo {
+  version: string;
+  name: string;
+}
+
+export interface PredictionData {
+  predicted_outcome: "Home" | "Away" | "Draw";
+  confidence: number;
+  probabilities: Probabilities;
+  model_info: ModelInfo;
+  predicted_at: string;
+  error?: string;
+}
+
 export interface Prediction {
   match_id: number;
-  predicted_outcome: "Home" | "Away" | "Draw";
-  confidence: number; // 0-1 range
-  probabilities: Probabilities;
-  match_info: MatchInfo;
-  model_info: ModelInfo;
-  features_used: string[];
-  predicted_at: string;
+  league_name: string;
+  home_team: string;
+  away_team: string;
+  match_date: string;
+  match_status: "upcoming" | "live" | "completed";
+  prediction: PredictionData;
 }
 
 export interface PredictionsResponse {
   predictions: Prediction[];
-  total_returned: number;
-  total_available: number;
-  limited: boolean;
-  limit_applied: number;
+  total_predictions: number;
+}
+
+// League Types
+export interface League {
+  league_id: number;
+  league_name: string;
+  country: string;
+  team_count: number;
+  logo_url: string;
+}
+
+export interface LeaguesResponse {
+  leagues: League[];
+  total_count: number;
+}
+
+// Team Types
+export interface TeamLeague {
+  league_id: number;
+  league_name: string;
+  country: string;
+}
+
+export interface Team {
+  team_id: number;
+  team_name: string;
+  league: TeamLeague;
+  logo_url: string;
+}
+
+export interface TeamsResponse {
+  teams: Team[];
+  total_count: number;
+}
+
+// Analytics Types
+export interface AccuracyAnalytics {
+  overall_accuracy: number;
+  breakdown: Record<string, number | object>;
+  timeframe: string;
+}
+
+export interface TrendsData {
+  date: string;
+  value: number;
+}
+
+export interface TrendsAnalytics {
+  metric: string;
+  period: string;
+  data: TrendsData[];
+  summary: {
+    total_points: number;
+    trend_direction: "up" | "down" | "stable";
+    change_percentage: number;
+  };
+}
+
+// Match Types
+export interface Match {
+  match_id: number;
+  home_team: string;
+  away_team: string;
+  league_name: string;
+  match_date: string;
+  match_status: "upcoming" | "live" | "completed";
+  home_score?: number;
+  away_score?: number;
+}
+
+export interface MatchesResponse {
+  matches: Match[];
+  pagination: {
+    current_page: number;
+    total_pages: number;
+    total_count: number;
+    has_next: boolean;
+    has_previous: boolean;
+  };
+}
+
+// Head to Head Types
+export interface HeadToHeadStats {
+  total_matches: number;
+  home_wins: number;
+  away_wins: number;
+  draws: number;
+  recent_matches: Match[];
+}
+
+// Team Stats Types
+export interface TeamStats {
+  team_id: number;
+  team_name: string;
+  matches_played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+  win_percentage: number;
+  form: string[];
 }

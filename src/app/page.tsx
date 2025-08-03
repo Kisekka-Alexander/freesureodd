@@ -3,25 +3,61 @@
 import { Hero } from "@/components/hero";
 import { Features } from "@/components/features";
 import { PredictionsTable } from "@/components/predictions-table";
-import { predictionsApi } from "@/lib/axios";
-import { Prediction } from "@/types";
+import { predictionsApi, leaguesApi } from "@/lib/axios";
+import { Prediction, League } from "@/types";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Home() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [selectedLeague, setSelectedLeague] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPredictions, setTotalPredictions] = useState(0);
+  const predictionsPerPage = 20;
 
+  // Fetch leagues on component mount
+  useEffect(() => {
+    const fetchLeagues = async () => {
+      try {
+        const response = await leaguesApi.getLeagues();
+        if (response.success) {
+          setLeagues(response.data.leagues);
+        }
+      } catch (err) {
+        console.error("Error fetching leagues:", err);
+      }
+    };
+
+    fetchLeagues();
+  }, []);
+
+  // Fetch predictions when filters change
   useEffect(() => {
     const fetchPredictions = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await predictionsApi.getAllPredictions();
+
+        const params = {
+          limit: predictionsPerPage,
+          offset: (currentPage - 1) * predictionsPerPage,
+          ...(selectedLeague && { league_id: selectedLeague }),
+          status: "upcoming" as const,
+          sort_by: "date" as const,
+          sort_order: "asc" as const,
+        };
+
+        const response = await predictionsApi.getAllPredictions(params);
 
         if (response.success) {
-          setPredictions(response.data.predictions); // Extract predictions from nested data
+          setPredictions(response.data.predictions);
+          setTotalPredictions(
+            response.data.total_predictions || response.data.predictions.length
+          );
         } else {
           throw new Error(response.message || "Failed to fetch predictions");
         }
@@ -36,16 +72,27 @@ export default function Home() {
     };
 
     fetchPredictions();
-  }, []);
+  }, [currentPage, selectedLeague]);
 
-  const leagues = [
-    { name: "Premier League", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", matches: 10 },
-    { name: "La Liga", flag: "🇪🇸", matches: 8 },
-    { name: "Serie A", flag: "🇮🇹", matches: 9 },
-    { name: "Bundesliga", flag: "🇩🇪", matches: 7 },
-    { name: "Champions League", flag: "⚽", matches: 6 },
-    { name: "Ligue 1", flag: "🇫🇷", matches: 8 },
-  ];
+  const getCountryFlag = (country: string) => {
+    const flags: Record<string, string> = {
+      England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      Spain: "🇪🇸",
+      Italy: "🇮🇹",
+      Germany: "🇩🇪",
+      France: "🇫🇷",
+      Netherlands: "🇳🇱",
+      Scotland: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    };
+    return flags[country] || "🌍";
+  };
+
+  const handleLeagueFilter = (leagueId: number | null) => {
+    setSelectedLeague(leagueId);
+    setCurrentPage(1);
+  };
+
+  const totalPages = Math.ceil(totalPredictions / predictionsPerPage);
 
   return (
     <main className="min-h-screen">
@@ -99,20 +146,62 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {leagues.map((league, index) => (
-              <button
-                key={index}
-                className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300"
-              >
-                <div className="text-3xl mb-3">{league.flag}</div>
-                <div className="font-semibold text-gray-900 text-sm mb-1">
-                  {league.name}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {league.matches} matches today
-                </div>
-              </button>
-            ))}
+            {/* All Leagues Button */}
+            <button
+              onClick={() => handleLeagueFilter(null)}
+              className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 ${
+                selectedLeague === null
+                  ? "ring-2 ring-blue-500 border-blue-300"
+                  : ""
+              }`}
+            >
+              <div className="text-3xl mb-3">🌍</div>
+              <div className="font-semibold text-gray-900 text-sm mb-1">
+                All Leagues
+              </div>
+              <div className="text-xs text-gray-500">
+                {totalPredictions} predictions
+              </div>
+            </button>
+
+            {/* Dynamic League Buttons */}
+            {leagues.slice(0, 5).map((league) => {
+              return (
+                <Link
+                  key={league.league_id}
+                  href={`/leagues/${league.league_id}`}
+                  className="group"
+                >
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleLeagueFilter(league.league_id);
+                    }}
+                    onDoubleClick={() =>
+                      (window.location.href = `/leagues/${league.league_id}`)
+                    }
+                    className={`w-full bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 group-hover:border-blue-300 ${
+                      selectedLeague === league.league_id
+                        ? "ring-2 ring-blue-500 border-blue-300"
+                        : ""
+                    }`}
+                  >
+                    <div className="text-3xl mb-3">
+                      {getCountryFlag(league.country)}
+                    </div>
+                    <div className="font-semibold text-gray-900 text-sm mb-1">
+                      {league.league_name}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {league.team_count} teams
+                    </div>
+                    <div className="text-xs text-blue-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Double-click to view →
+                    </div>
+                  </button>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -163,7 +252,11 @@ export default function Home() {
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   <span>
                     High confidence:{" "}
-                    {predictions.filter((p) => p.confidence > 0.7).length} tips
+                    {
+                      predictions.filter((p) => p.prediction.confidence > 0.7)
+                        .length
+                    }{" "}
+                    tips
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -172,7 +265,9 @@ export default function Home() {
                     Medium confidence:{" "}
                     {
                       predictions.filter(
-                        (p) => p.confidence >= 0.5 && p.confidence <= 0.7
+                        (p) =>
+                          p.prediction.confidence >= 0.5 &&
+                          p.prediction.confidence <= 0.7
                       ).length
                     }{" "}
                     tips
@@ -182,7 +277,11 @@ export default function Home() {
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                   <span>
                     Lower confidence:{" "}
-                    {predictions.filter((p) => p.confidence < 0.5).length} tips
+                    {
+                      predictions.filter((p) => p.prediction.confidence < 0.5)
+                        .length
+                    }{" "}
+                    tips
                   </span>
                 </div>
               </div>
@@ -236,6 +335,52 @@ export default function Home() {
 
           {!loading && !error && predictions.length > 0 && (
             <div>
+              {/* Filter and Pagination Info */}
+              <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+                <div className="text-sm text-gray-600 mb-4 md:mb-0">
+                  {selectedLeague ? (
+                    <>
+                      Showing predictions for{" "}
+                      <span className="font-medium">
+                        {
+                          leagues.find((l) => l.league_id === selectedLeague)
+                            ?.league_name
+                        }
+                      </span>{" "}
+                      (Page {currentPage} of {totalPages})
+                    </>
+                  ) : (
+                    <>
+                      Showing {predictions.length} of {totalPredictions}{" "}
+                      predictions (Page {currentPage} of {totalPages})
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    ← Previous
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+
               {viewMode === "table" ? (
                 <PredictionsTable predictions={predictions} />
               ) : (
@@ -247,31 +392,31 @@ export default function Home() {
                     >
                       <div className="flex items-center justify-between mb-4">
                         <div className="text-sm text-gray-500">
-                          {prediction.match_info.league} •{" "}
-                          {new Date(
-                            prediction.match_info.match_date
-                          ).toLocaleDateString()}
+                          {prediction.league_name} •{" "}
+                          {new Date(prediction.match_date).toLocaleDateString()}
                         </div>
                         <div
                           className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            prediction.confidence > 0.7
+                            prediction.prediction.confidence > 0.7
                               ? "bg-green-100 text-green-800"
-                              : prediction.confidence >= 0.5
+                              : prediction.prediction.confidence >= 0.5
                               ? "bg-yellow-100 text-yellow-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {Math.round(prediction.confidence * 100)}% confidence
+                          {Math.round(prediction.prediction.confidence * 100)}%
+                          confidence
+                          {prediction.prediction.error && " (Fallback)"}
                         </div>
                       </div>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-3">
                           <div className="text-lg font-semibold">
-                            {prediction.match_info.home_team}
+                            {prediction.home_team}
                           </div>
                           <div className="text-gray-400 font-bold">VS</div>
                           <div className="text-lg font-semibold">
-                            {prediction.match_info.away_team}
+                            {prediction.away_team}
                           </div>
                         </div>
                       </div>
@@ -280,7 +425,11 @@ export default function Home() {
                           🎯 AI Prediction:
                         </div>
                         <div className="text-xl font-bold text-blue-600">
-                          {prediction.predicted_outcome}
+                          {prediction.prediction.predicted_outcome}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Model: {prediction.prediction.model_info.name} v
+                          {prediction.prediction.model_info.version}
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3 text-sm">
@@ -289,13 +438,19 @@ export default function Home() {
                             Home Win
                           </div>
                           <div className="font-bold text-lg">
-                            {Math.round(prediction.probabilities.home * 100)}%
+                            {Math.round(
+                              prediction.prediction.probabilities.home * 100
+                            )}
+                            %
                           </div>
                         </div>
                         <div className="text-center p-2 bg-gray-50 rounded">
                           <div className="text-xs text-gray-500 mb-1">Draw</div>
                           <div className="font-bold text-lg">
-                            {Math.round(prediction.probabilities.draw * 100)}%
+                            {Math.round(
+                              prediction.prediction.probabilities.draw * 100
+                            )}
+                            %
                           </div>
                         </div>
                         <div className="text-center p-2 bg-gray-50 rounded">
@@ -303,7 +458,10 @@ export default function Home() {
                             Away Win
                           </div>
                           <div className="font-bold text-lg">
-                            {Math.round(prediction.probabilities.away * 100)}%
+                            {Math.round(
+                              prediction.prediction.probabilities.away * 100
+                            )}
+                            %
                           </div>
                         </div>
                       </div>

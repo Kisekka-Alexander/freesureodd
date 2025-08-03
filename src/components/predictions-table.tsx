@@ -19,13 +19,13 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "live":
-        return "text-red-600 font-semibold";
+        return "bg-red-100 text-red-800";
       case "upcoming":
-        return "text-blue-600";
+        return "bg-blue-100 text-blue-800";
       case "completed":
-        return "text-gray-600";
+        return "bg-gray-100 text-gray-800";
       default:
-        return "text-gray-600";
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -62,6 +62,9 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
     if (league.includes("Bundesliga")) return "🇩🇪";
     if (league.includes("Serie A")) return "🇮🇹";
     if (league.includes("Ligue 1")) return "🇫🇷";
+    if (league.includes("Championship")) return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
+    if (league.includes("Eredivisie")) return "🇳🇱";
+    if (league.includes("Scottish")) return "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
     return "⚽";
   };
 
@@ -115,17 +118,17 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 <td className="p-4">
                   <div className="flex items-start space-x-2">
                     <span className="text-lg">
-                      {getLeagueIcon(prediction.match_info.league)}
+                      {getLeagueIcon(prediction.league_name)}
                     </span>
                     <div>
                       <div className="font-semibold text-gray-900 text-sm">
-                        {prediction.match_info.home_team}
+                        {prediction.home_team}
                       </div>
                       <div className="text-gray-600 text-sm">
-                        {prediction.match_info.away_team}
+                        {prediction.away_team}
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
-                        {prediction.match_info.league}
+                        {prediction.league_name}
                       </div>
                     </div>
                   </div>
@@ -136,17 +139,23 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                   <div className="flex justify-center space-x-3 text-sm">
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
-                        {Math.round(prediction.probabilities.home * 100)}
+                        {Math.round(
+                          prediction.prediction.probabilities.home * 100
+                        )}
                       </div>
                     </div>
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
-                        {Math.round(prediction.probabilities.draw * 100)}
+                        {Math.round(
+                          prediction.prediction.probabilities.draw * 100
+                        )}
                       </div>
                     </div>
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
-                        {Math.round(prediction.probabilities.away * 100)}
+                        {Math.round(
+                          prediction.prediction.probabilities.away * 100
+                        )}
                       </div>
                     </div>
                   </div>
@@ -157,10 +166,12 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                   <div className="flex justify-center">
                     <span
                       className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${getPredictionColor(
-                        prediction.predicted_outcome
+                        prediction.prediction.predicted_outcome
                       )}`}
                     >
-                      {getPredictionNumber(prediction.predicted_outcome)}
+                      {getPredictionNumber(
+                        prediction.prediction.predicted_outcome
+                      )}
                     </span>
                   </div>
                 </td>
@@ -168,24 +179,23 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 {/* Confidence */}
                 <td className="p-4 text-center">
                   <div className="text-sm font-medium">
-                    {Math.round(prediction.confidence * 100)}%
+                    {Math.round(prediction.prediction.confidence * 100)}%
                   </div>
+                  {prediction.prediction.error && (
+                    <div className="text-xs text-yellow-600 mt-1">
+                      ⚠️ Fallback
+                    </div>
+                  )}
                 </td>
 
                 {/* Model Info */}
                 <td className="p-4 text-center">
                   <div className="text-xs">
                     <div className="font-medium text-gray-900">
-                      {prediction.model_info.model_name.replace("_", " ")}
+                      {prediction.prediction.model_info.name.replace("_", " ")}
                     </div>
                     <div className="text-gray-500">
-                      v{prediction.model_info.model_version}
-                    </div>
-                    <div className="text-gray-400">
-                      {Math.round(
-                        prediction.model_info.training_accuracy * 100
-                      )}
-                      % acc
+                      v{prediction.prediction.model_info.version}
                     </div>
                   </div>
                 </td>
@@ -194,17 +204,17 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 <td className="p-4 text-center">
                   <span
                     className={`inline-flex px-2 py-1 rounded-full text-xs font-medium uppercase ${getStatusColor(
-                      prediction.match_info.match_status
+                      prediction.match_status
                     )}`}
                   >
-                    {prediction.match_info.match_status}
+                    {prediction.match_status}
                   </span>
                 </td>
 
                 {/* Date/Time */}
                 <td className="p-4 text-center">
                   <div className="text-xs text-gray-600">
-                    {formatDate(prediction.match_info.match_date)}
+                    {formatDate(prediction.match_date)}
                   </div>
                 </td>
               </tr>
