@@ -8,12 +8,12 @@ interface PredictionCardProps {
 
 export function PredictionCard({ prediction }: PredictionCardProps) {
   const {
-    match_info,
-    predicted_outcome,
-    confidence,
-    probabilities,
-    model_info,
-    features_used,
+    home_team,
+    away_team,
+    league_name,
+    match_date,
+    match_status,
+    prediction: predictionData,
   } = prediction;
 
   const formatDate = (dateString: string) => {
@@ -64,31 +64,31 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <div className="text-sm text-gray-500">
-            {match_info.league} • {formatDate(match_info.match_date)}
+            {league_name} • {formatDate(match_date)}
           </div>
           <div
             className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(
-              match_info.match_status
+              match_status
             )}`}
           >
-            {match_info.match_status}
+            {match_status}
           </div>
         </div>
         <div
           className={`px-2 py-1 rounded text-xs font-medium ${getConfidenceColor(
-            confidence
+            predictionData.confidence
           )}`}
         >
-          {Math.round(confidence * 100)}% confidence
+          {Math.round(predictionData.confidence * 100)}% confidence
         </div>
       </div>
 
       {/* Teams */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="text-lg font-semibold">{match_info.home_team}</div>
+          <div className="text-lg font-semibold">{home_team}</div>
           <div className="text-gray-400">vs</div>
-          <div className="text-lg font-semibold">{match_info.away_team}</div>
+          <div className="text-lg font-semibold">{away_team}</div>
         </div>
       </div>
 
@@ -98,10 +98,10 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
         <div className="flex items-center space-x-4">
           <div
             className={`text-xl font-bold ${getOutcomeColor(
-              predicted_outcome
+              predictionData.predicted_outcome
             )}`}
           >
-            {predicted_outcome}
+            {predictionData.predicted_outcome}
           </div>
         </div>
       </div>
@@ -113,19 +113,19 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
           <div className="text-center">
             <div className="text-xs text-gray-500">Home</div>
             <div className="font-medium">
-              {Math.round(probabilities.home * 100)}%
+              {Math.round(predictionData.probabilities.home * 100)}%
             </div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-500">Draw</div>
             <div className="font-medium">
-              {Math.round(probabilities.draw * 100)}%
+              {Math.round(predictionData.probabilities.draw * 100)}%
             </div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-500">Away</div>
             <div className="font-medium">
-              {Math.round(probabilities.away * 100)}%
+              {Math.round(predictionData.probabilities.away * 100)}%
             </div>
           </div>
         </div>
@@ -135,14 +135,13 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
       <div className="border-t pt-3">
         <div className="text-sm text-gray-600 mb-1">Model:</div>
         <div className="text-sm text-gray-800 mb-2">
-          {model_info.model_name} v{model_info.model_version}{" "}
-          <span className="text-gray-500">
-            (Accuracy: {Math.round(model_info.training_accuracy * 100)}%)
-          </span>
+          {predictionData.model_info.name} v{predictionData.model_info.version}
         </div>
-        <div className="text-xs text-gray-500">
-          Features: {features_used.join(", ")}
-        </div>
+        {predictionData.error && (
+          <div className="text-xs text-yellow-600">
+            ⚠️ {predictionData.error}
+          </div>
+        )}
       </div>
     </div>
   );
