@@ -427,10 +427,10 @@ export default function Home() {
                         <div className="text-xl font-bold text-blue-600">
                           {prediction.prediction.predicted_outcome}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        {/* <div className="text-xs text-gray-500 mt-1">
                           Model: {prediction.prediction.model_info.name} v
                           {prediction.prediction.model_info.version}
-                        </div>
+                        </div> */}
                       </div>
                       <div className="grid grid-cols-3 gap-3 text-sm">
                         <div className="text-center p-2 bg-gray-50 rounded">
@@ -439,7 +439,7 @@ export default function Home() {
                           </div>
                           <div className="font-bold text-lg">
                             {Math.round(
-                              prediction.prediction.probabilities.home * 100
+                              prediction.prediction.probabilities.Home * 100
                             )}
                             %
                           </div>
@@ -448,7 +448,7 @@ export default function Home() {
                           <div className="text-xs text-gray-500 mb-1">Draw</div>
                           <div className="font-bold text-lg">
                             {Math.round(
-                              prediction.prediction.probabilities.draw * 100
+                              prediction.prediction.probabilities.Draw * 100
                             )}
                             %
                           </div>
@@ -459,7 +459,7 @@ export default function Home() {
                           </div>
                           <div className="font-bold text-lg">
                             {Math.round(
-                              prediction.prediction.probabilities.away * 100
+                              prediction.prediction.probabilities.Away * 100
                             )}
                             %
                           </div>
