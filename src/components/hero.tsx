@@ -113,19 +113,19 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
           <div className="text-center">
             <div className="text-xs text-gray-500">Home</div>
             <div className="font-medium">
-              {Math.round(predictionData.probabilities.home * 100)}%
+              {Math.round(predictionData.probabilities.Home * 100)}%
             </div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-500">Draw</div>
             <div className="font-medium">
-              {Math.round(predictionData.probabilities.draw * 100)}%
+              {Math.round(predictionData.probabilities.Draw * 100)}%
             </div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-500">Away</div>
             <div className="font-medium">
-              {Math.round(predictionData.probabilities.away * 100)}%
+              {Math.round(predictionData.probabilities.Away * 100)}%
             </div>
           </div>
         </div>

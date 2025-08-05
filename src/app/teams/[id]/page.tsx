@@ -271,11 +271,10 @@ export default function TeamDetailPage() {
                 onClick={() =>
                   setActiveTab(tab.id as "overview" | "matches" | "predictions")
                 }
-                className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-colors ${
-                  activeTab === tab.id
+                className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-colors ${activeTab === tab.id
                     ? "border-blue-600 text-blue-600 font-semibold"
                     : "border-transparent text-gray-600 hover:text-gray-800"
-                }`}
+                  }`}
               >
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
@@ -514,13 +513,12 @@ export default function TeamDetailPage() {
                           {new Date(prediction.match_date).toLocaleDateString()}
                         </div>
                         <div
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            prediction.prediction.confidence > 0.7
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${prediction.prediction.confidence > 0.7
                               ? "bg-green-100 text-green-800"
                               : prediction.prediction.confidence >= 0.5
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
                         >
                           {Math.round(prediction.prediction.confidence * 100)}%
                           confidence
@@ -537,14 +535,13 @@ export default function TeamDetailPage() {
                           </div>
                         </div>
                         <div
-                          className={`px-3 py-1 rounded-full font-medium ${
-                            prediction.prediction.predicted_outcome === "Home"
+                          className={`px-3 py-1 rounded-full font-medium ${prediction.prediction.predicted_outcome === "Home"
                               ? "bg-green-100 text-green-800"
                               : prediction.prediction.predicted_outcome ===
                                 "Away"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
                         >
                           {prediction.prediction.predicted_outcome}
                         </div>
@@ -556,7 +553,7 @@ export default function TeamDetailPage() {
                           </div>
                           <div className="font-bold">
                             {Math.round(
-                              prediction.prediction.probabilities.home * 100
+                              prediction.prediction.probabilities.Home * 100
                             )}
                             %
                           </div>
@@ -565,7 +562,7 @@ export default function TeamDetailPage() {
                           <div className="text-xs text-gray-500 mb-1">Draw</div>
                           <div className="font-bold">
                             {Math.round(
-                              prediction.prediction.probabilities.draw * 100
+                              prediction.prediction.probabilities.Draw * 100
                             )}
                             %
                           </div>
@@ -576,7 +573,7 @@ export default function TeamDetailPage() {
                           </div>
                           <div className="font-bold">
                             {Math.round(
-                              prediction.prediction.probabilities.away * 100
+                              prediction.prediction.probabilities.Away * 100
                             )}
                             %
                           </div>
