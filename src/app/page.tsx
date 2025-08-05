@@ -149,11 +149,10 @@ export default function Home() {
             {/* All Leagues Button */}
             <button
               onClick={() => handleLeagueFilter(null)}
-              className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 ${
-                selectedLeague === null
+              className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 ${selectedLeague === null
                   ? "ring-2 ring-blue-500 border-blue-300"
                   : ""
-              }`}
+                }`}
             >
               <div className="text-3xl mb-3">🌍</div>
               <div className="font-semibold text-gray-900 text-sm mb-1">
@@ -180,11 +179,10 @@ export default function Home() {
                     onDoubleClick={() =>
                       (window.location.href = `/leagues/${league.league_id}`)
                     }
-                    className={`w-full bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 group-hover:border-blue-300 ${
-                      selectedLeague === league.league_id
+                    className={`w-full bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 group-hover:border-blue-300 ${selectedLeague === league.league_id
                         ? "ring-2 ring-blue-500 border-blue-300"
                         : ""
-                    }`}
+                      }`}
                   >
                     <div className="text-3xl mb-3">
                       {getCountryFlag(league.country)}
@@ -224,21 +222,19 @@ export default function Home() {
               <div className="bg-gray-100 rounded-xl p-1 shadow-sm border">
                 <button
                   onClick={() => setViewMode("table")}
-                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    viewMode === "table"
+                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === "table"
                       ? "bg-blue-500 text-white shadow-md"
                       : "text-gray-600 hover:text-gray-800 hover:bg-white"
-                  }`}
+                    }`}
                 >
                   📊 Detailed Table
                 </button>
                 <button
                   onClick={() => setViewMode("cards")}
-                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    viewMode === "cards"
+                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === "cards"
                       ? "bg-blue-500 text-white shadow-md"
                       : "text-gray-600 hover:text-gray-800 hover:bg-white"
-                  }`}
+                    }`}
                 >
                   📋 Quick Cards
                 </button>
@@ -396,13 +392,12 @@ export default function Home() {
                           {new Date(prediction.match_date).toLocaleDateString()}
                         </div>
                         <div
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            prediction.prediction.confidence > 0.7
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${prediction.prediction.confidence > 0.7
                               ? "bg-green-100 text-green-800"
                               : prediction.prediction.confidence >= 0.5
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
                         >
                           {Math.round(prediction.prediction.confidence * 100)}%
                           confidence
@@ -439,7 +434,7 @@ export default function Home() {
                           </div>
                           <div className="font-bold text-lg">
                             {Math.round(
-                              prediction.prediction.probabilities.home * 100
+                              prediction.prediction.probabilities.Home * 100
                             )}
                             %
                           </div>
@@ -448,7 +443,7 @@ export default function Home() {
                           <div className="text-xs text-gray-500 mb-1">Draw</div>
                           <div className="font-bold text-lg">
                             {Math.round(
-                              prediction.prediction.probabilities.draw * 100
+                              prediction.prediction.probabilities.Draw * 100
                             )}
                             %
                           </div>
@@ -459,7 +454,7 @@ export default function Home() {
                           </div>
                           <div className="font-bold text-lg">
                             {Math.round(
-                              prediction.prediction.probabilities.away * 100
+                              prediction.prediction.probabilities.Away * 100
                             )}
                             %
                           </div>
