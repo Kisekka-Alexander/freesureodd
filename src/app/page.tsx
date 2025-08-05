@@ -422,10 +422,10 @@ export default function Home() {
                         <div className="text-xl font-bold text-blue-600">
                           {prediction.prediction.predicted_outcome}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        {/* <div className="text-xs text-gray-500 mt-1">
                           Model: {prediction.prediction.model_info.name} v
                           {prediction.prediction.model_info.version}
-                        </div>
+                        </div> */}
                       </div>
                       <div className="grid grid-cols-3 gap-3 text-sm">
                         <div className="text-center p-2 bg-gray-50 rounded">
