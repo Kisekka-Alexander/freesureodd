@@ -95,9 +95,9 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
               <th className="text-center p-4 font-semibold text-gray-700 min-w-[100px]">
                 Confidence
               </th>
-              <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
+              {/* <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
                 Model Info
-              </th>
+              </th> */}
               <th className="text-center p-4 font-semibold text-gray-700 min-w-[80px]">
                 Status
               </th>
@@ -140,21 +140,21 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
                         {Math.round(
-                          prediction.prediction.probabilities.home * 100
+                          prediction.prediction.probabilities.Home * 100
                         )}
                       </div>
                     </div>
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
                         {Math.round(
-                          prediction.prediction.probabilities.draw * 100
+                          prediction.prediction.probabilities.Draw * 100
                         )}
                       </div>
                     </div>
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
                         {Math.round(
-                          prediction.prediction.probabilities.away * 100
+                          prediction.prediction.probabilities.Away * 100
                         )}
                       </div>
                     </div>
@@ -189,7 +189,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 </td>
 
                 {/* Model Info */}
-                <td className="p-4 text-center">
+                {/* <td className="p-4 text-center">
                   <div className="text-xs">
                     <div className="font-medium text-gray-900">
                       {prediction.prediction.model_info.name.replace("_", " ")}
@@ -198,7 +198,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                       v{prediction.prediction.model_info.version}
                     </div>
                   </div>
-                </td>
+                </td> */}
 
                 {/* Status */}
                 <td className="p-4 text-center">

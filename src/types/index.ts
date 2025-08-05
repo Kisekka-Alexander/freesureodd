@@ -64,10 +64,11 @@ export interface FormikHelpers<Values> {
 }
 
 // Football Prediction Types (Updated for real backend)
+// Prediction Types UPdated to match the new backend structure
 export interface Probabilities {
-  home: number;
-  draw: number;
-  away: number;
+  Home: number;
+  Draw: number;
+  Away: number;
 }
 
 export interface ModelInfo {
