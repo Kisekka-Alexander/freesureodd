@@ -6,6 +6,7 @@ import { League, Team, Prediction } from "@/types";
 import { leaguesApi, teamsApi, predictionsApi } from "@/lib/axios";
 import { PredictionsTable } from "@/components/predictions-table";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LeagueDetailPage() {
   const params = useParams();
@@ -32,7 +33,7 @@ export default function LeagueDetailPage() {
         const leaguesResponse = await leaguesApi.getLeagues();
         if (leaguesResponse.success) {
           const foundLeague = leaguesResponse.data.leagues.find(
-            (l) => l.league_id === leagueId
+            (l: League) => l.league_id === leagueId
           );
           if (foundLeague) {
             setLeague(foundLeague);
@@ -191,8 +192,8 @@ export default function LeagueDetailPage() {
                   )
                 }
                 className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-colors ${activeTab === tab.id
-                    ? "border-blue-600 text-blue-600 font-semibold"
-                    : "border-transparent text-gray-600 hover:text-gray-800"
+                  ? "border-blue-600 text-blue-600 font-semibold"
+                  : "border-transparent text-gray-600 hover:text-gray-800"
                   }`}
               >
                 <span>{tab.icon}</span>
@@ -262,11 +263,11 @@ export default function LeagueDetailPage() {
                         <div className="flex items-center justify-between">
                           <span
                             className={`px-2 py-1 rounded text-xs font-medium ${prediction.prediction.predicted_outcome === "Home"
-                                ? "bg-green-100 text-green-800"
-                                : prediction.prediction.predicted_outcome ===
-                                  "Away"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                              ? "bg-green-100 text-green-800"
+                              : prediction.prediction.predicted_outcome ===
+                                "Away"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
                               }`}
                           >
                             {prediction.prediction.predicted_outcome}
@@ -316,10 +317,12 @@ export default function LeagueDetailPage() {
                         <div className="text-center">
                           <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                             {team.logo_url ? (
-                              <img
+                              <Image
                                 src={team.logo_url}
                                 alt={team.team_name}
-                                className="w-12 h-12 object-contain"
+                                width={48}
+                                height={48}
+                                className="object-contain"
                               />
                             ) : (
                               <span className="text-2xl">⚽</span>

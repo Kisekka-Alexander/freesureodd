@@ -317,8 +317,8 @@ export function Hero() {
                     {featuredMatch.prediction === "1"
                       ? "HOME WIN"
                       : featuredMatch.prediction === "X"
-                      ? "DRAW"
-                      : "AWAY WIN"}
+                        ? "DRAW"
+                        : "AWAY WIN"}
                   </div>
                   <div className="text-lg text-green-300 font-semibold">
                     {featuredMatch.confidence}% Confidence
@@ -346,9 +346,8 @@ export function Hero() {
                 {mockFeaturedMatches.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === featuredIndex ? "bg-yellow-300" : "bg-white/30"
-                    }`}
+                    className={`w-2 h-2 rounded-full transition-colors ${index === featuredIndex ? "bg-yellow-300" : "bg-white/30"
+                      }`}
                   ></div>
                 ))}
               </div>
