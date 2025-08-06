@@ -33,7 +33,17 @@ export default function LeagueDetailPage() {
   const [league, setLeague] = useState<League | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [standings, setStandings] = useState<any[] | null>(null);
+  const [standings, setStandings] = useState<Array<{
+    position: number;
+    team: { team_id: number; team_name: string };
+    matches_played: number;
+    wins: number;
+    draws: number;
+    losses: number;
+    goals_scored: number;
+    goals_conceded: number;
+    points: number;
+  }> | null>(null);
 
   const [activeTab, setActiveTab] = useState<
     "overview" | "teams" | "predictions" | "standings"
@@ -391,44 +401,44 @@ export default function LeagueDetailPage() {
                 </div>
               ) : (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                   <table className="w-full text-left">
-        <thead>
-          <tr className="text-gray-600 border-b">
-            <th className="py-2">#</th>
-            <th className="py-2">TEAM</th>
-            <th className="py-2">P</th>
-            <th className="py-2">W</th>
-            <th className="py-2">D</th>
-            <th className="py-2">L</th>
-            <th className="py-2">GOALS</th>
-            <th className="py-2">PTS</th>
-          </tr>
-        </thead>
-        <tbody>
-          {standings.map((standing, index) => (
-            <tr
-              key={standing.team.team_id}
-              className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
-            >
-              <td className="py-2">{standing.position}</td>
-              <td className="py-2 flex items-center">
-                <span className="w-6 h-6 mr-2">
-                  {/* Placeholder for team logo */}
-                </span>
-                {standing.team.team_name}
-              </td>
-              <td className="py-2">{standing.matches_played}</td>
-              <td className="py-2">{standing.wins}</td>
-              <td className="py-2">{standing.draws}</td>
-              <td className="py-2">{standing.losses}</td>
-              <td className="py-2">
-                {standing.goals_scored}:{standing.goals_conceded}
-              </td>
-              <td className="py-2">{standing.points}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="text-gray-600 border-b">
+                        <th className="py-2">#</th>
+                        <th className="py-2">TEAM</th>
+                        <th className="py-2">P</th>
+                        <th className="py-2">W</th>
+                        <th className="py-2">D</th>
+                        <th className="py-2">L</th>
+                        <th className="py-2">GOALS</th>
+                        <th className="py-2">PTS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {standings.map((standing, index) => (
+                        <tr
+                          key={standing.team.team_id}
+                          className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
+                        >
+                          <td className="py-2">{standing.position}</td>
+                          <td className="py-2 flex items-center">
+                            <span className="w-6 h-6 mr-2">
+                              {/* Placeholder for team logo */}
+                            </span>
+                            {standing.team.team_name}
+                          </td>
+                          <td className="py-2">{standing.matches_played}</td>
+                          <td className="py-2">{standing.wins}</td>
+                          <td className="py-2">{standing.draws}</td>
+                          <td className="py-2">{standing.losses}</td>
+                          <td className="py-2">
+                            {standing.goals_scored}:{standing.goals_conceded}
+                          </td>
+                          <td className="py-2">{standing.points}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
