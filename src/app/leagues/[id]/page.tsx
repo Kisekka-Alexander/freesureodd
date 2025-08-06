@@ -95,7 +95,7 @@ export default function LeagueDetailPage() {
         } catch {
           console.log("Top performers not available for this league");
         }
-      } catch (err) {
+      } catch (err: unknown) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to fetch league data";
         setError(errorMessage);
@@ -209,11 +209,10 @@ export default function LeagueDetailPage() {
                     tab.id as "overview" | "teams" | "predictions" | "standings"
                   )
                 }
-                className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-colors ${
-                  activeTab === tab.id
+                className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-colors ${activeTab === tab.id
                     ? "border-blue-600 text-blue-600 font-semibold"
                     : "border-transparent text-gray-600 hover:text-gray-800"
-                }`}
+                  }`}
               >
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
@@ -281,14 +280,13 @@ export default function LeagueDetailPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${
-                              prediction.prediction.predicted_outcome === "Home"
+                            className={`px-2 py-1 rounded text-xs font-medium ${prediction.prediction.predicted_outcome === "Home"
                                 ? "bg-green-100 text-green-800"
                                 : prediction.prediction.predicted_outcome ===
                                   "Away"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
                           >
                             {prediction.prediction.predicted_outcome}
                           </span>
