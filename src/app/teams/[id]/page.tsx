@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Team, TeamStats, Match, Prediction } from "@/types";
 import { teamsApi, predictionsApi } from "@/lib/axios";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function TeamDetailPage() {
   const params = useParams();
@@ -198,26 +199,18 @@ export default function TeamDetailPage() {
           <div className="flex items-center space-x-6">
             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
               {team.logo_url ? (
-                <img
+                <Image
                   src={team.logo_url}
                   alt={team.team_name}
-                  className="w-20 h-20 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const nextElement = e.currentTarget
-                      .nextElementSibling as HTMLElement;
-                    if (nextElement) {
-                      nextElement.style.display = "flex";
-                    }
-                  }}
+                  width={80}
+                  height={80}
+                  className="object-contain"
                 />
-              ) : null}
-              <div
-                className="w-20 h-20 flex items-center justify-center text-4xl text-gray-400"
-                style={{ display: team.logo_url ? "none" : "flex" }}
-              >
-                ⚽
-              </div>
+              ) : (
+                <div className="w-20 h-20 flex items-center justify-center text-4xl text-gray-400">
+                  ⚽
+                </div>
+              )}
             </div>
             <div>
               <h1 className="text-4xl md:text-6xl font-bold mb-2">
@@ -272,8 +265,8 @@ export default function TeamDetailPage() {
                   setActiveTab(tab.id as "overview" | "matches" | "predictions")
                 }
                 className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-colors ${activeTab === tab.id
-                    ? "border-blue-600 text-blue-600 font-semibold"
-                    : "border-transparent text-gray-600 hover:text-gray-800"
+                  ? "border-blue-600 text-blue-600 font-semibold"
+                  : "border-transparent text-gray-600 hover:text-gray-800"
                   }`}
               >
                 <span>{tab.icon}</span>
@@ -514,10 +507,10 @@ export default function TeamDetailPage() {
                         </div>
                         <div
                           className={`px-3 py-1 rounded-full text-xs font-medium ${prediction.prediction.confidence > 0.7
-                              ? "bg-green-100 text-green-800"
-                              : prediction.prediction.confidence >= 0.5
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
+                            ? "bg-green-100 text-green-800"
+                            : prediction.prediction.confidence >= 0.5
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
                             }`}
                         >
                           {Math.round(prediction.prediction.confidence * 100)}%
@@ -536,11 +529,11 @@ export default function TeamDetailPage() {
                         </div>
                         <div
                           className={`px-3 py-1 rounded-full font-medium ${prediction.prediction.predicted_outcome === "Home"
-                              ? "bg-green-100 text-green-800"
-                              : prediction.prediction.predicted_outcome ===
-                                "Away"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
+                            ? "bg-green-100 text-green-800"
+                            : prediction.prediction.predicted_outcome ===
+                              "Away"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
                             }`}
                         >
                           {prediction.prediction.predicted_outcome}

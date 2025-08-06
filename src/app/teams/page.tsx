@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Team, League } from "@/types";
 import { teamsApi, leaguesApi } from "@/lib/axios";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -208,10 +209,9 @@ export default function TeamsPage() {
               <div className="text-center mb-8">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                   {selectedLeague
-                    ? `Teams in ${
-                        leagues.find((l) => l.league_id === selectedLeague)
-                          ?.league_name
-                      }`
+                    ? `Teams in ${leagues.find((l) => l.league_id === selectedLeague)
+                      ?.league_name
+                    }`
                     : "All Teams"}
                 </h2>
                 <p className="text-gray-600">
@@ -230,26 +230,18 @@ export default function TeamsPage() {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1 text-center">
                       <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                         {team.logo_url ? (
-                          <img
+                          <Image
                             src={team.logo_url}
                             alt={team.team_name}
-                            className="w-12 h-12 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                              const nextElement = e.currentTarget
-                                .nextElementSibling as HTMLElement;
-                              if (nextElement) {
-                                nextElement.style.display = "block";
-                              }
-                            }}
+                            width={48}
+                            height={48}
+                            className="object-contain"
                           />
-                        ) : null}
-                        <span
-                          className="text-2xl"
-                          style={{ display: team.logo_url ? "none" : "block" }}
-                        >
-                          ⚽
-                        </span>
+                        ) : (
+                          <span className="text-2xl">
+                            ⚽
+                          </span>
+                        )}
                       </div>
 
                       <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors mb-1 text-sm">
