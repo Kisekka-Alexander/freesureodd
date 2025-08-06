@@ -7,6 +7,24 @@ import { leaguesApi, teamsApi, predictionsApi } from "@/lib/axios";
 import { PredictionsTable } from "@/components/predictions-table";
 import Link from "next/link";
 
+// Define the expected response type
+type LeagueStandingsResponse = {
+  success: boolean;
+  data: {
+    standings: Array<{
+      position: number;
+      team: { team_id: number; team_name: string };
+      matches_played: number;
+      wins: number;
+      draws: number;
+      losses: number;
+      goals_scored: number;
+      goals_conceded: number;
+      points: number;
+    }>; // Define the structure of StandingType inline
+  };
+};
+
 export default function LeagueDetailPage() {
   const params = useParams();
   const leagueId = parseInt(params.id as string);
@@ -62,7 +80,8 @@ export default function LeagueDetailPage() {
         try {
           const standingsResponse = await leaguesApi.getLeagueStandings(
             leagueId
-          );
+          ) as LeagueStandingsResponse;
+
           if (standingsResponse.success) {
             setStandings(standingsResponse.data.standings);
           }
