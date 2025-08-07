@@ -83,7 +83,8 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
               </th>
 
               <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
-                Odds<br />
+                Odds
+                <br />
                 <div className="flex justify-center space-x-4 text-sm font-normal text-gray-500 mt-1">
                   <span>1</span>
                   <span>X</span>
@@ -148,23 +149,17 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                   <div className="flex justify-center space-x-3 text-sm">
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
-                        {
-                          prediction.home_odds
-                        }
+                        {parseFloat(prediction.home_odds).toFixed(2)}
                       </div>
                     </div>
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
-                        {
-                          prediction.draw_odds
-                        }
+                        {parseFloat(prediction.draw_odds).toFixed(2)}
                       </div>
                     </div>
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
-                        {
-                          prediction.away_odds
-                        }
+                        {parseFloat(prediction.away_odds).toFixed(2)}
                       </div>
                     </div>
                   </div>
