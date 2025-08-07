@@ -1,5 +1,0 @@
-# Local Development Environment
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-local-secret-key
-NEXT_PUBLIC_API_URL=http://3.135.230.49:8000
-NODE_ENV=development
