@@ -81,6 +81,16 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                   Away team
                 </span>
               </th>
+
+              <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
+                Odds<br />
+                <div className="flex justify-center space-x-4 text-sm font-normal text-gray-500 mt-1">
+                  <span>1</span>
+                  <span>X</span>
+                  <span>2</span>
+                </div>
+              </th>
+
               <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
                 Probability %<br />
                 <div className="flex justify-center space-x-4 text-sm font-normal text-gray-500 mt-1">
@@ -129,6 +139,32 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
                         {prediction.league_name}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                {/* Odds */}
+                <td className="p-4">
+                  <div className="flex justify-center space-x-3 text-sm">
+                    <div className="text-center min-w-[30px]">
+                      <div className="font-medium">
+                        {
+                          prediction.home_odds
+                        }
+                      </div>
+                    </div>
+                    <div className="text-center min-w-[30px]">
+                      <div className="font-medium">
+                        {
+                          prediction.draw_odds
+                        }
+                      </div>
+                    </div>
+                    <div className="text-center min-w-[30px]">
+                      <div className="font-medium">
+                        {
+                          prediction.away_odds
+                        }
                       </div>
                     </div>
                   </div>
