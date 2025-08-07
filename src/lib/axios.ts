@@ -10,9 +10,13 @@ const baseURL =
 
 export const api = axios.create({
   baseURL,
-  timeout: 10000,
+  timeout: 30000, // Increased timeout for large responses
   headers: {
     "Content-Type": "application/json",
+  },
+  // Add retry logic for connection resets
+  validateStatus: function (status) {
+    return status < 500; // Accept any status code less than 500
   },
 });
 
@@ -47,9 +51,30 @@ api.interceptors.response.use(
       }
     }
 
-    // Show error toast
-    const message =
-      error.response?.data?.message || error.message || "An error occurred";
+    // Enhanced error logging for debugging
+    console.error("API Error Details:", {
+      message: error.message,
+      code: error.code,
+      response: error.response?.data,
+      status: error.response?.status,
+      url: error.config?.url,
+      method: error.config?.method,
+    });
+
+    // Show error toast with more specific messages
+    let message = "An error occurred";
+    if (
+      error.code === "ECONNRESET" ||
+      error.message.includes("Network Error")
+    ) {
+      message =
+        "Network connection was reset. The server may be overloaded or the response too large.";
+    } else if (error.code === "ECONNABORTED") {
+      message = "Request timed out. Please try again.";
+    } else {
+      message = error.response?.data?.message || error.message || message;
+    }
+
     toast.error(message);
 
     return Promise.reject(error);
@@ -120,10 +145,39 @@ export const predictionsApi = {
 };
 
 export const leaguesApi = {
-  // Get all leagues
-  getLeagues: async (): Promise<ApiResponse<LeaguesResponse>> => {
-    const response = await api.get("/v1/leagues");
-    return response.data;
+  // Get all leagues with retry logic
+  getLeagues: async (retries = 3): Promise<ApiResponse<LeaguesResponse>> => {
+    let lastError: any;
+
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(
+          `Attempting to fetch leagues (attempt ${attempt}/${retries})`
+        );
+        const response = await api.get("/v1/leagues");
+        console.log("Successfully fetched leagues:", response.data);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        console.warn(`Leagues fetch attempt ${attempt} failed:`, error.message);
+
+        // If it's a connection reset or network error and we have retries left, wait and retry
+        if (
+          attempt < retries &&
+          (error.code === "ECONNRESET" ||
+            error.message.includes("Network Error"))
+        ) {
+          console.log(`Retrying in ${attempt * 1000}ms...`);
+          await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+          continue;
+        }
+
+        // If all retries exhausted or it's a different error, throw
+        throw error;
+      }
+    }
+
+    throw lastError;
   },
 
   // Get league standings
