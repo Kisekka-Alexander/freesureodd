@@ -147,7 +147,7 @@ export const predictionsApi = {
 export const leaguesApi = {
   // Get all leagues with retry logic
   getLeagues: async (retries = 3): Promise<ApiResponse<LeaguesResponse>> => {
-    let lastError: any;
+    let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
@@ -157,15 +157,16 @@ export const leaguesApi = {
         const response = await api.get("/v1/leagues");
         console.log("Successfully fetched leagues:", response.data);
         return response.data;
-      } catch (error: any) {
-        lastError = error;
-        console.warn(`Leagues fetch attempt ${attempt} failed:`, error.message);
+      } catch (error: unknown) {
+        const err = error as Error & { code?: string };
+        lastError = err;
+        console.warn(`Leagues fetch attempt ${attempt} failed:`, err.message);
 
         // If it's a connection reset or network error and we have retries left, wait and retry
         if (
           attempt < retries &&
-          (error.code === "ECONNRESET" ||
-            error.message.includes("Network Error"))
+          (err.code === "ECONNRESET" ||
+            err.message.includes("Network Error"))
         ) {
           console.log(`Retrying in ${attempt * 1000}ms...`);
           await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
@@ -173,11 +174,11 @@ export const leaguesApi = {
         }
 
         // If all retries exhausted or it's a different error, throw
-        throw error;
+        throw err;
       }
     }
 
-    throw lastError;
+    throw lastError || new Error("All retry attempts failed");
   },
 
   // Get league standings

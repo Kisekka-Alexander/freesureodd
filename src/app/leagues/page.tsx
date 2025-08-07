@@ -119,30 +119,34 @@ export default function LeaguesPage() {
         } else {
           throw new Error(response.message || "Failed to fetch leagues");
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as Error & {
+          code?: string;
+          response?: { status?: number; data?: { message?: string } };
+        };
         console.error("Detailed error fetching leagues:", {
-          error: err,
-          message: err?.message,
-          code: err?.code,
-          response: err?.response,
+          error: error,
+          message: error?.message,
+          code: error?.code,
+          response: error?.response,
         });
 
         let errorMessage = "Failed to fetch leagues";
         if (
-          err?.code === "ECONNRESET" ||
-          err?.message?.includes("Network Error")
+          error?.code === "ECONNRESET" ||
+          error?.message?.includes("Network Error")
         ) {
           errorMessage =
             "Network connection issue. The server may be experiencing high load or the response was too large. Please try refreshing the page.";
-        } else if (err?.code === "ECONNABORTED") {
+        } else if (error?.code === "ECONNABORTED") {
           errorMessage =
             "Request timed out. Please check your connection and try again.";
-        } else if (err?.response?.status) {
-          errorMessage = `Server error (${err.response.status}): ${
-            err?.response?.data?.message || err.message
+        } else if (error?.response?.status) {
+          errorMessage = `Server error (${error.response.status}): ${
+            error?.response?.data?.message || error.message
           }`;
         } else {
-          errorMessage = err instanceof Error ? err.message : errorMessage;
+          errorMessage = error instanceof Error ? error.message : errorMessage;
         }
 
         setError(errorMessage);
@@ -337,7 +341,7 @@ export default function LeaguesPage() {
                               response.message || "Failed to fetch leagues"
                             );
                           }
-                        } catch (err: any) {
+                        } catch {
                           setError(
                             "Retry failed. Please check your connection and try again."
                           );
