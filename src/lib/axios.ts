@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 const baseURL =
   process.env.NODE_ENV === "production"
     ? "" // Empty string means use relative URLs, which will be handled by Vercel rewrites
-    : process.env.NEXT_PUBLIC_API_URL || "http://3.135.230.49:8000";
+    : process.env.NEXT_PUBLIC_API_URL || "http://3.129.204.58:8000";
 
 export const api = axios.create({
   baseURL,
