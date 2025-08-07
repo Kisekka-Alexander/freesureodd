@@ -79,7 +79,7 @@ export interface ModelInfo {
 export interface PredictionData {
   predicted_outcome: "Home" | "Away" | "Draw";
   confidence: number;
-  
+
   probabilities: Probabilities;
   model_info: ModelInfo;
   predicted_at: string;
@@ -111,6 +111,7 @@ export interface League {
   country: string;
   team_count: number;
   logo_url: string;
+  season_name?: string | null;
 }
 
 export interface LeaguesResponse {
