@@ -18,7 +18,15 @@ export default function LeaguesPage() {
         const response = await leaguesApi.getLeagues();
 
         if (response.success) {
-          setLeagues(response.data.leagues);
+          // Filter leagues to keep only unique league_id entries
+          const uniqueLeagues = response.data.leagues.reduce((acc, current) => {
+            const leagueExists = acc.find((item) => item.league_id === current.league_id);
+            if (!leagueExists) {
+              return [...acc, current];
+            }
+            return acc;
+          }, [] as League[]);
+          setLeagues(uniqueLeagues);
         } else {
           throw new Error(response.message || "Failed to fetch leagues");
         }
