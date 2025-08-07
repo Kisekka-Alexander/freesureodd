@@ -30,9 +30,9 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">SW</span>
+              <span className="text-white font-bold text-sm">FSO</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">SureWin</span>
+            <span className="text-xl font-bold text-gray-900">FreeSureOdd</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -41,11 +41,10 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive(item.href)
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive(item.href)
                     ? "bg-blue-100 text-blue-700"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <span>{item.icon}</span>
                 <span>{item.name}</span>
@@ -99,11 +98,10 @@ export function Header() {
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive(item.href)
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(item.href)
                       ? "bg-blue-100 text-blue-700"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                  }`}
+                    }`}
                 >
                   <span className="text-lg">{item.icon}</span>
                   <span>{item.name}</span>

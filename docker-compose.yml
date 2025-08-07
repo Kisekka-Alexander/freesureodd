@@ -21,7 +21,7 @@ services:
   # database:
   #   image: postgres:15
   #   environment:
-  #     POSTGRES_DB: surewin
+  #     POSTGRES_DB: freesureodd
   #     POSTGRES_USER: postgres
   #     POSTGRES_PASSWORD: password
   #   ports:
