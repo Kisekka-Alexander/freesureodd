@@ -189,8 +189,8 @@ docker compose up --build
 **Option 2: Using Docker directly**
 
 ```bash
-docker build -t surewin:latest .
-docker run -p 3000:3000 surewin:latest
+docker build -t freesureodd:latest .
+docker run -p 3000:3000 freesureodd:latest
 ```
 
 **Option 3: Using the helper script**

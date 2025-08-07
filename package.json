@@ -1,5 +1,5 @@
 {
-  "name": "surewin",
+  "name": "freesureodd",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "setup": "node scripts/setup-new-project.js",
-    "docker:build": "docker build -t surewin:latest .",
-    "docker:run": "docker run -p 3000:3000 --rm surewin:latest",
+    "docker:build": "docker build -t freesureodd:latest .",
+    "docker:run": "docker run -p 3000:3000 --rm freesureodd:latest",
     "docker:compose": "docker compose up --build",
     "docker:stop": "docker compose down"
   },

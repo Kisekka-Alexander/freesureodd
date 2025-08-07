@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Docker development script for SureWin
+# Docker development script for FreeSureOdd
 
 set -e
 
 case "$1" in
   "build")
     echo "🐳 Building Docker image..."
-    docker build -t surewin:latest .
+    docker build -t freesureodd:latest .
     echo "✅ Build complete!"
     ;;
   "run")
@@ -15,9 +15,9 @@ case "$1" in
     docker run -p 3000:3000 \
       -e NEXTAUTH_URL=http://localhost:3000 \
       -e NEXTAUTH_SECRET=your-super-secret-key-here-change-this-in-production \
-      --name surewin-app \
+      --name freesureodd-app \
       --rm \
-      surewin:latest
+      freesureodd:latest
     ;;
   "dev")
     echo "🔧 Starting development environment..."
@@ -34,12 +34,12 @@ case "$1" in
   "stop")
     echo "🛑 Stopping containers..."
     docker compose -f docker-compose.dev.yml down 2>/dev/null || true
-    docker stop surewin-app 2>/dev/null || true
+    docker stop freesureodd-app 2>/dev/null || true
     ;;
   "clean")
     echo "🧹 Cleaning up Docker resources..."
     docker compose -f docker-compose.dev.yml down --rmi all --volumes --remove-orphans
-    docker rmi surewin:latest 2>/dev/null || true
+    docker rmi freesureodd:latest 2>/dev/null || true
     echo "✅ Cleanup complete!"
     ;;
   "logs")
@@ -47,7 +47,7 @@ case "$1" in
     docker compose -f docker-compose.dev.yml logs -f
     ;;
   *)
-    echo "🐳 SureWin Docker Helper"
+    echo "🐳 FreeSureOdd Docker Helper"
     echo ""
     echo "Usage: $0 {build|run|dev|stop|clean|logs}"
     echo ""
