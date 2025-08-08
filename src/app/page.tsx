@@ -23,12 +23,37 @@ export default function Home() {
   useEffect(() => {
     const fetchLeagues = async () => {
       try {
-        const response = await leaguesApi.getLeagues();
+        // Use getCurrentSeasonLeagues for featured leagues section
+        // This gets only current season leagues (2024-2025) without duplicates
+        const response = await leaguesApi.getCurrentSeasonLeagues();
         if (response.success) {
           setLeagues(response.data.leagues);
         }
       } catch (err) {
         console.error("Error fetching leagues:", err);
+        // Fallback to unique leagues if current season fails
+        try {
+          const fallbackResponse = await leaguesApi.getUniqueLeagues();
+          if (fallbackResponse.success) {
+            // Convert UniqueLeague to League format for compatibility
+            const currentSeasonLeagues = fallbackResponse.data.leagues.map(uniqueLeague => {
+              const currentSeason = uniqueLeague.seasons.find(s => s.season_name === "2024-2025")
+                || uniqueLeague.seasons[uniqueLeague.seasons.length - 1]; // Get latest season as fallback
+
+              return {
+                league_id: uniqueLeague.league_id,
+                league_name: uniqueLeague.league_name,
+                country: uniqueLeague.country,
+                logo_url: uniqueLeague.logo_url,
+                season_name: currentSeason?.season_name || null,
+                team_count: currentSeason?.team_count || 0
+              };
+            });
+            setLeagues(currentSeasonLeagues);
+          }
+        } catch (fallbackErr) {
+          console.error("Error fetching fallback leagues:", fallbackErr);
+        }
       }
     };
 
@@ -150,8 +175,8 @@ export default function Home() {
             <button
               onClick={() => handleLeagueFilter(null)}
               className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 ${selectedLeague === null
-                  ? "ring-2 ring-blue-500 border-blue-300"
-                  : ""
+                ? "ring-2 ring-blue-500 border-blue-300"
+                : ""
                 }`}
             >
               <div className="text-3xl mb-3">🌍</div>
@@ -163,43 +188,47 @@ export default function Home() {
               </div>
             </button>
 
-            {/* Dynamic League Buttons */}
-            {leagues.slice(0, 5).map((league) => {
-              return (
-                <Link
-                  key={league.league_id}
-                  href={`/leagues/${league.league_id}`}
-                  className="group"
-                >
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleLeagueFilter(league.league_id);
-                    }}
-                    onDoubleClick={() =>
-                      (window.location.href = `/leagues/${league.league_id}`)
-                    }
-                    className={`w-full bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 group-hover:border-blue-300 ${selectedLeague === league.league_id
+            {/* Dynamic League Buttons - Show top 5 leagues with most teams */}
+            {leagues
+              .filter(league => league.team_count > 0) // Filter out leagues with no teams
+              .sort((a, b) => b.team_count - a.team_count) // Sort by team count descending
+              .slice(0, 5)
+              .map((league) => {
+                return (
+                  <Link
+                    key={league.league_id}
+                    href={`/leagues/${league.league_id}`}
+                    className="group"
+                  >
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleLeagueFilter(league.league_id);
+                      }}
+                      onDoubleClick={() =>
+                        (window.location.href = `/leagues/${league.league_id}`)
+                      }
+                      className={`w-full bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 group-hover:border-blue-300 ${selectedLeague === league.league_id
                         ? "ring-2 ring-blue-500 border-blue-300"
                         : ""
-                      }`}
-                  >
-                    <div className="text-3xl mb-3">
-                      {getCountryFlag(league.country)}
-                    </div>
-                    <div className="font-semibold text-gray-900 text-sm mb-1">
-                      {league.league_name}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {league.team_count} teams
-                    </div>
-                    <div className="text-xs text-blue-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Double-click to view →
-                    </div>
-                  </button>
-                </Link>
-              );
-            })}
+                        }`}
+                    >
+                      <div className="text-3xl mb-3">
+                        {getCountryFlag(league.country)}
+                      </div>
+                      <div className="font-semibold text-gray-900 text-sm mb-1">
+                        {league.league_name}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {league.team_count} teams
+                      </div>
+                      <div className="text-xs text-blue-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Double-click to view →
+                      </div>
+                    </button>
+                  </Link>
+                );
+              })}
           </div>
         </div>
       </section>
@@ -223,8 +252,8 @@ export default function Home() {
                 <button
                   onClick={() => setViewMode("table")}
                   className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === "table"
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "text-gray-600 hover:text-gray-800 hover:bg-white"
+                    ? "bg-blue-500 text-white shadow-md"
+                    : "text-gray-600 hover:text-gray-800 hover:bg-white"
                     }`}
                 >
                   📊 Detailed Table
@@ -232,8 +261,8 @@ export default function Home() {
                 <button
                   onClick={() => setViewMode("cards")}
                   className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === "cards"
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "text-gray-600 hover:text-gray-800 hover:bg-white"
+                    ? "bg-blue-500 text-white shadow-md"
+                    : "text-gray-600 hover:text-gray-800 hover:bg-white"
                     }`}
                 >
                   📋 Quick Cards
@@ -393,10 +422,10 @@ export default function Home() {
                         </div>
                         <div
                           className={`px-3 py-1 rounded-full text-xs font-medium ${prediction.prediction.confidence > 0.7
-                              ? "bg-green-100 text-green-800"
-                              : prediction.prediction.confidence >= 0.5
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
+                            ? "bg-green-100 text-green-800"
+                            : prediction.prediction.confidence >= 0.5
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
                             }`}
                         >
                           {Math.round(prediction.prediction.confidence * 100)}%

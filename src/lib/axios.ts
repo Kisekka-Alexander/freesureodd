@@ -93,6 +93,7 @@ import {
   TrendsAnalytics,
   HeadToHeadStats,
   TeamStats,
+  UniqueLeague,
 } from "@/types";
 
 export const predictionsApi = {
@@ -179,6 +180,67 @@ export const leaguesApi = {
     }
 
     throw lastError || new Error("All retry attempts failed");
+  },
+
+  // Get unique leagues (grouped by league_id, removing duplicates from different seasons)
+  getUniqueLeagues: async (retries = 3): Promise<ApiResponse<{ leagues: UniqueLeague[]; total_count: number }>> => {
+    const response = await leaguesApi.getLeagues(retries);
+
+    // Group leagues by league_id and aggregate seasons
+    const leagueMap = new Map<number, UniqueLeague>();
+
+    response.data.leagues.forEach(league => {
+      if (!leagueMap.has(league.league_id)) {
+        leagueMap.set(league.league_id, {
+          league_id: league.league_id,
+          league_name: league.league_name,
+          country: league.country,
+          logo_url: league.logo_url,
+          seasons: []
+        });
+      }
+
+      const uniqueLeague = leagueMap.get(league.league_id)!;
+      uniqueLeague.seasons.push({
+        season_name: league.season_name ?? null,
+        team_count: league.team_count
+      });
+    });
+
+    const uniqueLeagues = Array.from(leagueMap.values());
+
+    return {
+      ...response,
+      data: {
+        leagues: uniqueLeagues,
+        total_count: uniqueLeagues.length
+      }
+    };
+  },
+
+  // Get leagues for a specific season
+  getLeaguesBySeason: async (
+    seasonName: string,
+    retries = 3
+  ): Promise<ApiResponse<LeaguesResponse>> => {
+    const response = await leaguesApi.getLeagues(retries);
+
+    const filteredLeagues = response.data.leagues.filter(
+      league => league.season_name === seasonName
+    );
+
+    return {
+      ...response,
+      data: {
+        leagues: filteredLeagues,
+        total_count: filteredLeagues.length
+      }
+    };
+  },
+
+  // Get current season leagues (2024-2025)
+  getCurrentSeasonLeagues: async (retries = 3): Promise<ApiResponse<LeaguesResponse>> => {
+    return leaguesApi.getLeaguesBySeason("2024-2025", retries);
   },
 
   // Get league standings

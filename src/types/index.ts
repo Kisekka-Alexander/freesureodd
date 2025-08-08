@@ -119,6 +119,20 @@ export interface LeaguesResponse {
   total_count: number;
 }
 
+// Helper types for better league data handling
+export interface UniqueLeague {
+  league_id: number;
+  league_name: string;
+  country: string;
+  logo_url: string;
+  seasons: LeagueSeason[];
+}
+
+export interface LeagueSeason {
+  season_name: string | null;
+  team_count: number;
+}
+
 // Team Types
 export interface TeamLeague {
   league_id: number;
