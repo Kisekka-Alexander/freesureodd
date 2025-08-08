@@ -147,46 +147,21 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
   );
 }
 
-// Mock featured matches for hero - in real app, these would come from props or API
-const mockFeaturedMatches = [
-  {
-    homeTeam: "Manchester City",
-    awayTeam: "Liverpool",
-    league: "Premier League",
-    time: "15:30",
-    prediction: "1",
-    confidence: 78,
-    homeOdds: 45,
-    drawOdds: 28,
-    awayOdds: 27,
-  },
-  {
-    homeTeam: "Real Madrid",
-    awayTeam: "Barcelona",
-    league: "La Liga",
-    time: "18:00",
-    prediction: "X",
-    confidence: 65,
-    homeOdds: 38,
-    drawOdds: 32,
-    awayOdds: 30,
-  },
-  {
-    homeTeam: "Bayern Munich",
-    awayTeam: "Borussia Dortmund",
-    league: "Bundesliga",
-    time: "20:30",
-    prediction: "1",
-    confidence: 72,
-    homeOdds: 52,
-    drawOdds: 25,
-    awayOdds: 23,
-  },
-];
+interface HeroProps {
+  predictions?: Prediction[];
+}
 
-export function Hero() {
+export function Hero({ predictions = [] }: HeroProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [featuredIndex, setFeaturedIndex] = useState(0);
+
+  // Get top 3 highest confidence predictions for cycling
+  const topPredictions = predictions
+    .slice() // Create a copy to avoid mutating original array
+    .sort((a, b) => b.prediction.confidence - a.prediction.confidence)
+    .slice(0, 3);
+
+  const displayMatches = topPredictions;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -194,16 +169,51 @@ export function Hero() {
     }, 1000);
 
     const featuredTimer = setInterval(() => {
-      setFeaturedIndex((prev) => (prev + 1) % mockFeaturedMatches.length);
+      setFeaturedIndex((prev) => (prev + 1) % displayMatches.length);
     }, 4000);
 
     return () => {
       clearInterval(timer);
       clearInterval(featuredTimer);
     };
-  }, []);
+  }, [displayMatches.length]);
 
-  const featuredMatch = mockFeaturedMatches[featuredIndex];
+  // Convert real prediction data to match interface
+  const getFeaturedMatch = () => {
+    if (topPredictions.length > 0) {
+      const prediction = topPredictions[featuredIndex];
+      return {
+        homeTeam: prediction.home_team,
+        awayTeam: prediction.away_team,
+        league: prediction.league_name,
+        time: new Date(prediction.match_date).toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        prediction: prediction.prediction.predicted_outcome === 'Home' ? '1' :
+          prediction.prediction.predicted_outcome === 'Away' ? '2' : 'X',
+        confidence: Math.round(prediction.prediction.confidence * 100),
+        homeOdds: Math.round(prediction.prediction.probabilities.Home * 100),
+        drawOdds: Math.round(prediction.prediction.probabilities.Draw * 100),
+        awayOdds: Math.round(prediction.prediction.probabilities.Away * 100),
+      };
+    } else {
+      // Return placeholder data when no predictions are available
+      return {
+        homeTeam: "Loading...",
+        awayTeam: "Loading...",
+        league: "Fetching data...",
+        time: "--:--",
+        prediction: "X",
+        confidence: 0,
+        homeOdds: 0,
+        drawOdds: 0,
+        awayOdds: 0,
+      };
+    }
+  };
+
+  const featuredMatch = getFeaturedMatch();
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-green-600 via-blue-700 to-purple-800 text-white">
@@ -342,15 +352,17 @@ export function Hero() {
               </div>
 
               {/* Progress indicators */}
-              <div className="flex justify-center space-x-2">
-                {mockFeaturedMatches.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-2 h-2 rounded-full transition-colors ${index === featuredIndex ? "bg-yellow-300" : "bg-white/30"
-                      }`}
-                  ></div>
-                ))}
-              </div>
+              {displayMatches.length > 0 && (
+                <div className="flex justify-center space-x-2">
+                  {displayMatches.map((_, index: number) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-colors ${index === featuredIndex ? "bg-yellow-300" : "bg-white/30"
+                        }`}
+                    ></div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Quick access buttons */}
