@@ -121,7 +121,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
-      <Hero />
+      <Hero predictions={predictions} />
 
       {/* Quick Stats Section */}
       <section className="py-16 bg-white">
@@ -138,21 +138,29 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
               <div className="text-3xl font-bold text-green-600 mb-2">
-                {predictions.length || 24}
+                {predictions.length}
               </div>
               <div className="text-sm text-green-700">Today&apos;s Tips</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-              <div className="text-3xl font-bold text-blue-600 mb-2">87%</div>
-              <div className="text-sm text-blue-700">Win Rate This Week</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">
+                {predictions.length > 0 ? Math.round(
+                  predictions.reduce((sum, p) => sum + p.prediction.confidence, 0) / predictions.length * 100
+                ) : 0}%
+              </div>
+              <div className="text-sm text-blue-700">Avg Confidence</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
-              <div className="text-3xl font-bold text-purple-600 mb-2">15</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">
+                {leagues.length}
+              </div>
               <div className="text-sm text-purple-700">Leagues Covered</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
-              <div className="text-3xl font-bold text-orange-600 mb-2">🔥</div>
-              <div className="text-sm text-orange-700">Hot Streak</div>
+              <div className="text-3xl font-bold text-orange-600 mb-2">
+                {predictions.filter(p => p.prediction.confidence > 0.7).length}
+              </div>
+              <div className="text-sm text-orange-700">High Confidence</div>
             </div>
           </div>
         </div>
