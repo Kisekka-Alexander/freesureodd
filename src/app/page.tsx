@@ -4,7 +4,7 @@ import { Hero } from "@/components/hero";
 import { Features } from "@/components/features";
 import { PredictionsTable } from "@/components/predictions-table";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
-import { Prediction, League, UniqueLeague } from "@/types";
+import { Prediction, League } from "@/types";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
