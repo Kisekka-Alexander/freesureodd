@@ -94,22 +94,37 @@ import {
   HeadToHeadStats,
   TeamStats,
   UniqueLeague,
+  StandingsResponse,
 } from "@/types";
 
 export const predictionsApi = {
   // Get all predictions with pagination
   getAllPredictions: async (params?: {
-    limit?: number;
-    offset?: number;
+    page?: number;
+    page_size?: number;
     league_id?: number;
     status?: "upcoming" | "live" | "completed";
     confidence_threshold?: number;
-    sort_by?: "date" | "confidence" | "league";
+    sort_by?: "match_date" | "confidence" | "league";
     sort_order?: "asc" | "desc";
   }): Promise<ApiResponse<PredictionsResponse>> => {
     const queryParams = new URLSearchParams();
-    if (params?.limit) queryParams.append("limit", params.limit.toString());
-    if (params?.offset) queryParams.append("offset", params.offset.toString());
+
+    // Set default page and page_size if not provided
+    const page = params?.page ?? 1;
+    const page_size = params?.page_size ?? 20;
+
+    // Validate pagination parameters
+    if (page < 1) {
+      throw new Error("Page must be 1 or greater");
+    }
+    if (page_size < 1 || page_size > 100) {
+      throw new Error("Page size must be between 1 and 100");
+    }
+
+    queryParams.append("page", page.toString());
+    queryParams.append("page_size", page_size.toString());
+
     if (params?.league_id)
       queryParams.append("league_id", params.league_id.toString());
     if (params?.status) queryParams.append("status", params.status);
@@ -122,8 +137,10 @@ export const predictionsApi = {
     if (params?.sort_order) queryParams.append("sort_order", params.sort_order);
 
     const response = await api.get(
-      `/v1/predictions/all?${queryParams.toString()}`
+      `/v1/predictions?${queryParams.toString()}`
     );
+    console.log("Raw axios response:", response);
+    console.log("Response data structure:", response.data);
     return response.data;
   },
 
@@ -245,10 +262,53 @@ export const leaguesApi = {
 
   // Get league standings
   getLeagueStandings: async (
-    leagueId: number
-  ): Promise<ApiResponse<object>> => {
-    const response = await api.get(`/v1/leagues/${leagueId}/standings`);
+    leagueId: number,
+    season?: string
+  ): Promise<StandingsResponse> => {
+    const seasonParam = season ? `?season=${season}` : '';
+    const response = await api.get(`/v1/leagues/${leagueId}/standings${seasonParam}`);
     return response.data;
+  },
+
+  // Get available seasons for a league
+  getAvailableSeasons: async (leagueId: number): Promise<string[]> => {
+    const commonSeasons = [
+      "2024-2025",
+      "2023-2024",
+      "2022-2023",
+      "2021-2022",
+      "2020-2021",
+      "2019-2020",
+      "2018-2019"
+    ];
+
+    try {
+      // Try to get standings without season parameter first to see if we get data from multiple seasons
+      const response = await api.get(`/v1/leagues/${leagueId}/standings`);
+      if (response.data.success && response.data.data.standings.length > 0) {
+        // If we get data, we know the league exists, so we can assume common seasons are available
+        // We'll test just a few recent seasons to be sure
+        const availableSeasons: string[] = [];
+
+        for (const season of commonSeasons.slice(0, 4)) { // Test only recent 4 seasons
+          try {
+            const seasonResponse = await api.get(`/v1/leagues/${leagueId}/standings?season=${season}`);
+            if (seasonResponse.data.success && seasonResponse.data.data.standings.length > 0) {
+              availableSeasons.push(season);
+            }
+          } catch {
+            // Season not available, continue to next
+          }
+        }
+
+        return availableSeasons.length > 0 ? availableSeasons : commonSeasons.slice(0, 3);
+      }
+    } catch {
+      console.log(`Could not fetch seasons for league ${leagueId}`);
+    }
+
+    // Fallback to default seasons
+    return ["2023-2024", "2022-2023", "2021-2022"];
   },
 
   // Get league top performers

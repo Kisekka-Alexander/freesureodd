@@ -99,9 +99,17 @@ export interface Prediction {
   prediction: PredictionData;
 }
 
+export interface PaginationInfo {
+  total_count: number;
+  current_page: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
 export interface PredictionsResponse {
   predictions: Prediction[];
-  total_predictions: number;
+  pagination: PaginationInfo;
 }
 
 // League Types
@@ -220,4 +228,42 @@ export interface TeamStats {
   goal_difference: number;
   win_percentage: number;
   form: string[];
+}
+
+// Standings Types
+export interface StandingTeam {
+  team_id: number;
+  team_name: string;
+}
+
+export interface Standing {
+  position: number;
+  team: StandingTeam;
+  matches_played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_scored: number;
+  goals_conceded: number;
+  goal_difference: number;
+  points: number;
+  form: string;
+  points_per_match: number;
+}
+
+export interface StandingsLeague {
+  league_id: number;
+  league_name: string;
+  country: string;
+}
+
+export interface StandingsData {
+  league: StandingsLeague;
+  standings: Standing[];
+}
+
+export interface StandingsResponse {
+  success: boolean;
+  timestamp: string;
+  data: StandingsData;
 }
