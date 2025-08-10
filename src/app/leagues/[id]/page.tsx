@@ -6,7 +6,6 @@ import { League, Prediction, Standing, StandingsResponse } from "@/types";
 import { leaguesApi, predictionsApi } from "@/lib/axios";
 import { PredictionsTable } from "@/components/predictions-table";
 import Link from "next/link";
-import Image from "next/image";
 
 export default function LeagueDetailPage() {
   const params = useParams();
