@@ -296,14 +296,14 @@ export const leaguesApi = {
             if (seasonResponse.data.success && seasonResponse.data.data.standings.length > 0) {
               availableSeasons.push(season);
             }
-          } catch (error) {
+          } catch {
             // Season not available, continue to next
           }
         }
 
         return availableSeasons.length > 0 ? availableSeasons : commonSeasons.slice(0, 3);
       }
-    } catch (error) {
+    } catch {
       console.log(`Could not fetch seasons for league ${leagueId}`);
     }
 

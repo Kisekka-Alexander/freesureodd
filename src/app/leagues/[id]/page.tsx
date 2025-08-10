@@ -104,7 +104,7 @@ export default function LeagueDetailPage() {
           if (seasons.length > 0 && !seasons.includes(season)) {
             setSeason(seasons[0]);
           }
-        } catch (error) {
+        } catch {
           console.log("Could not fetch available seasons, using defaults");
         } finally {
           setSeasonsLoading(false);
@@ -439,7 +439,7 @@ export default function LeagueDetailPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {standings.map((standing, index) => (
+                        {standings.map((standing) => (
                           <tr
                             key={standing.team.team_id}
                             className={`hover:bg-gray-50 border-b border-gray-100 ${standing.position <= 4

@@ -17,6 +17,7 @@ export default function Home() {
   const [selectedLeague, setSelectedLeague] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPredictions, setTotalPredictions] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const predictionsPerPage = 20;
 
   // Fetch leagues on component mount
@@ -60,6 +61,32 @@ export default function Home() {
     fetchLeagues();
   }, []);
 
+  // Fetch total predictions count on component mount
+  useEffect(() => {
+    const fetchInitialPredictions = async () => {
+      try {
+        // Get the first page to initialize pagination info
+        const response = await predictionsApi.getAllPredictions({
+          page: 1,
+          page_size: predictionsPerPage,
+          status: "upcoming",
+          sort_by: "match_date",
+          sort_order: "asc",
+        });
+
+        if (response.success) {
+          setTotalPredictions(response.data.pagination.total_count);
+          setTotalPages(response.data.pagination.total_pages);
+        }
+      } catch (err) {
+        console.error("Error fetching initial predictions info:", err);
+        // Keep the existing state if this fails
+      }
+    };
+
+    fetchInitialPredictions();
+  }, []);
+
   // Fetch predictions when filters change
   useEffect(() => {
     const fetchPredictions = async () => {
@@ -68,21 +95,27 @@ export default function Home() {
         setError(null);
 
         const params = {
-          limit: predictionsPerPage,
-          offset: (currentPage - 1) * predictionsPerPage,
+          page: currentPage,
+          page_size: predictionsPerPage,
           ...(selectedLeague && { league_id: selectedLeague }),
           status: "upcoming" as const,
-          sort_by: "date" as const,
+          sort_by: "match_date" as const,
           sort_order: "asc" as const,
         };
 
+        console.log("Fetching predictions with params:", params);
         const response = await predictionsApi.getAllPredictions(params);
+        console.log("Predictions fetched successfully");
 
         if (response.success) {
           setPredictions(response.data.predictions);
-          setTotalPredictions(
-            response.data.total_predictions || response.data.predictions.length
-          );
+          setTotalPredictions(response.data.pagination.total_count);
+          setTotalPages(response.data.pagination.total_pages);
+
+          // If we're on a page that doesn't exist (e.g., after filtering), go to page 1
+          if (currentPage > response.data.pagination.total_pages && response.data.pagination.total_count > 0) {
+            setCurrentPage(1);
+          }
         } else {
           throw new Error(response.message || "Failed to fetch predictions");
         }
@@ -116,8 +149,6 @@ export default function Home() {
     setSelectedLeague(leagueId);
     setCurrentPage(1);
   };
-
-  const totalPages = Math.ceil(totalPredictions / predictionsPerPage);
 
   return (
     <main className="min-h-screen">
@@ -394,19 +425,19 @@ export default function Home() {
                     onClick={() =>
                       setCurrentPage((prev) => Math.max(1, prev - 1))
                     }
-                    disabled={currentPage === 1}
+                    disabled={currentPage <= 1 || loading}
                     className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                   >
                     ← Previous
                   </button>
                   <span className="text-sm text-gray-600">
-                    {currentPage} / {totalPages}
+                    {totalPredictions > 0 ? `${currentPage} / ${totalPages}` : "0 / 0"}
                   </span>
                   <button
                     onClick={() =>
                       setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                     }
-                    disabled={currentPage === totalPages}
+                    disabled={currentPage >= totalPages || loading || totalPredictions === 0}
                     className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                   >
                     Next →
