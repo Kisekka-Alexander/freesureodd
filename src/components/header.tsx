@@ -12,7 +12,6 @@ export function Header() {
     { name: "Home", href: "/", icon: "🏠" },
     { name: "Predictions", href: "/", icon: "🎯" },
     { name: "Leagues", href: "/leagues", icon: "🏆" },
-    { name: "Teams", href: "/teams", icon: "⚽" },
     { name: "Analytics", href: "/analytics", icon: "📊" },
   ];
 

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { League, Team, Prediction, Standing, StandingsResponse } from "@/types";
-import { leaguesApi, teamsApi, predictionsApi } from "@/lib/axios";
+import { League, Prediction, Standing, StandingsResponse } from "@/types";
+import { leaguesApi, predictionsApi } from "@/lib/axios";
 import { PredictionsTable } from "@/components/predictions-table";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,7 +13,6 @@ export default function LeagueDetailPage() {
   const leagueId = parseInt(params.id as string);
 
   const [league, setLeague] = useState<League | null>(null);
-  const [teams, setTeams] = useState<Team[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [standings, setStandings] = useState<Standing[]>([]);
   const [season, setSeason] = useState<string>("2023-2024"); // Default season
@@ -21,7 +20,7 @@ export default function LeagueDetailPage() {
   const [seasonsLoading, setSeasonsLoading] = useState<boolean>(false);
 
   const [activeTab, setActiveTab] = useState<
-    "overview" | "teams" | "predictions" | "standings"
+    "overview" | "predictions" | "standings"
   >("overview");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,15 +40,6 @@ export default function LeagueDetailPage() {
           if (foundLeague) {
             setLeague(foundLeague);
           }
-        }
-
-        // Fetch teams for this league
-        const teamsResponse = await teamsApi.getTeams({
-          league_id: leagueId,
-          limit: 50,
-        });
-        if (teamsResponse.success) {
-          setTeams(teamsResponse.data.teams);
         }
 
         // Fetch predictions for this league
@@ -187,10 +177,6 @@ export default function LeagueDetailPage() {
               <p className="text-xl opacity-90 mb-4">{league.country}</p>
               <div className="flex items-center space-x-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{league.team_count}</div>
-                  <div className="text-sm opacity-75">Teams</div>
-                </div>
-                <div className="text-center">
                   <div className="text-2xl font-bold">{predictions.length}</div>
                   <div className="text-sm opacity-75">Upcoming Predictions</div>
                 </div>
@@ -206,7 +192,6 @@ export default function LeagueDetailPage() {
           <div className="flex space-x-8">
             {[
               { id: "overview", label: "Overview", icon: "📊" },
-              { id: "teams", label: "Teams", icon: "🏟️" },
               { id: "predictions", label: "Predictions", icon: "🎯" },
               { id: "standings", label: "Standings", icon: "🏆" },
             ].map((tab) => (
@@ -214,7 +199,7 @@ export default function LeagueDetailPage() {
                 key={tab.id}
                 onClick={() =>
                   setActiveTab(
-                    tab.id as "overview" | "teams" | "predictions" | "standings"
+                    tab.id as "overview" | "predictions" | "standings"
                   )
                 }
                 className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-colors ${activeTab === tab.id
@@ -319,53 +304,6 @@ export default function LeagueDetailPage() {
             </div>
           )}
 
-          {activeTab === "teams" && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Teams in {league.league_name}
-              </h2>
-              {teams.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-4xl mb-4">🏟️</div>
-                  <p className="text-gray-600">
-                    No teams data available for this league.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {teams.map((team) => (
-                    <Link
-                      key={team.team_id}
-                      href={`/teams/${team.team_id}`}
-                      className="group"
-                    >
-                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1">
-                        <div className="text-center">
-                          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                            {team.logo_url ? (
-                              <Image
-                                src={team.logo_url}
-                                alt={team.team_name}
-                                width={48}
-                                height={48}
-                                className="object-contain"
-                              />
-                            ) : (
-                              <span className="text-2xl">⚽</span>
-                            )}
-                          </div>
-                          <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                            {team.team_name}
-                          </h3>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
           {activeTab === "predictions" && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -455,15 +393,12 @@ export default function LeagueDetailPage() {
                               {standing.position}
                             </td>
                             <td className="py-3 px-4">
-                              <Link
-                                href={`/teams/${standing.team.team_id}`}
-                                className="flex items-center hover:text-blue-600 transition-colors"
-                              >
+                              <div className="flex items-center">
                                 <span className="w-6 h-6 mr-3 bg-gray-200 rounded-full flex items-center justify-center text-xs">
                                   {standing.team.team_name.substring(0, 2).toUpperCase()}
                                 </span>
                                 <span className="font-medium">{standing.team.team_name}</span>
-                              </Link>
+                              </div>
                             </td>
                             <td className="py-3 px-4 text-center text-gray-600">{standing.matches_played}</td>
                             <td className="py-3 px-4 text-center text-green-600 font-medium">{standing.wins}</td>
