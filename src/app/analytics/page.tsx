@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { AccuracyAnalytics, TrendsAnalytics, League } from "@/types";
 import { analyticsApi, leaguesApi } from "@/lib/axios";
 
-// Import with type assertion to handle missing types
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { getCountryCode, flag } = require("country-flag-emoji") as {
   getCountryCode: (countryName: string) => string | undefined;
   flag: (countryCode: string) => string | undefined;
