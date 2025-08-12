@@ -2,7 +2,6 @@
 
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { SessionProvider } from "next-auth/react";
 import { store, persistor } from "@/store";
 import { useEffect, useState } from "react";
 
@@ -12,6 +11,11 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   const [mswReady, setMswReady] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const initMSW = async () => {
@@ -39,7 +43,11 @@ export function Providers({ children }: ProvidersProps) {
     initMSW();
   }, []);
 
-  // Don't render children until MSW is ready in development (only if MSW is enabled and in browser)
+  // Don't render children until we're on the client side and MSW is ready (if needed)
+  if (!isClient) {
+    return <div>Loading...</div>;
+  }
+
   if (
     typeof window !== "undefined" &&
     process.env.NODE_ENV === "development" &&
@@ -50,12 +58,10 @@ export function Providers({ children }: ProvidersProps) {
   }
 
   return (
-    <SessionProvider>
-      <Provider store={store}>
-        <PersistGate loading={<div>Loading...</div>} persistor={persistor}>
-          {children}
-        </PersistGate>
-      </Provider>
-    </SessionProvider>
+    <Provider store={store}>
+      <PersistGate loading={<div>Loading...</div>} persistor={persistor}>
+        {children}
+      </PersistGate>
+    </Provider>
   );
 }

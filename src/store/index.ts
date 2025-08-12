@@ -5,6 +5,24 @@ import { combineReducers } from "@reduxjs/toolkit";
 
 // Import your slice reducers here
 import authSlice from "./slices/authSlice";
+
+// Create a noop storage for SSR
+const createNoopStorage = () => {
+  return {
+    getItem() {
+      return Promise.resolve(null);
+    },
+    setItem(_: string, value: unknown) {
+      return Promise.resolve(value);
+    },
+    removeItem() {
+      return Promise.resolve();
+    },
+  };
+};
+
+// Use conditional storage based on environment
+const persistStorage = typeof window !== "undefined" ? storage : createNoopStorage();
 // import userSlice from './slices/userSlice'
 
 const rootReducer = combineReducers({
@@ -15,7 +33,7 @@ const rootReducer = combineReducers({
 
 const persistConfig = {
   key: "root",
-  storage,
+  storage: persistStorage,
   whitelist: ["auth"], // Add reducers you want to persist
 };
 

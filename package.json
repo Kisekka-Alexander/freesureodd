@@ -23,6 +23,7 @@
     "apexcharts": "^4.7.0",
     "axios": "^1.9.0",
     "clsx": "^2.1.1",
+    "country-flag-emoji": "^1.0.3",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
     "next": "15.3.2",

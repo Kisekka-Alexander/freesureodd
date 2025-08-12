@@ -4,6 +4,12 @@ import { useState, useEffect } from "react";
 import { AccuracyAnalytics, TrendsAnalytics, League } from "@/types";
 import { analyticsApi, leaguesApi } from "@/lib/axios";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { getCountryCode, flag } = require("country-flag-emoji") as {
+  getCountryCode: (countryName: string) => string | undefined;
+  flag: (countryCode: string) => string | undefined;
+};
+
 export default function AnalyticsPage() {
   const [accuracyData, setAccuracyData] = useState<AccuracyAnalytics | null>(
     null
@@ -63,8 +69,8 @@ export default function AnalyticsPage() {
             selectedPeriod === "7d"
               ? "daily"
               : selectedPeriod === "30d"
-              ? "daily"
-              : "weekly",
+                ? "daily"
+                : "weekly",
         });
         if (trendsResponse.success) {
           setTrendsData(trendsResponse.data);
@@ -83,16 +89,26 @@ export default function AnalyticsPage() {
   }, [selectedLeague, selectedMetric, selectedPeriod, breakdown]);
 
   const getCountryFlag = (country: string) => {
-    const flags: Record<string, string> = {
+    // Try to get the country code first
+    const countryCode = getCountryCode(country);
+
+    if (countryCode) {
+      // Get flag emoji using country code
+      const flagEmoji = flag(countryCode);
+      if (flagEmoji) {
+        return flagEmoji;
+      }
+    }
+
+    // Fallback to manual mapping for special cases or if library fails
+    const fallbackFlags: Record<string, string> = {
       England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-      Spain: "🇪🇸",
-      Italy: "🇮🇹",
-      Germany: "🇩🇪",
-      France: "🇫🇷",
-      Netherlands: "🇳🇱",
-      Scotland: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+      Scotland: "�󠁧󠁢󠁳󠁣󠁴󠁿",
+      Wales: "�󠁧󠁢󠁷󠁬󠁳󠁿",
+      "Northern Ireland": "🏴󠁧󠁢���󠁿",
     };
-    return flags[country] || "🌍";
+
+    return fallbackFlags[country] || "🌍";
   };
 
   const getTrendDirection = (direction: "up" | "down" | "stable") => {
@@ -159,9 +175,9 @@ export default function AnalyticsPage() {
                 onChange={(e) =>
                   setSelectedMetric(
                     e.target.value as
-                      | "accuracy"
-                      | "predictions_count"
-                      | "avg_confidence"
+                    | "accuracy"
+                    | "predictions_count"
+                    | "avg_confidence"
                   )
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -288,10 +304,9 @@ export default function AnalyticsPage() {
                       {trendsData.summary.change_percentage.toFixed(1)}%
                     </div>
                     <div
-                      className={`text-sm ${
-                        getTrendDirection(trendsData.summary.trend_direction)
+                      className={`text-sm ${getTrendDirection(trendsData.summary.trend_direction)
                           .color
-                      }`}
+                        }`}
                     >
                       {
                         getTrendDirection(trendsData.summary.trend_direction)
@@ -360,7 +375,7 @@ export default function AnalyticsPage() {
                               </div>
                               <div className="text-sm font-medium w-16 text-right">
                                 {selectedMetric === "accuracy" ||
-                                selectedMetric === "avg_confidence"
+                                  selectedMetric === "avg_confidence"
                                   ? `${(point.value * 100).toFixed(1)}%`
                                   : point.value.toFixed(0)}
                               </div>
