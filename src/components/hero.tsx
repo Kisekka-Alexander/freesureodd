@@ -1,5 +1,6 @@
 import { Prediction } from "@/types";
 import { useEffect, useState } from "react";
+import { formatCompactDate, getRelativeTime, isMatchToday, formatTimeOnly } from "@/utils/date";
 
 // PredictionCard component
 interface PredictionCardProps {
@@ -15,15 +16,6 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
     match_status,
     prediction: predictionData,
   } = prediction;
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -64,7 +56,17 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <div className="text-sm text-gray-500">
-            {league_name} • {formatDate(match_date)}
+            <div>
+              {league_name}
+            </div>
+            <div className="mt-1">
+              {formatCompactDate(match_date)}
+              {isMatchToday(match_date) && (
+                <span className="ml-2 text-blue-600 font-semibold">
+                  {getRelativeTime(match_date)}
+                </span>
+              )}
+            </div>
           </div>
           <div
             className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(
@@ -186,10 +188,7 @@ export function Hero({ predictions = [] }: HeroProps) {
         homeTeam: prediction.home_team,
         awayTeam: prediction.away_team,
         league: prediction.league_name,
-        time: new Date(prediction.match_date).toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
+        time: formatTimeOnly(prediction.match_date),
         prediction: prediction.prediction.predicted_outcome === 'Home' ? '1' :
           prediction.prediction.predicted_outcome === 'Away' ? '2' : 'X',
         confidence: Math.round(prediction.prediction.confidence * 100),

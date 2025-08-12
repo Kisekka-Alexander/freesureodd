@@ -6,6 +6,7 @@ import { League, Prediction, Standing, StandingsResponse } from "@/types";
 import { leaguesApi, predictionsApi } from "@/lib/axios";
 import { PredictionsTable } from "@/components/predictions-table";
 import Link from "next/link";
+import { formatCompactDate, getRelativeTime, isMatchToday } from "@/utils/date";
 
 export default function LeagueDetailPage() {
   const params = useParams();
@@ -265,7 +266,14 @@ export default function LeagueDetailPage() {
                         className="p-4 bg-gray-50 rounded-lg"
                       >
                         <div className="text-sm text-gray-500 mb-2">
-                          {new Date(prediction.match_date).toLocaleDateString()}
+                          <div>
+                            {formatCompactDate(prediction.match_date)}
+                          </div>
+                          {isMatchToday(prediction.match_date) && (
+                            <div className="text-blue-600 font-semibold mt-1">
+                              {getRelativeTime(prediction.match_date)}
+                            </div>
+                          )}
                         </div>
                         <div className="font-semibold text-gray-900 mb-1">
                           {prediction.home_team} vs {prediction.away_team}

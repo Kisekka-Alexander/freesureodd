@@ -7,6 +7,7 @@ import { predictionsApi, leaguesApi } from "@/lib/axios";
 import { Prediction, League } from "@/types";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { formatCompactDate, getRelativeTime, isMatchToday } from "@/utils/date";
 
 export default function Home() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -456,8 +457,17 @@ export default function Home() {
                     >
                       <div className="flex items-center justify-between mb-4">
                         <div className="text-sm text-gray-500">
-                          {prediction.league_name} •{" "}
-                          {new Date(prediction.match_date).toLocaleDateString()}
+                          <div>
+                            {prediction.league_name}
+                          </div>
+                          <div className="mt-1">
+                            {formatCompactDate(prediction.match_date)}
+                            {isMatchToday(prediction.match_date) && (
+                              <span className="ml-2 text-blue-600 font-semibold">
+                                {getRelativeTime(prediction.match_date)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div
                           className={`px-3 py-1 rounded-full text-xs font-medium ${prediction.prediction.confidence > 0.7

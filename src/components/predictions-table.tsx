@@ -1,20 +1,11 @@
 import { Prediction } from "@/types";
+import { formatMatchDate, getRelativeTime, isMatchToday } from "@/utils/date";
 
 interface PredictionsTableProps {
   predictions: Prediction[];
 }
 
 export function PredictionsTable({ predictions }: PredictionsTableProps) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -121,9 +112,8 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
             {predictions.map((prediction, index) => (
               <tr
                 key={prediction.match_id}
-                className={`border-b hover:bg-gray-50 ${
-                  index % 2 === 0 ? "bg-white" : "bg-gray-25"
-                }`}
+                className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-25"
+                  }`}
               >
                 {/* Teams */}
                 <td className="p-4">
@@ -245,7 +235,14 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 {/* Date/Time */}
                 <td className="p-4 text-center">
                   <div className="text-xs text-gray-600">
-                    {formatDate(prediction.match_date)}
+                    <div className="font-medium">
+                      {formatMatchDate(prediction.match_date)}
+                    </div>
+                    {isMatchToday(prediction.match_date) && (
+                      <div className="text-blue-600 font-semibold mt-1">
+                        {getRelativeTime(prediction.match_date)}
+                      </div>
+                    )}
                   </div>
                 </td>
               </tr>
