@@ -9,13 +9,13 @@ import authSlice from "./slices/authSlice";
 // Create a noop storage for SSR
 const createNoopStorage = () => {
   return {
-    getItem(_key: string) {
+    getItem() {
       return Promise.resolve(null);
     },
-    setItem(_key: string, value: unknown) {
+    setItem(_: string, value: unknown) {
       return Promise.resolve(value);
     },
-    removeItem(_key: string) {
+    removeItem() {
       return Promise.resolve();
     },
   };
