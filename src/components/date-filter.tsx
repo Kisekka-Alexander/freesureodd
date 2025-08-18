@@ -20,7 +20,6 @@ export function DateFilter({ selectedDate, onDateChange }: DateFilterProps) {
   ];
 
   const userTimezone = getUserTimezone();
-  const todayDate = getTodayLocalDate();
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
@@ -49,7 +48,7 @@ export function DateFilter({ selectedDate, onDateChange }: DateFilterProps) {
         </button>
 
         {/* Date Options */}
-        {dateOptions.map(({ offset, label }) => {
+        {dateOptions.map(({ offset }) => {
           const filterDate = getDateForFilter(offset);
           const dayAbbr = getDayAbbreviation(offset);
           const isSelected = selectedDate === filterDate;

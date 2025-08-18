@@ -7,7 +7,6 @@ import { DateFilter } from "@/components/date-filter";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
 import { Prediction, League } from "@/types";
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
 import {
   formatCompactDate,
   getRelativeTime,
@@ -146,23 +145,24 @@ export default function Home() {
     fetchPredictions();
   }, [selectedLeague]); // Removed currentPage and selectedDate from deps since filtering is now client-side
 
-  const getCountryFlag = (country: string) => {
-    const flags: Record<string, string> = {
-      England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-      Spain: "🇪🇸",
-      Italy: "🇮🇹",
-      Germany: "🇩🇪",
-      France: "🇫🇷",
-      Netherlands: "🇳🇱",
-      Scotland: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-    };
-    return flags[country] || "🌍";
-  };
+  // Note: These functions are kept for potential future use
+  // const getCountryFlag = (country: string) => {
+  //   const flags: Record<string, string> = {
+  //     England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+  //     Spain: "🇪🇸",
+  //     Italy: "🇮🇹",
+  //     Germany: "🇩🇪",
+  //     France: "🇫🇷",
+  //     Netherlands: "🇳🇱",
+  //     Scotland: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+  //   };
+  //   return flags[country] || "🌍";
+  // };
 
-  const handleLeagueFilter = (leagueId: number | null) => {
-    setSelectedLeague(leagueId);
-    setCurrentPage(1);
-  };
+  // const handleLeagueFilter = (leagueId: number | null) => {
+  //   setSelectedLeague(leagueId);
+  //   setCurrentPage(1);
+  // };
 
   const handleDateFilter = (date: string | null) => {
     setSelectedDate(date);

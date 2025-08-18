@@ -147,9 +147,6 @@ export function getDateLabel(daysOffset: number): string {
   const date = new Date();
   date.setDate(date.getDate() + daysOffset);
 
-  const today = new Date();
-  const isToday = date.toDateString() === today.toDateString();
-
   if (daysOffset === 0) return "Today";
   if (daysOffset === -1) return "Yesterday";
   if (daysOffset === 1) return "Tomorrow";
