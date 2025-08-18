@@ -25,10 +25,11 @@ export default function Home() {
   useEffect(() => {
     const fetchLeagues = async () => {
       try {
-        // Use getCurrentSeasonLeagues for featured leagues section
-        // This gets only current season leagues (2024-2025) without duplicates
-        const response = await leaguesApi.getCurrentSeasonLeagues();
+        // Get all leagues since the new API doesn't filter by season at the league level
+        const response = await leaguesApi.getLeagues();
         if (response.success) {
+          // With the new API structure, leagues don't have season or team count data
+          // So we'll just use the leagues as they come from the API
           setLeagues(response.data.leagues);
         }
       } catch (err) {
@@ -247,11 +248,9 @@ export default function Home() {
               </div>
             </button>
 
-            {/* Dynamic League Buttons - Show top 5 leagues with most teams */}
+            {/* Dynamic League Buttons - Show first 5 leagues */}
             {leagues
-              .filter((league) => league.team_count > 0) // Filter out leagues with no teams
-              .sort((a, b) => b.team_count - a.team_count) // Sort by team count descending
-              .slice(0, 5)
+              .slice(0, 5) // Just take the first 5 leagues since we don't have team count for sorting
               .map((league) => {
                 return (
                   <Link
@@ -278,9 +277,6 @@ export default function Home() {
                       </div>
                       <div className="font-semibold text-gray-900 text-sm mb-1">
                         {league.league_name}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {league.team_count} teams
                       </div>
                       <div className="text-xs text-blue-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         Double-click to view →

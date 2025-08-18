@@ -15,6 +15,7 @@ interface LeagueWithSeasons extends League {
     team_count: number;
   };
   totalSeasons: number;
+  team_count: number; // Override to make it required for this interface
 }
 
 export default function LeaguesPage() {
@@ -49,71 +50,38 @@ export default function LeaguesPage() {
             );
           }
 
-          // Process leagues with season data
-          const leaguesMap = new Map<number, LeagueWithSeasons>();
+          // Process leagues - new API structure is simpler without season data at league level
+          const processedLeagues: LeagueWithSeasons[] = response.data.leagues
+            .filter(
+              (league) =>
+                league.league_id && league.league_name && league.country
+            )
+            .map((league): LeagueWithSeasons => {
+              const teamCount = league.team_count ?? 0;
 
-          response.data.leagues.forEach((current) => {
-            // Validate each league object
-            if (
-              !current.league_id ||
-              !current.league_name ||
-              !current.country
-            ) {
-              console.warn("Invalid league object:", current);
-              return;
-            }
-
-            const leagueId = current.league_id;
-
-            if (!leaguesMap.has(leagueId)) {
-              // Create new league entry
-              leaguesMap.set(leagueId, {
-                ...current,
-                seasons: [],
-                totalSeasons: 0,
-              });
-            }
-
-            const league = leaguesMap.get(leagueId)!;
-
-            // Add season data
-            league.seasons.push({
-              season_name: current.season_name,
-              team_count: current.team_count,
+              return {
+                ...league,
+                team_count: teamCount, // Ensure this is always a number
+                seasons: league.season_name
+                  ? [
+                      {
+                        season_name: league.season_name,
+                        team_count: teamCount,
+                      },
+                    ]
+                  : [], // Create seasons array if season_name exists
+                currentSeason: league.season_name
+                  ? {
+                      season_name: league.season_name,
+                      team_count: teamCount,
+                    }
+                  : undefined,
+                totalSeasons: league.season_name ? 1 : 0, // Set to 1 if we have season data, 0 otherwise
+              };
             });
 
-            // Update current season (prefer most recent or null season)
-            if (
-              !league.currentSeason ||
-              (current.season_name &&
-                current.season_name >
-                  (league.currentSeason.season_name || "")) ||
-              (!league.currentSeason.season_name && current.season_name)
-            ) {
-              league.currentSeason = {
-                season_name: current.season_name,
-                team_count: current.team_count,
-              };
-              // Update the main league data with current season info
-              league.team_count = current.team_count;
-            }
-          });
-
-          // Convert map to array and calculate total seasons
-          const processedLeagues = Array.from(leaguesMap.values()).map(
-            (league) => ({
-              ...league,
-              totalSeasons: league.seasons.length,
-              seasons: league.seasons.sort((a, b) => {
-                if (!a.season_name) return 1;
-                if (!b.season_name) return -1;
-                return b.season_name.localeCompare(a.season_name);
-              }),
-            })
-          );
-
           console.log(
-            `Processed ${processedLeagues.length} unique leagues with season data from ${response.data.leagues.length} total entries`
+            `Processed ${processedLeagues.length} leagues from ${response.data.leagues.length} total entries`
           );
           setLeagues(processedLeagues);
         } else {
@@ -274,68 +242,38 @@ export default function LeaguesPage() {
                           const response = await leaguesApi.getLeagues();
                           if (response.success) {
                             // Process leagues with season data (same logic as main fetch)
-                            const leaguesMap = new Map<
-                              number,
-                              LeagueWithSeasons
-                            >();
+                            const processedRetryLeagues = response.data.leagues
+                              .filter(
+                                (league) =>
+                                  league.league_id &&
+                                  league.league_name &&
+                                  league.country
+                              )
+                              .map((league): LeagueWithSeasons => {
+                                const teamCount = league.team_count ?? 0;
 
-                            response.data.leagues.forEach((current) => {
-                              if (
-                                !current.league_id ||
-                                !current.league_name ||
-                                !current.country
-                              ) {
-                                return;
-                              }
-
-                              const leagueId = current.league_id;
-
-                              if (!leaguesMap.has(leagueId)) {
-                                leaguesMap.set(leagueId, {
-                                  ...current,
-                                  seasons: [],
-                                  totalSeasons: 0,
-                                });
-                              }
-
-                              const league = leaguesMap.get(leagueId)!;
-
-                              league.seasons.push({
-                                season_name: current.season_name,
-                                team_count: current.team_count,
+                                return {
+                                  ...league,
+                                  team_count: teamCount,
+                                  seasons: league.season_name
+                                    ? [
+                                        {
+                                          season_name: league.season_name,
+                                          team_count: teamCount,
+                                        },
+                                      ]
+                                    : [],
+                                  currentSeason: league.season_name
+                                    ? {
+                                        season_name: league.season_name,
+                                        team_count: teamCount,
+                                      }
+                                    : undefined,
+                                  totalSeasons: league.season_name ? 1 : 0,
+                                };
                               });
 
-                              if (
-                                !league.currentSeason ||
-                                (current.season_name &&
-                                  current.season_name >
-                                    (league.currentSeason.season_name || "")) ||
-                                (!league.currentSeason.season_name &&
-                                  current.season_name)
-                              ) {
-                                league.currentSeason = {
-                                  season_name: current.season_name,
-                                  team_count: current.team_count,
-                                };
-                                league.team_count = current.team_count;
-                              }
-                            });
-
-                            const processedLeagues = Array.from(
-                              leaguesMap.values()
-                            ).map((league) => ({
-                              ...league,
-                              totalSeasons: league.seasons.length,
-                              seasons: league.seasons.sort((a, b) => {
-                                if (!a.season_name) return 1;
-                                if (!b.season_name) return -1;
-                                return b.season_name.localeCompare(
-                                  a.season_name
-                                );
-                              }),
-                            }));
-
-                            setLeagues(processedLeagues);
+                            setLeagues(processedRetryLeagues);
                           } else {
                             throw new Error(
                               response.message || "Failed to fetch leagues"
@@ -400,13 +338,9 @@ export default function LeaguesPage() {
                   </div>
                   <div>
                     <div className="text-3xl font-bold text-orange-600 mb-1">
-                      {leagues.reduce(
-                        (sum, league) =>
-                          sum + (league.currentSeason?.team_count || 0),
-                        0
-                      )}
+                      {leagues.length}
                     </div>
-                    <div className="text-sm text-gray-600">Total Teams</div>
+                    <div className="text-sm text-gray-600">Active Leagues</div>
                   </div>
                 </div>
               </div>
@@ -491,19 +425,13 @@ export default function LeaguesPage() {
                         </p>
                       </div>
 
-                      {/* Statistics Grid */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600">
-                            {league.currentSeason?.team_count || 0}
-                          </div>
-                          <div className="text-xs text-gray-500">Teams</div>
+                      {/* Statistics */}
+                      <div className="text-center mb-4">
+                        <div className="text-2xl font-bold text-green-600">
+                          {league.totalSeasons || 0}
                         </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">
-                            {league.totalSeasons}
-                          </div>
-                          <div className="text-xs text-gray-500">Seasons</div>
+                        <div className="text-xs text-gray-500">
+                          {league.totalSeasons ? "Seasons" : "Seasons (N/A)"}
                         </div>
                       </div>
 
@@ -543,13 +471,10 @@ export default function LeaguesPage() {
                             {league.seasons.map((season, index) => (
                               <div
                                 key={index}
-                                className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded"
+                                className="text-xs bg-gray-50 p-2 rounded"
                               >
                                 <span className="font-medium">
                                   {season.season_name || "Unknown Season"}
-                                </span>
-                                <span className="text-gray-600">
-                                  {season.team_count} teams
                                 </span>
                               </div>
                             ))}
