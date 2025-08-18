@@ -108,6 +108,7 @@ export const predictionsApi = {
     confidence_threshold?: number;
     sort_by?: "match_date" | "confidence" | "league";
     sort_order?: "asc" | "desc";
+    // Note: match_date removed from API params since we'll filter client-side for timezone accuracy
   }): Promise<ApiResponse<PredictionsResponse>> => {
     const queryParams = new URLSearchParams();
 
@@ -136,6 +137,7 @@ export const predictionsApi = {
       );
     if (params?.sort_by) queryParams.append("sort_by", params.sort_by);
     if (params?.sort_order) queryParams.append("sort_order", params.sort_order);
+    // Removed match_date and timezone params - filtering will be done client-side
 
     const response = await api.get(`/v1/predictions?${queryParams.toString()}`);
     console.log("Raw axios response:", response);

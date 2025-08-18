@@ -177,7 +177,9 @@ export function Hero({ predictions = [] }: HeroProps) {
     }, 1000);
 
     const featuredTimer = setInterval(() => {
-      setFeaturedIndex((prev) => (prev + 1) % displayMatches.length);
+      if (displayMatches.length > 0) {
+        setFeaturedIndex((prev) => (prev + 1) % displayMatches.length);
+      }
     }, 4000);
 
     return () => {
@@ -186,44 +188,54 @@ export function Hero({ predictions = [] }: HeroProps) {
     };
   }, [displayMatches.length]);
 
+  // Reset featured index when predictions change or if it's out of bounds
+  useEffect(() => {
+    if (displayMatches.length === 0 || featuredIndex >= displayMatches.length) {
+      setFeaturedIndex(0);
+    }
+  }, [displayMatches.length, featuredIndex]);
+
   // Convert real prediction data to match interface
   const getFeaturedMatch = () => {
-    if (topPredictions.length > 0) {
+    if (topPredictions.length > 0 && featuredIndex < topPredictions.length) {
       const prediction = topPredictions[featuredIndex];
-      return {
-        homeTeam: prediction.home_team,
-        awayTeam: prediction.away_team,
-        league: prediction.league_name,
-        time: formatTimeOnly(prediction.match_date),
-        prediction: (() => {
-          const o = prediction.prediction.predicted_outcome;
-          if (o === "Home") return "1";
-          if (o === "Draw") return "X";
-          if (o === "Away") return "2";
-          if (o === "Home or Draw") return "1X";
-          if (o === "Away or Draw") return "X2";
-          if (o === "Home or Away") return "12";
-          return "?";
-        })(),
-        confidence: Math.round(prediction.prediction.confidence * 100),
-        homeOdds: Math.round(prediction.prediction.probabilities.home * 100),
-        drawOdds: Math.round(prediction.prediction.probabilities.draw * 100),
-        awayOdds: Math.round(prediction.prediction.probabilities.away * 100),
-      };
-    } else {
-      // Return placeholder data when no predictions are available
-      return {
-        homeTeam: "Loading...",
-        awayTeam: "Loading...",
-        league: "Fetching data...",
-        time: "--:--",
-        prediction: "X",
-        confidence: 0,
-        homeOdds: 0,
-        drawOdds: 0,
-        awayOdds: 0,
-      };
+      // Additional safety check to ensure prediction exists
+      if (prediction && prediction.home_team && prediction.away_team) {
+        return {
+          homeTeam: prediction.home_team,
+          awayTeam: prediction.away_team,
+          league: prediction.league_name,
+          time: formatTimeOnly(prediction.match_date),
+          prediction: (() => {
+            const o = prediction.prediction.predicted_outcome;
+            if (o === "Home") return "1";
+            if (o === "Draw") return "X";
+            if (o === "Away") return "2";
+            if (o === "Home or Draw") return "1X";
+            if (o === "Away or Draw") return "X2";
+            if (o === "Home or Away") return "12";
+            return "?";
+          })(),
+          confidence: Math.round(prediction.prediction.confidence * 100),
+          homeOdds: Math.round(prediction.prediction.probabilities.home * 100),
+          drawOdds: Math.round(prediction.prediction.probabilities.draw * 100),
+          awayOdds: Math.round(prediction.prediction.probabilities.away * 100),
+        };
+      }
     }
+
+    // Return placeholder data when no predictions are available or invalid
+    return {
+      homeTeam: "No matches",
+      awayTeam: "available",
+      league: "Try adjusting filters",
+      time: "--:--",
+      prediction: "X",
+      confidence: 0,
+      homeOdds: 0,
+      drawOdds: 0,
+      awayOdds: 0,
+    };
   };
 
   const featuredMatch = getFeaturedMatch();
