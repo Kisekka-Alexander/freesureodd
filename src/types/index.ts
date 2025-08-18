@@ -141,7 +141,7 @@ export interface League {
   league_id: number;
   league_name: string;
   country: string;
-  team_count: number;
+  team_count?: number; // Made optional as new API doesn't always include this
   logo_url: string;
   season_name?: string | null;
 }

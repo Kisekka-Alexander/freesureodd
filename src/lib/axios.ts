@@ -220,7 +220,7 @@ export const leaguesApi = {
       const uniqueLeague = leagueMap.get(league.league_id)!;
       uniqueLeague.seasons.push({
         season_name: league.season_name ?? null,
-        team_count: league.team_count,
+        team_count: league.team_count ?? 0,
       });
     });
 

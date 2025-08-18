@@ -226,13 +226,7 @@ export default function LeagueDetailPage() {
           {activeTab === "overview" && (
             <div className="space-y-12">
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {league.team_count}
-                  </div>
-                  <div className="text-sm text-gray-600">Total Teams</div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                   <div className="text-3xl font-bold text-green-600 mb-2">
                     {predictions.length}
