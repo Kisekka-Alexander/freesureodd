@@ -66,9 +66,9 @@ export interface FormikHelpers<Values> {
 // Football Prediction Types (Updated for real backend)
 // Prediction Types UPdated to match the new backend structure
 export interface Probabilities {
-  Home: number;
-  Draw: number;
-  Away: number;
+  home: number;
+  draw: number;
+  away: number;
 }
 
 export interface ModelInfo {
@@ -76,13 +76,35 @@ export interface ModelInfo {
   name: string;
 }
 
+// New API match status codes
+export type MatchStatusCode =
+  | "NS" // Not Started
+  | "LIVE"
+  | "HT" // Half Time
+  | "1H"
+  | "2H"
+  | "ET" // Extra Time
+  | "P" // Penalties / Postponed depending on API
+  | "FT" // Full Time
+  | "A" // Awarded
+  | "CANC" // Canceled
+  | "PST" // Postponed
+  | "TBD" // To Be Decided
+  | "INT"; // Interrupted
+
 export interface PredictionData {
-  predicted_outcome: "Home" | "Away" | "Draw";
+  predicted_outcome:
+    | "Home"
+    | "Away"
+    | "Draw"
+    | "Home or Draw"
+    | "Away or Draw"
+    | "Home or Away";
   confidence: number;
 
   probabilities: Probabilities;
-  model_info: ModelInfo;
-  predicted_at: string;
+  model_info?: ModelInfo; // Some responses may omit model info
+  predicted_at?: string;
   error?: string;
 }
 
@@ -91,11 +113,13 @@ export interface Prediction {
   league_name: string;
   home_team: string;
   away_team: string;
-  home_odds: string;
-  draw_odds: string;
-  away_odds: string;
+  home_odds: number;
+  draw_odds: number;
+  away_odds: number;
+  home_or_draw_odds?: number;
+  away_or_draw_odds?: number;
   match_date: string;
-  match_status: "upcoming" | "live" | "completed";
+  match_status: MatchStatusCode;
   prediction: PredictionData;
 }
 
@@ -190,7 +214,7 @@ export interface Match {
   away_team: string;
   league_name: string;
   match_date: string;
-  match_status: "upcoming" | "live" | "completed";
+  match_status: MatchStatusCode;
   home_score?: number;
   away_score?: number;
 }

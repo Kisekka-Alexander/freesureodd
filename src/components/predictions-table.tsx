@@ -6,18 +6,17 @@ interface PredictionsTableProps {
 }
 
 export function PredictionsTable({ predictions }: PredictionsTableProps) {
-
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "live":
-        return "bg-red-100 text-red-800";
-      case "upcoming":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+    const liveStatuses = new Set(["LIVE", "1H", "2H", "HT", "ET", "P"]);
+    const upcomingStatuses = new Set(["NS", "TBD"]);
+    const completedStatuses = new Set(["FT"]);
+    const canceledStatuses = new Set(["CANC", "PST", "A", "ABD", "INT"]);
+
+    if (liveStatuses.has(status)) return "bg-red-100 text-red-800";
+    if (upcomingStatuses.has(status)) return "bg-blue-100 text-blue-800";
+    if (completedStatuses.has(status)) return "bg-gray-100 text-gray-800";
+    if (canceledStatuses.has(status)) return "bg-gray-100 text-gray-800";
+    return "bg-gray-100 text-gray-800";
   };
 
   const getPredictionNumber = (outcome: string) => {
@@ -28,6 +27,12 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
         return "X";
       case "Away":
         return "2";
+      case "Home or Draw":
+        return "1X";
+      case "Away or Draw":
+        return "X2";
+      case "Home or Away":
+        return "12";
       default:
         return "-";
     }
@@ -41,6 +46,10 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
         return "bg-yellow-100 text-yellow-800";
       case "Away":
         return "bg-red-100 text-red-800";
+      case "Home or Draw":
+      case "Away or Draw":
+      case "Home or Away":
+        return "bg-blue-100 text-blue-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -73,30 +82,22 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 </span>
               </th>
 
-              <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
+              <th className="text-center p-4 font-semibold text-gray-700 min-w-[180px]">
                 Odds
                 <br />
-                <div className="flex justify-center space-x-4 text-sm font-normal text-gray-500 mt-1">
-                  <span>1</span>
-                  <span>X</span>
-                  <span>2</span>
+                <div className="flex justify-center space-x-3 text-sm font-normal text-gray-500 mt-1">
+                  <span className="text-center min-w-[30px]">1</span>
+                  <span className="text-center min-w-[30px]">X</span>
+                  <span className="text-center min-w-[30px]">2</span>
+                  <span className="text-center min-w-[30px]">1X</span>
+                  <span className="text-center min-w-[30px]">X2</span>
                 </div>
               </th>
 
-              <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
-                Probability %<br />
-                <div className="flex justify-center space-x-4 text-sm font-normal text-gray-500 mt-1">
-                  <span>1</span>
-                  <span>X</span>
-                  <span>2</span>
-                </div>
-              </th>
               <th className="text-center p-4 font-semibold text-gray-700 min-w-[80px]">
                 Pred
               </th>
-              <th className="text-center p-4 font-semibold text-gray-700 min-w-[100px]">
-                Confidence
-              </th>
+
               {/* <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
                 Model Info
               </th> */}
@@ -112,8 +113,9 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
             {predictions.map((prediction, index) => (
               <tr
                 key={prediction.match_id}
-                className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-25"
-                  }`}
+                className={`border-b hover:bg-gray-50 ${
+                  index % 2 === 0 ? "bg-white" : "bg-gray-25"
+                }`}
               >
                 {/* Teams */}
                 <td className="p-4">
@@ -139,46 +141,33 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                   <div className="flex justify-center space-x-3 text-sm">
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
-                        {parseFloat(prediction.home_odds).toFixed(2)}
+                        {prediction.home_odds.toFixed(2)}
                       </div>
                     </div>
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
-                        {parseFloat(prediction.draw_odds).toFixed(2)}
+                        {prediction.draw_odds.toFixed(2)}
                       </div>
                     </div>
                     <div className="text-center min-w-[30px]">
                       <div className="font-medium">
-                        {parseFloat(prediction.away_odds).toFixed(2)}
+                        {prediction.away_odds.toFixed(2)}
                       </div>
                     </div>
-                  </div>
-                </td>
-
-                {/* Probabilities */}
-                <td className="p-4">
-                  <div className="flex justify-center space-x-3 text-sm">
-                    <div className="text-center min-w-[30px]">
-                      <div className="font-medium">
-                        {Math.round(
-                          prediction.prediction.probabilities.Home * 100
-                        )}
+                    {typeof prediction.home_or_draw_odds === "number" && (
+                      <div className="text-center min-w-[30px]">
+                        <div className="font-medium">
+                          {prediction.home_or_draw_odds.toFixed(2)}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-center min-w-[30px]">
-                      <div className="font-medium">
-                        {Math.round(
-                          prediction.prediction.probabilities.Draw * 100
-                        )}
+                    )}
+                    {typeof prediction.away_or_draw_odds === "number" && (
+                      <div className="text-center min-w-[30px]">
+                        <div className="font-medium">
+                          {prediction.away_or_draw_odds.toFixed(2)}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-center min-w-[30px]">
-                      <div className="font-medium">
-                        {Math.round(
-                          prediction.prediction.probabilities.Away * 100
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </td>
 
@@ -195,18 +184,6 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                       )}
                     </span>
                   </div>
-                </td>
-
-                {/* Confidence */}
-                <td className="p-4 text-center">
-                  <div className="text-sm font-medium">
-                    {Math.round(prediction.prediction.confidence * 100)}%
-                  </div>
-                  {prediction.prediction.error && (
-                    <div className="text-xs text-yellow-600 mt-1">
-                      ⚠️ Fallback
-                    </div>
-                  )}
                 </td>
 
                 {/* Model Info */}
