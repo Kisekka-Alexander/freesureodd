@@ -3,11 +3,18 @@
 import { Hero } from "@/components/hero";
 import { Features } from "@/components/features";
 import { PredictionsTable } from "@/components/predictions-table";
+import { DateFilter } from "@/components/date-filter";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
 import { Prediction, League } from "@/types";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { formatCompactDate, getRelativeTime, isMatchToday } from "@/utils/date";
+import { useEffect, useState, useMemo } from "react";
+import {
+  formatCompactDate,
+  getRelativeTime,
+  isMatchToday,
+  isMatchOnDate,
+  debugTimezoneInfo,
+  getUserTimezone,
+} from "@/utils/date";
 
 export default function Home() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -16,9 +23,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [selectedLeague, setSelectedLeague] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPredictions, setTotalPredictions] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [allFetchedPredictions, setAllFetchedPredictions] = useState(0); // Track total fetched from API
   const predictionsPerPage = 20;
 
   // Fetch leagues on component mount
@@ -100,9 +109,11 @@ export default function Home() {
         setLoading(true);
         setError(null);
 
+        // Fetch more predictions to account for client-side date filtering
+        // We'll fetch a larger page size and filter locally for timezone accuracy
         const params = {
-          page: currentPage,
-          page_size: predictionsPerPage,
+          page: 1, // Always fetch from page 1 since we'll filter client-side
+          page_size: 100, // Fetch more to ensure we have enough after filtering
           ...(selectedLeague && { league_id: selectedLeague }),
           status: "NS" as const,
           sort_by: "match_date" as const,
@@ -115,16 +126,9 @@ export default function Home() {
 
         if (response.success) {
           setPredictions(response.data.predictions);
-          setTotalPredictions(response.data.pagination.total_count);
-          setTotalPages(response.data.pagination.total_pages);
-
-          // If we're on a page that doesn't exist (e.g., after filtering), go to page 1
-          if (
-            currentPage > response.data.pagination.total_pages &&
-            response.data.pagination.total_count > 0
-          ) {
-            setCurrentPage(1);
-          }
+          setAllFetchedPredictions(response.data.predictions.length);
+          // Note: Total predictions will be recalculated after client-side filtering
+          // We'll update pagination info in the filteredPredictions useMemo
         } else {
           throw new Error(response.message || "Failed to fetch predictions");
         }
@@ -139,29 +143,86 @@ export default function Home() {
     };
 
     fetchPredictions();
-  }, [currentPage, selectedLeague]);
+  }, [selectedLeague]); // Removed currentPage and selectedDate from deps since filtering is now client-side
 
-  const getCountryFlag = (country: string) => {
-    const flags: Record<string, string> = {
-      England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-      Spain: "🇪🇸",
-      Italy: "🇮🇹",
-      Germany: "🇩🇪",
-      France: "🇫🇷",
-      Netherlands: "🇳🇱",
-      Scotland: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-    };
-    return flags[country] || "🌍";
-  };
+  // Note: These functions are kept for potential future use
+  // const getCountryFlag = (country: string) => {
+  //   const flags: Record<string, string> = {
+  //     England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+  //     Spain: "🇪🇸",
+  //     Italy: "🇮🇹",
+  //     Germany: "🇩🇪",
+  //     France: "🇫🇷",
+  //     Netherlands: "🇳🇱",
+  //     Scotland: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+  //   };
+  //   return flags[country] || "🌍";
+  // };
 
-  const handleLeagueFilter = (leagueId: number | null) => {
-    setSelectedLeague(leagueId);
+  // const handleLeagueFilter = (leagueId: number | null) => {
+  //   setSelectedLeague(leagueId);
+  //   setCurrentPage(1);
+  // };
+
+  const handleDateFilter = (date: string | null) => {
+    setSelectedDate(date);
     setCurrentPage(1);
   };
 
+  // Get filtered predictions (without pagination)
+  const allFilteredPredictions = useMemo(() => {
+    let filtered = predictions;
+
+    // Apply date filter if selected
+    if (selectedDate) {
+      filtered = predictions.filter((prediction) => {
+        const matches = isMatchOnDate(prediction.match_date, selectedDate);
+
+        // Debug logging in development (only log first few for brevity)
+        if (
+          process.env.NODE_ENV === "development" &&
+          predictions.indexOf(prediction) < 3
+        ) {
+          debugTimezoneInfo(prediction.match_date, selectedDate);
+        }
+
+        return matches;
+      });
+
+      console.log(
+        `🔍 Timezone filtering: ${filtered.length} of ${
+          predictions.length
+        } matches found for date ${selectedDate} in timezone ${getUserTimezone()}`
+      );
+    }
+
+    return filtered;
+  }, [predictions, selectedDate]);
+
+  // Update pagination info when filtered predictions change
+  useEffect(() => {
+    const totalFiltered = allFilteredPredictions.length;
+    const totalFilteredPages = Math.ceil(totalFiltered / predictionsPerPage);
+
+    setTotalPredictions(totalFiltered);
+    setTotalPages(totalFilteredPages);
+
+    // Reset to page 1 if current page is beyond available pages
+    if (currentPage > totalFilteredPages && totalFilteredPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [allFilteredPredictions.length, currentPage, predictionsPerPage]);
+
+  // Get paginated results from filtered predictions
+  const filteredPredictions = useMemo(() => {
+    const startIndex = (currentPage - 1) * predictionsPerPage;
+    const endIndex = startIndex + predictionsPerPage;
+    return allFilteredPredictions.slice(startIndex, endIndex);
+  }, [allFilteredPredictions, currentPage, predictionsPerPage]);
+
   return (
     <main className="min-h-screen">
-      <Hero predictions={predictions} />
+      <Hero predictions={filteredPredictions} />
 
       {/* Quick Stats Section */}
       <section className="py-16 bg-white">
@@ -178,19 +239,21 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
               <div className="text-3xl font-bold text-green-600 mb-2">
-                {predictions.length}
+                {filteredPredictions.length}
               </div>
-              <div className="text-sm text-green-700">Today&apos;s Tips</div>
+              <div className="text-sm text-green-700">
+                {selectedDate ? "Filtered Tips" : "Today's Tips"}
+              </div>
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
               <div className="text-3xl font-bold text-blue-600 mb-2">
-                {predictions.length > 0
+                {filteredPredictions.length > 0
                   ? Math.round(
-                      (predictions.reduce(
+                      (filteredPredictions.reduce(
                         (sum, p) => sum + p.prediction.confidence,
                         0
                       ) /
-                        predictions.length) *
+                        filteredPredictions.length) *
                         100
                     )
                   : 0}
@@ -207,84 +270,13 @@ export default function Home() {
             <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
               <div className="text-3xl font-bold text-orange-600 mb-2">
                 {
-                  predictions.filter((p) => p.prediction.confidence > 0.7)
-                    .length
+                  filteredPredictions.filter(
+                    (p) => p.prediction.confidence > 0.7
+                  ).length
                 }
               </div>
               <div className="text-sm text-orange-700">High Confidence</div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Leagues Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              🏆 Featured Leagues
-            </h2>
-            <p className="text-gray-600">
-              Choose your favorite league and get instant predictions
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {/* All Leagues Button */}
-            <button
-              onClick={() => handleLeagueFilter(null)}
-              className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 ${
-                selectedLeague === null
-                  ? "ring-2 ring-blue-500 border-blue-300"
-                  : ""
-              }`}
-            >
-              <div className="text-3xl mb-3">🌍</div>
-              <div className="font-semibold text-gray-900 text-sm mb-1">
-                All Leagues
-              </div>
-              <div className="text-xs text-gray-500">
-                {totalPredictions} predictions
-              </div>
-            </button>
-
-            {/* Dynamic League Buttons - Show first 5 leagues */}
-            {leagues
-              .slice(0, 5) // Just take the first 5 leagues since we don't have team count for sorting
-              .map((league) => {
-                return (
-                  <Link
-                    key={league.league_id}
-                    href={`/leagues/${league.league_id}`}
-                    className="group"
-                  >
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleLeagueFilter(league.league_id);
-                      }}
-                      onDoubleClick={() =>
-                        (window.location.href = `/leagues/${league.league_id}`)
-                      }
-                      className={`w-full bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 group-hover:border-blue-300 ${
-                        selectedLeague === league.league_id
-                          ? "ring-2 ring-blue-500 border-blue-300"
-                          : ""
-                      }`}
-                    >
-                      <div className="text-3xl mb-3">
-                        {getCountryFlag(league.country)}
-                      </div>
-                      <div className="font-semibold text-gray-900 text-sm mb-1">
-                        {league.league_name}
-                      </div>
-                      <div className="text-xs text-blue-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Double-click to view →
-                      </div>
-                    </button>
-                  </Link>
-                );
-              })}
           </div>
         </div>
       </section>
@@ -329,15 +321,16 @@ export default function Home() {
             </div>
 
             {/* Prediction stats */}
-            {!loading && !error && predictions.length > 0 && (
+            {!loading && !error && filteredPredictions.length > 0 && (
               <div className="flex justify-center space-x-8 text-sm text-gray-600 mb-8">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   <span>
                     High confidence:{" "}
                     {
-                      predictions.filter((p) => p.prediction.confidence > 0.7)
-                        .length
+                      filteredPredictions.filter(
+                        (p) => p.prediction.confidence > 0.7
+                      ).length
                     }{" "}
                     tips
                   </span>
@@ -347,7 +340,7 @@ export default function Home() {
                   <span>
                     Medium confidence:{" "}
                     {
-                      predictions.filter(
+                      filteredPredictions.filter(
                         (p) =>
                           p.prediction.confidence >= 0.5 &&
                           p.prediction.confidence <= 0.7
@@ -361,8 +354,9 @@ export default function Home() {
                   <span>
                     Lower confidence:{" "}
                     {
-                      predictions.filter((p) => p.prediction.confidence < 0.5)
-                        .length
+                      filteredPredictions.filter(
+                        (p) => p.prediction.confidence < 0.5
+                      ).length
                     }{" "}
                     tips
                   </span>
@@ -403,6 +397,16 @@ export default function Home() {
             </div>
           )}
 
+          {/* Date Filter - Always show when predictions are available */}
+          {!loading && !error && predictions.length > 0 && (
+            <div className="mb-6">
+              <DateFilter
+                selectedDate={selectedDate}
+                onDateChange={handleDateFilter}
+              />
+            </div>
+          )}
+
           {!loading && !error && predictions.length === 0 && (
             <div className="text-center py-20">
               <div className="text-6xl mb-4">⚽</div>
@@ -416,26 +420,86 @@ export default function Home() {
             </div>
           )}
 
-          {!loading && !error && predictions.length > 0 && (
+          {!loading &&
+            !error &&
+            filteredPredictions.length === 0 &&
+            predictions.length > 0 && (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4">⚽</div>
+                <p className="text-gray-600 text-xl mb-4">
+                  {selectedDate || selectedLeague
+                    ? "No predictions found for the selected filters."
+                    : "No predictions available at the moment."}
+                </p>
+                <p className="text-gray-500">
+                  {selectedDate || selectedLeague
+                    ? "Try adjusting your filters or check back later."
+                    : "Check back later for today's fresh predictions and analysis."}
+                </p>
+                {(selectedDate || selectedLeague) && (
+                  <button
+                    onClick={() => {
+                      setSelectedDate(null);
+                      setSelectedLeague(null);
+                    }}
+                    className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </div>
+            )}
+
+          {!loading && !error && filteredPredictions.length > 0 && (
             <div>
               {/* Filter and Pagination Info */}
               <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                 <div className="text-sm text-gray-600 mb-4 md:mb-0">
-                  {selectedLeague ? (
+                  {selectedLeague || selectedDate ? (
                     <>
-                      Showing predictions for{" "}
-                      <span className="font-medium">
-                        {
-                          leagues.find((l) => l.league_id === selectedLeague)
-                            ?.league_name
-                        }
-                      </span>{" "}
+                      Showing predictions
+                      {selectedLeague && (
+                        <>
+                          {" "}
+                          for{" "}
+                          <span className="font-medium">
+                            {
+                              leagues.find(
+                                (l) => l.league_id === selectedLeague
+                              )?.league_name
+                            }
+                          </span>
+                        </>
+                      )}
+                      {selectedDate && (
+                        <>
+                          {" "}
+                          on{" "}
+                          <span className="font-medium">
+                            {new Date(
+                              selectedDate + "T00:00:00"
+                            ).toLocaleDateString("en-US", {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </span>
+                        </>
+                      )}{" "}
                       (Page {currentPage} of {totalPages})
                     </>
                   ) : (
                     <>
-                      Showing {predictions.length} of {totalPredictions}{" "}
-                      predictions (Page {currentPage} of {totalPages})
+                      Showing {filteredPredictions.length} of {totalPredictions}{" "}
+                      {selectedDate ? "filtered " : ""}predictions
+                      {allFetchedPredictions > totalPredictions &&
+                        selectedDate && (
+                          <span className="text-gray-400">
+                            {" "}
+                            (from {allFetchedPredictions} total)
+                          </span>
+                        )}{" "}
+                      (Page {currentPage} of {totalPages})
                     </>
                   )}
                 </div>
@@ -471,10 +535,10 @@ export default function Home() {
               </div>
 
               {viewMode === "table" ? (
-                <PredictionsTable predictions={predictions} />
+                <PredictionsTable predictions={filteredPredictions} />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {predictions.map((prediction) => (
+                  {filteredPredictions.map((prediction) => (
                     <div
                       key={prediction.match_id}
                       className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1"
