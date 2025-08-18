@@ -38,19 +38,23 @@ export default function Home() {
           const fallbackResponse = await leaguesApi.getUniqueLeagues();
           if (fallbackResponse.success) {
             // Convert UniqueLeague to League format for compatibility
-            const currentSeasonLeagues = fallbackResponse.data.leagues.map(uniqueLeague => {
-              const currentSeason = uniqueLeague.seasons.find(s => s.season_name === "2024-2025")
-                || uniqueLeague.seasons[uniqueLeague.seasons.length - 1]; // Get latest season as fallback
+            const currentSeasonLeagues = fallbackResponse.data.leagues.map(
+              (uniqueLeague) => {
+                const currentSeason =
+                  uniqueLeague.seasons.find(
+                    (s) => s.season_name === "2024-2025"
+                  ) || uniqueLeague.seasons[uniqueLeague.seasons.length - 1]; // Get latest season as fallback
 
-              return {
-                league_id: uniqueLeague.league_id,
-                league_name: uniqueLeague.league_name,
-                country: uniqueLeague.country,
-                logo_url: uniqueLeague.logo_url,
-                season_name: currentSeason?.season_name || null,
-                team_count: currentSeason?.team_count || 0
-              };
-            });
+                return {
+                  league_id: uniqueLeague.league_id,
+                  league_name: uniqueLeague.league_name,
+                  country: uniqueLeague.country,
+                  logo_url: uniqueLeague.logo_url,
+                  season_name: currentSeason?.season_name || null,
+                  team_count: currentSeason?.team_count || 0,
+                };
+              }
+            );
             setLeagues(currentSeasonLeagues);
           }
         } catch (fallbackErr) {
@@ -70,7 +74,7 @@ export default function Home() {
         const response = await predictionsApi.getAllPredictions({
           page: 1,
           page_size: predictionsPerPage,
-          status: "upcoming",
+          status: "NS",
           sort_by: "match_date",
           sort_order: "asc",
         });
@@ -99,7 +103,7 @@ export default function Home() {
           page: currentPage,
           page_size: predictionsPerPage,
           ...(selectedLeague && { league_id: selectedLeague }),
-          status: "upcoming" as const,
+          status: "NS" as const,
           sort_by: "match_date" as const,
           sort_order: "asc" as const,
         };
@@ -114,7 +118,10 @@ export default function Home() {
           setTotalPages(response.data.pagination.total_pages);
 
           // If we're on a page that doesn't exist (e.g., after filtering), go to page 1
-          if (currentPage > response.data.pagination.total_pages && response.data.pagination.total_count > 0) {
+          if (
+            currentPage > response.data.pagination.total_pages &&
+            response.data.pagination.total_count > 0
+          ) {
             setCurrentPage(1);
           }
         } else {
@@ -176,9 +183,17 @@ export default function Home() {
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
               <div className="text-3xl font-bold text-blue-600 mb-2">
-                {predictions.length > 0 ? Math.round(
-                  predictions.reduce((sum, p) => sum + p.prediction.confidence, 0) / predictions.length * 100
-                ) : 0}%
+                {predictions.length > 0
+                  ? Math.round(
+                      (predictions.reduce(
+                        (sum, p) => sum + p.prediction.confidence,
+                        0
+                      ) /
+                        predictions.length) *
+                        100
+                    )
+                  : 0}
+                %
               </div>
               <div className="text-sm text-blue-700">Avg Confidence</div>
             </div>
@@ -190,7 +205,10 @@ export default function Home() {
             </div>
             <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
               <div className="text-3xl font-bold text-orange-600 mb-2">
-                {predictions.filter(p => p.prediction.confidence > 0.7).length}
+                {
+                  predictions.filter((p) => p.prediction.confidence > 0.7)
+                    .length
+                }
               </div>
               <div className="text-sm text-orange-700">High Confidence</div>
             </div>
@@ -214,10 +232,11 @@ export default function Home() {
             {/* All Leagues Button */}
             <button
               onClick={() => handleLeagueFilter(null)}
-              className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 ${selectedLeague === null
-                ? "ring-2 ring-blue-500 border-blue-300"
-                : ""
-                }`}
+              className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 ${
+                selectedLeague === null
+                  ? "ring-2 ring-blue-500 border-blue-300"
+                  : ""
+              }`}
             >
               <div className="text-3xl mb-3">🌍</div>
               <div className="font-semibold text-gray-900 text-sm mb-1">
@@ -230,7 +249,7 @@ export default function Home() {
 
             {/* Dynamic League Buttons - Show top 5 leagues with most teams */}
             {leagues
-              .filter(league => league.team_count > 0) // Filter out leagues with no teams
+              .filter((league) => league.team_count > 0) // Filter out leagues with no teams
               .sort((a, b) => b.team_count - a.team_count) // Sort by team count descending
               .slice(0, 5)
               .map((league) => {
@@ -248,10 +267,11 @@ export default function Home() {
                       onDoubleClick={() =>
                         (window.location.href = `/leagues/${league.league_id}`)
                       }
-                      className={`w-full bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 group-hover:border-blue-300 ${selectedLeague === league.league_id
-                        ? "ring-2 ring-blue-500 border-blue-300"
-                        : ""
-                        }`}
+                      className={`w-full bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-1 border border-gray-200 hover:border-blue-300 group-hover:border-blue-300 ${
+                        selectedLeague === league.league_id
+                          ? "ring-2 ring-blue-500 border-blue-300"
+                          : ""
+                      }`}
                     >
                       <div className="text-3xl mb-3">
                         {getCountryFlag(league.country)}
@@ -291,19 +311,21 @@ export default function Home() {
               <div className="bg-gray-100 rounded-xl p-1 shadow-sm border">
                 <button
                   onClick={() => setViewMode("table")}
-                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === "table"
-                    ? "bg-blue-500 text-white shadow-md"
-                    : "text-gray-600 hover:text-gray-800 hover:bg-white"
-                    }`}
+                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    viewMode === "table"
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "text-gray-600 hover:text-gray-800 hover:bg-white"
+                  }`}
                 >
                   📊 Detailed Table
                 </button>
                 <button
                   onClick={() => setViewMode("cards")}
-                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${viewMode === "cards"
-                    ? "bg-blue-500 text-white shadow-md"
-                    : "text-gray-600 hover:text-gray-800 hover:bg-white"
-                    }`}
+                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    viewMode === "cards"
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "text-gray-600 hover:text-gray-800 hover:bg-white"
+                  }`}
                 >
                   📋 Quick Cards
                 </button>
@@ -432,13 +454,19 @@ export default function Home() {
                     ← Previous
                   </button>
                   <span className="text-sm text-gray-600">
-                    {totalPredictions > 0 ? `${currentPage} / ${totalPages}` : "0 / 0"}
+                    {totalPredictions > 0
+                      ? `${currentPage} / ${totalPages}`
+                      : "0 / 0"}
                   </span>
                   <button
                     onClick={() =>
                       setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                     }
-                    disabled={currentPage >= totalPages || loading || totalPredictions === 0}
+                    disabled={
+                      currentPage >= totalPages ||
+                      loading ||
+                      totalPredictions === 0
+                    }
                     className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                   >
                     Next →
@@ -457,9 +485,7 @@ export default function Home() {
                     >
                       <div className="flex items-center justify-between mb-4">
                         <div className="text-sm text-gray-500">
-                          <div>
-                            {prediction.league_name}
-                          </div>
+                          <div>{prediction.league_name}</div>
                           <div className="mt-1">
                             {formatCompactDate(prediction.match_date)}
                             {isMatchToday(prediction.match_date) && (
@@ -470,12 +496,13 @@ export default function Home() {
                           </div>
                         </div>
                         <div
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${prediction.prediction.confidence > 0.7
-                            ? "bg-green-100 text-green-800"
-                            : prediction.prediction.confidence >= 0.5
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            prediction.prediction.confidence > 0.7
+                              ? "bg-green-100 text-green-800"
+                              : prediction.prediction.confidence >= 0.5
                               ? "bg-yellow-100 text-yellow-800"
                               : "bg-red-100 text-red-800"
-                            }`}
+                          }`}
                         >
                           {Math.round(prediction.prediction.confidence * 100)}%
                           confidence
@@ -512,7 +539,7 @@ export default function Home() {
                           </div>
                           <div className="font-bold text-lg">
                             {Math.round(
-                              prediction.prediction.probabilities.Home * 100
+                              prediction.prediction.probabilities.home * 100
                             )}
                             %
                           </div>
@@ -521,7 +548,7 @@ export default function Home() {
                           <div className="text-xs text-gray-500 mb-1">Draw</div>
                           <div className="font-bold text-lg">
                             {Math.round(
-                              prediction.prediction.probabilities.Draw * 100
+                              prediction.prediction.probabilities.draw * 100
                             )}
                             %
                           </div>
@@ -532,7 +559,7 @@ export default function Home() {
                           </div>
                           <div className="font-bold text-lg">
                             {Math.round(
-                              prediction.prediction.probabilities.Away * 100
+                              prediction.prediction.probabilities.away * 100
                             )}
                             %
                           </div>

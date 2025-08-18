@@ -1,6 +1,11 @@
 import { Prediction } from "@/types";
 import { useEffect, useState } from "react";
-import { formatCompactDate, getRelativeTime, isMatchToday, formatTimeOnly } from "@/utils/date";
+import {
+  formatCompactDate,
+  getRelativeTime,
+  isMatchToday,
+  formatTimeOnly,
+} from "@/utils/date";
 
 // PredictionCard component
 interface PredictionCardProps {
@@ -18,16 +23,16 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
   } = prediction;
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "live":
-        return "text-red-600 bg-red-100";
-      case "upcoming":
-        return "text-blue-600 bg-blue-100";
-      case "completed":
-        return "text-gray-600 bg-gray-100";
-      default:
-        return "text-gray-600 bg-gray-100";
-    }
+    const liveStatuses = new Set(["LIVE", "1H", "2H", "HT", "ET", "P"]);
+    const upcomingStatuses = new Set(["NS", "TBD"]);
+    const completedStatuses = new Set(["FT"]);
+    const canceledStatuses = new Set(["CANC", "PST", "A", "ABD", "INT"]);
+
+    if (liveStatuses.has(status)) return "text-red-600 bg-red-100";
+    if (upcomingStatuses.has(status)) return "text-blue-600 bg-blue-100";
+    if (completedStatuses.has(status)) return "text-gray-600 bg-gray-100";
+    if (canceledStatuses.has(status)) return "text-gray-600 bg-gray-100";
+    return "text-gray-600 bg-gray-100";
   };
 
   const getConfidenceColor = (confidence: number) => {
@@ -56,9 +61,7 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <div className="text-sm text-gray-500">
-            <div>
-              {league_name}
-            </div>
+            <div>{league_name}</div>
             <div className="mt-1">
               {formatCompactDate(match_date)}
               {isMatchToday(match_date) && (
@@ -115,19 +118,19 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
           <div className="text-center">
             <div className="text-xs text-gray-500">Home</div>
             <div className="font-medium">
-              {Math.round(predictionData.probabilities.Home * 100)}%
+              {Math.round(predictionData.probabilities.home * 100)}%
             </div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-500">Draw</div>
             <div className="font-medium">
-              {Math.round(predictionData.probabilities.Draw * 100)}%
+              {Math.round(predictionData.probabilities.draw * 100)}%
             </div>
           </div>
           <div className="text-center">
             <div className="text-xs text-gray-500">Away</div>
             <div className="font-medium">
-              {Math.round(predictionData.probabilities.Away * 100)}%
+              {Math.round(predictionData.probabilities.away * 100)}%
             </div>
           </div>
         </div>
@@ -136,9 +139,12 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
       {/* Model Info */}
       <div className="border-t pt-3">
         <div className="text-sm text-gray-600 mb-1">Model:</div>
-        <div className="text-sm text-gray-800 mb-2">
-          {predictionData.model_info.name} v{predictionData.model_info.version}
-        </div>
+        {predictionData.model_info && (
+          <div className="text-sm text-gray-800 mb-2">
+            {predictionData.model_info.name} v
+            {predictionData.model_info.version}
+          </div>
+        )}
         {predictionData.error && (
           <div className="text-xs text-yellow-600">
             ⚠️ {predictionData.error}
@@ -189,12 +195,20 @@ export function Hero({ predictions = [] }: HeroProps) {
         awayTeam: prediction.away_team,
         league: prediction.league_name,
         time: formatTimeOnly(prediction.match_date),
-        prediction: prediction.prediction.predicted_outcome === 'Home' ? '1' :
-          prediction.prediction.predicted_outcome === 'Away' ? '2' : 'X',
+        prediction: (() => {
+          const o = prediction.prediction.predicted_outcome;
+          if (o === "Home") return "1";
+          if (o === "Draw") return "X";
+          if (o === "Away") return "2";
+          if (o === "Home or Draw") return "1X";
+          if (o === "Away or Draw") return "X2";
+          if (o === "Home or Away") return "12";
+          return "?";
+        })(),
         confidence: Math.round(prediction.prediction.confidence * 100),
-        homeOdds: Math.round(prediction.prediction.probabilities.Home * 100),
-        drawOdds: Math.round(prediction.prediction.probabilities.Draw * 100),
-        awayOdds: Math.round(prediction.prediction.probabilities.Away * 100),
+        homeOdds: Math.round(prediction.prediction.probabilities.home * 100),
+        drawOdds: Math.round(prediction.prediction.probabilities.draw * 100),
+        awayOdds: Math.round(prediction.prediction.probabilities.away * 100),
       };
     } else {
       // Return placeholder data when no predictions are available
@@ -326,8 +340,8 @@ export function Hero({ predictions = [] }: HeroProps) {
                     {featuredMatch.prediction === "1"
                       ? "HOME WIN"
                       : featuredMatch.prediction === "X"
-                        ? "DRAW"
-                        : "AWAY WIN"}
+                      ? "DRAW"
+                      : "AWAY WIN"}
                   </div>
                   <div className="text-lg text-green-300 font-semibold">
                     {featuredMatch.confidence}% Confidence
@@ -356,8 +370,11 @@ export function Hero({ predictions = [] }: HeroProps) {
                   {displayMatches.map((_, index: number) => (
                     <div
                       key={index}
-                      className={`w-2 h-2 rounded-full transition-colors ${index === featuredIndex ? "bg-yellow-300" : "bg-white/30"
-                        }`}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === featuredIndex
+                          ? "bg-yellow-300"
+                          : "bg-white/30"
+                      }`}
                     ></div>
                   ))}
                 </div>

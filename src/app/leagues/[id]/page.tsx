@@ -16,7 +16,11 @@ export default function LeagueDetailPage() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [standings, setStandings] = useState<Standing[]>([]);
   const [season, setSeason] = useState<string>("2023-2024"); // Default season
-  const [availableSeasons, setAvailableSeasons] = useState<string[]>(["2023-2024", "2022-2023", "2021-2022"]);
+  const [availableSeasons, setAvailableSeasons] = useState<string[]>([
+    "2023-2024",
+    "2022-2023",
+    "2021-2022",
+  ]);
   const [seasonsLoading, setSeasonsLoading] = useState<boolean>(false);
 
   const [activeTab, setActiveTab] = useState<
@@ -46,7 +50,7 @@ export default function LeagueDetailPage() {
         const predictionsResponse = await predictionsApi.getAllPredictions({
           league_id: leagueId,
           page_size: 20,
-          status: "upcoming",
+          status: "NS",
         });
         if (predictionsResponse.success) {
           setPredictions(predictionsResponse.data.predictions);
@@ -54,10 +58,10 @@ export default function LeagueDetailPage() {
 
         // Try to fetch standings
         try {
-          const standingsResponse = await leaguesApi.getLeagueStandings(
+          const standingsResponse = (await leaguesApi.getLeagueStandings(
             leagueId,
             season
-          ) as StandingsResponse;
+          )) as StandingsResponse;
 
           if (standingsResponse.success) {
             setStandings(standingsResponse.data.standings);
@@ -202,10 +206,11 @@ export default function LeagueDetailPage() {
                     tab.id as "overview" | "predictions" | "standings"
                   )
                 }
-                className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-colors ${activeTab === tab.id
-                  ? "border-blue-600 text-blue-600 font-semibold"
-                  : "border-transparent text-gray-600 hover:text-gray-800"
-                  }`}
+                className={`flex items-center space-x-2 px-4 py-4 border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? "border-blue-600 text-blue-600 font-semibold"
+                    : "border-transparent text-gray-600 hover:text-gray-800"
+                }`}
               >
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
@@ -266,9 +271,7 @@ export default function LeagueDetailPage() {
                         className="p-4 bg-gray-50 rounded-lg"
                       >
                         <div className="text-sm text-gray-500 mb-2">
-                          <div>
-                            {formatCompactDate(prediction.match_date)}
-                          </div>
+                          <div>{formatCompactDate(prediction.match_date)}</div>
                           {isMatchToday(prediction.match_date) && (
                             <div className="text-blue-600 font-semibold mt-1">
                               {getRelativeTime(prediction.match_date)}
@@ -280,13 +283,14 @@ export default function LeagueDetailPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${prediction.prediction.predicted_outcome === "Home"
-                              ? "bg-green-100 text-green-800"
-                              : prediction.prediction.predicted_outcome ===
-                                "Away"
+                            className={`px-2 py-1 rounded text-xs font-medium ${
+                              prediction.prediction.predicted_outcome === "Home"
+                                ? "bg-green-100 text-green-800"
+                                : prediction.prediction.predicted_outcome ===
+                                  "Away"
                                 ? "bg-red-100 text-red-800"
                                 : "bg-yellow-100 text-yellow-800"
-                              }`}
+                            }`}
                           >
                             {prediction.prediction.predicted_outcome}
                           </span>
@@ -336,7 +340,10 @@ export default function LeagueDetailPage() {
                   League Standings
                 </h2>
                 <div className="flex items-center space-x-2">
-                  <label htmlFor="season" className="text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="season"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Season:
                   </label>
                   <select
@@ -370,31 +377,55 @@ export default function LeagueDetailPage() {
                     <table className="w-full text-left">
                       <thead className="bg-gray-50">
                         <tr className="text-gray-600 border-b">
-                          <th className="py-3 px-4 text-xs font-medium uppercase">#</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase">Team</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">P</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">W</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">D</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">L</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">GF</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">GA</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">GD</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">Pts</th>
-                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">Form</th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase">
+                            #
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase">
+                            Team
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">
+                            P
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">
+                            W
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">
+                            D
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">
+                            L
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">
+                            GF
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">
+                            GA
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">
+                            GD
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">
+                            Pts
+                          </th>
+                          <th className="py-3 px-4 text-xs font-medium uppercase text-center">
+                            Form
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {standings.map((standing) => (
                           <tr
                             key={standing.team.team_id}
-                            className={`hover:bg-gray-50 border-b border-gray-100 ${standing.position <= 4
-                              ? 'border-l-4 border-l-green-500'
-                              : standing.position >= 18
-                                ? 'border-l-4 border-l-red-500'
-                                : standing.position >= 5 && standing.position <= 6
-                                  ? 'border-l-4 border-l-blue-500'
-                                  : ''
-                              }`}
+                            className={`hover:bg-gray-50 border-b border-gray-100 ${
+                              standing.position <= 4
+                                ? "border-l-4 border-l-green-500"
+                                : standing.position >= 18
+                                ? "border-l-4 border-l-red-500"
+                                : standing.position >= 5 &&
+                                  standing.position <= 6
+                                ? "border-l-4 border-l-blue-500"
+                                : ""
+                            }`}
                           >
                             <td className="py-3 px-4 font-medium text-gray-900">
                               {standing.position}
@@ -402,38 +433,67 @@ export default function LeagueDetailPage() {
                             <td className="py-3 px-4">
                               <div className="flex items-center">
                                 <span className="w-6 h-6 mr-3 bg-gray-200 rounded-full flex items-center justify-center text-xs">
-                                  {standing.team.team_name.substring(0, 2).toUpperCase()}
+                                  {standing.team.team_name
+                                    .substring(0, 2)
+                                    .toUpperCase()}
                                 </span>
-                                <span className="font-medium">{standing.team.team_name}</span>
+                                <span className="font-medium">
+                                  {standing.team.team_name}
+                                </span>
                               </div>
                             </td>
-                            <td className="py-3 px-4 text-center text-gray-600">{standing.matches_played}</td>
-                            <td className="py-3 px-4 text-center text-green-600 font-medium">{standing.wins}</td>
-                            <td className="py-3 px-4 text-center text-yellow-600 font-medium">{standing.draws}</td>
-                            <td className="py-3 px-4 text-center text-red-600 font-medium">{standing.losses}</td>
-                            <td className="py-3 px-4 text-center text-gray-600">{standing.goals_scored}</td>
-                            <td className="py-3 px-4 text-center text-gray-600">{standing.goals_conceded}</td>
+                            <td className="py-3 px-4 text-center text-gray-600">
+                              {standing.matches_played}
+                            </td>
+                            <td className="py-3 px-4 text-center text-green-600 font-medium">
+                              {standing.wins}
+                            </td>
+                            <td className="py-3 px-4 text-center text-yellow-600 font-medium">
+                              {standing.draws}
+                            </td>
+                            <td className="py-3 px-4 text-center text-red-600 font-medium">
+                              {standing.losses}
+                            </td>
+                            <td className="py-3 px-4 text-center text-gray-600">
+                              {standing.goals_scored}
+                            </td>
+                            <td className="py-3 px-4 text-center text-gray-600">
+                              {standing.goals_conceded}
+                            </td>
                             <td className="py-3 px-4 text-center font-medium">
-                              <span className={standing.goal_difference >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                {standing.goal_difference > 0 ? '+' : ''}{standing.goal_difference}
+                              <span
+                                className={
+                                  standing.goal_difference >= 0
+                                    ? "text-green-600"
+                                    : "text-red-600"
+                                }
+                              >
+                                {standing.goal_difference > 0 ? "+" : ""}
+                                {standing.goal_difference}
                               </span>
                             </td>
-                            <td className="py-3 px-4 text-center font-bold text-gray-900">{standing.points}</td>
+                            <td className="py-3 px-4 text-center font-bold text-gray-900">
+                              {standing.points}
+                            </td>
                             <td className="py-3 px-4 text-center">
                               <div className="flex space-x-1 justify-center">
-                                {standing.form.split('').slice(-5).map((result, idx) => (
-                                  <span
-                                    key={idx}
-                                    className={`w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white ${result === 'W'
-                                      ? 'bg-green-500'
-                                      : result === 'D'
-                                        ? 'bg-yellow-500'
-                                        : 'bg-red-500'
+                                {standing.form
+                                  .split("")
+                                  .slice(-5)
+                                  .map((result, idx) => (
+                                    <span
+                                      key={idx}
+                                      className={`w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center text-white ${
+                                        result === "W"
+                                          ? "bg-green-500"
+                                          : result === "D"
+                                          ? "bg-yellow-500"
+                                          : "bg-red-500"
                                       }`}
-                                  >
-                                    {result}
-                                  </span>
-                                ))}
+                                    >
+                                      {result}
+                                    </span>
+                                  ))}
                               </div>
                             </td>
                           </tr>

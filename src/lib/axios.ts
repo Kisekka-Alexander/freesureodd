@@ -95,6 +95,7 @@ import {
   TeamStats,
   UniqueLeague,
   StandingsResponse,
+  MatchStatusCode,
 } from "@/types";
 
 export const predictionsApi = {
@@ -103,7 +104,7 @@ export const predictionsApi = {
     page?: number;
     page_size?: number;
     league_id?: number;
-    status?: "upcoming" | "live" | "completed";
+    status?: MatchStatusCode;
     confidence_threshold?: number;
     sort_by?: "match_date" | "confidence" | "league";
     sort_order?: "asc" | "desc";
@@ -136,9 +137,7 @@ export const predictionsApi = {
     if (params?.sort_by) queryParams.append("sort_by", params.sort_by);
     if (params?.sort_order) queryParams.append("sort_order", params.sort_order);
 
-    const response = await api.get(
-      `/v1/predictions?${queryParams.toString()}`
-    );
+    const response = await api.get(`/v1/predictions?${queryParams.toString()}`);
     console.log("Raw axios response:", response);
     console.log("Response data structure:", response.data);
     return response.data;
@@ -183,8 +182,7 @@ export const leaguesApi = {
         // If it's a connection reset or network error and we have retries left, wait and retry
         if (
           attempt < retries &&
-          (err.code === "ECONNRESET" ||
-            err.message.includes("Network Error"))
+          (err.code === "ECONNRESET" || err.message.includes("Network Error"))
         ) {
           console.log(`Retrying in ${attempt * 1000}ms...`);
           await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
@@ -200,27 +198,29 @@ export const leaguesApi = {
   },
 
   // Get unique leagues (grouped by league_id, removing duplicates from different seasons)
-  getUniqueLeagues: async (retries = 3): Promise<ApiResponse<{ leagues: UniqueLeague[]; total_count: number }>> => {
+  getUniqueLeagues: async (
+    retries = 3
+  ): Promise<ApiResponse<{ leagues: UniqueLeague[]; total_count: number }>> => {
     const response = await leaguesApi.getLeagues(retries);
 
     // Group leagues by league_id and aggregate seasons
     const leagueMap = new Map<number, UniqueLeague>();
 
-    response.data.leagues.forEach(league => {
+    response.data.leagues.forEach((league) => {
       if (!leagueMap.has(league.league_id)) {
         leagueMap.set(league.league_id, {
           league_id: league.league_id,
           league_name: league.league_name,
           country: league.country,
           logo_url: league.logo_url,
-          seasons: []
+          seasons: [],
         });
       }
 
       const uniqueLeague = leagueMap.get(league.league_id)!;
       uniqueLeague.seasons.push({
         season_name: league.season_name ?? null,
-        team_count: league.team_count
+        team_count: league.team_count,
       });
     });
 
@@ -230,8 +230,8 @@ export const leaguesApi = {
       ...response,
       data: {
         leagues: uniqueLeagues,
-        total_count: uniqueLeagues.length
-      }
+        total_count: uniqueLeagues.length,
+      },
     };
   },
 
@@ -243,20 +243,22 @@ export const leaguesApi = {
     const response = await leaguesApi.getLeagues(retries);
 
     const filteredLeagues = response.data.leagues.filter(
-      league => league.season_name === seasonName
+      (league) => league.season_name === seasonName
     );
 
     return {
       ...response,
       data: {
         leagues: filteredLeagues,
-        total_count: filteredLeagues.length
-      }
+        total_count: filteredLeagues.length,
+      },
     };
   },
 
   // Get current season leagues (2024-2025)
-  getCurrentSeasonLeagues: async (retries = 3): Promise<ApiResponse<LeaguesResponse>> => {
+  getCurrentSeasonLeagues: async (
+    retries = 3
+  ): Promise<ApiResponse<LeaguesResponse>> => {
     return leaguesApi.getLeaguesBySeason("2024-2025", retries);
   },
 
@@ -265,8 +267,10 @@ export const leaguesApi = {
     leagueId: number,
     season?: string
   ): Promise<StandingsResponse> => {
-    const seasonParam = season ? `?season=${season}` : '';
-    const response = await api.get(`/v1/leagues/${leagueId}/standings${seasonParam}`);
+    const seasonParam = season ? `?season=${season}` : "";
+    const response = await api.get(
+      `/v1/leagues/${leagueId}/standings${seasonParam}`
+    );
     return response.data;
   },
 
@@ -279,7 +283,7 @@ export const leaguesApi = {
       "2021-2022",
       "2020-2021",
       "2019-2020",
-      "2018-2019"
+      "2018-2019",
     ];
 
     try {
@@ -290,10 +294,16 @@ export const leaguesApi = {
         // We'll test just a few recent seasons to be sure
         const availableSeasons: string[] = [];
 
-        for (const season of commonSeasons.slice(0, 4)) { // Test only recent 4 seasons
+        for (const season of commonSeasons.slice(0, 4)) {
+          // Test only recent 4 seasons
           try {
-            const seasonResponse = await api.get(`/v1/leagues/${leagueId}/standings?season=${season}`);
-            if (seasonResponse.data.success && seasonResponse.data.data.standings.length > 0) {
+            const seasonResponse = await api.get(
+              `/v1/leagues/${leagueId}/standings?season=${season}`
+            );
+            if (
+              seasonResponse.data.success &&
+              seasonResponse.data.data.standings.length > 0
+            ) {
               availableSeasons.push(season);
             }
           } catch {
@@ -301,7 +311,9 @@ export const leaguesApi = {
           }
         }
 
-        return availableSeasons.length > 0 ? availableSeasons : commonSeasons.slice(0, 3);
+        return availableSeasons.length > 0
+          ? availableSeasons
+          : commonSeasons.slice(0, 3);
       }
     } catch {
       console.log(`Could not fetch seasons for league ${leagueId}`);
