@@ -2,7 +2,6 @@ import {
   getDayAbbreviation,
   getDateForFilter,
   getUserTimezone,
-  getTodayLocalDate,
 } from "@/utils/date";
 
 interface DateFilterProps {
