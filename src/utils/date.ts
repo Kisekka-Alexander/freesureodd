@@ -43,6 +43,7 @@ export function formatMatchDate(utcDateString: string): string {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    timeZoneName: undefined, // Remove timezone abbreviation
   });
 }
 
@@ -58,6 +59,7 @@ export function formatCompactDate(utcDateString: string): string {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    timeZoneName: undefined, // Remove timezone abbreviation
   });
 }
 
