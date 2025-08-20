@@ -228,13 +228,12 @@ export function isDateToday(dateString: string): boolean {
 /**
  * Converts a local date to UTC date range for API filtering
  * @param localDateString - Date string in YYYY-MM-DD format in user's timezone
- * @param userTimezone - User's timezone identifier (e.g., "America/New_York")
  * @returns Object with UTC start and end timestamps for the local date
  */
-export function getUtcDateRangeForLocalDate(
-  localDateString: string,
-  userTimezone: string
-): { startUtc: string; endUtc: string } {
+export function getUtcDateRangeForLocalDate(localDateString: string): {
+  startUtc: string;
+  endUtc: string;
+} {
   // Create date objects for start and end of the local date
   const startOfDay = new Date(`${localDateString}T00:00:00`);
   const endOfDay = new Date(`${localDateString}T23:59:59.999`);

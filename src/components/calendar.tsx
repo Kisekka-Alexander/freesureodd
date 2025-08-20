@@ -12,7 +12,6 @@ interface CalendarProps {
 export function Calendar({
   selectedDate,
   onDateChange,
-  predictions = [],
   onNavigation,
 }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());

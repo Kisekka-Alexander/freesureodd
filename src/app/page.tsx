@@ -6,13 +6,12 @@ import { PredictionsTable } from "@/components/predictions-table";
 import { DateFilter } from "@/components/date-filter";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
 import { Prediction, League } from "@/types";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   formatCompactDate,
   getRelativeTime,
   isMatchToday,
   prepareDateFilterForApi,
-  getUserTimezone,
   getTodayLocalDate,
 } from "@/utils/date";
 

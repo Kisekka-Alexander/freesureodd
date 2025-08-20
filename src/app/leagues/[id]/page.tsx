@@ -49,7 +49,6 @@ export default function LeagueDetailPage() {
         // Fetch predictions for this league
         const predictionsResponse = await predictionsApi.getAllPredictions({
           league_id: leagueId,
-          page_size: 20,
           status: "NS",
         });
         if (predictionsResponse.success) {
