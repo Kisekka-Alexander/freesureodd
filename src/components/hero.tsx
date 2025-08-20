@@ -216,10 +216,10 @@ export function Hero({ predictions = [] }: HeroProps) {
             if (o === "Home or Away") return "12";
             return "?";
           })(),
-          confidence: Math.round(prediction.prediction.confidence * 100),
-          homeOdds: Math.round(prediction.prediction.probabilities.home * 100),
-          drawOdds: Math.round(prediction.prediction.probabilities.draw * 100),
-          awayOdds: Math.round(prediction.prediction.probabilities.away * 100),
+          // confidence: Math.round(prediction.prediction.confidence * 100),
+          homeOdds: prediction.home_odds,
+          drawOdds: prediction.draw_odds,
+          awayOdds: prediction.away_odds,
         };
       }
     }
@@ -353,25 +353,26 @@ export function Hero({ predictions = [] }: HeroProps) {
                       ? "HOME WIN"
                       : featuredMatch.prediction === "X"
                       ? "DRAW"
+                      : featuredMatch.prediction === "1X"
+                      ? "HOME OR DRAW"
+                      : featuredMatch.prediction === "2X"
+                      ? "AWAY OR DRAW"
                       : "AWAY WIN"}
-                  </div>
-                  <div className="text-lg text-green-300 font-semibold">
-                    {featuredMatch.confidence}% Confidence
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div className="text-center">
                     <div className="text-white/70">Home</div>
-                    <div className="font-bold">{featuredMatch.homeOdds}%</div>
+                    <div className="font-bold">{featuredMatch.homeOdds}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-white/70">Draw</div>
-                    <div className="font-bold">{featuredMatch.drawOdds}%</div>
+                    <div className="font-bold">{featuredMatch.drawOdds}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-white/70">Away</div>
-                    <div className="font-bold">{featuredMatch.awayOdds}%</div>
+                    <div className="font-bold">{featuredMatch.awayOdds}</div>
                   </div>
                 </div>
               </div>

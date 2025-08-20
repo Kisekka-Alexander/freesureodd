@@ -99,33 +99,17 @@ import {
 } from "@/types";
 
 export const predictionsApi = {
-  // Get all predictions with pagination
+  // Get all predictions
   getAllPredictions: async (params?: {
-    page?: number;
-    page_size?: number;
     league_id?: number;
     status?: MatchStatusCode;
     confidence_threshold?: number;
     sort_by?: "match_date" | "confidence" | "league";
     sort_order?: "asc" | "desc";
-    // Note: match_date removed from API params since we'll filter client-side for timezone accuracy
+    match_date?: string; // Date in YYYY-MM-DD format in user's timezone
+    timezone?: string; // User's timezone identifier (e.g., "America/New_York")
   }): Promise<ApiResponse<PredictionsResponse>> => {
     const queryParams = new URLSearchParams();
-
-    // Set default page and page_size if not provided
-    const page = params?.page ?? 1;
-    const page_size = params?.page_size ?? 20;
-
-    // Validate pagination parameters
-    if (page < 1) {
-      throw new Error("Page must be 1 or greater");
-    }
-    if (page_size < 1 || page_size > 100) {
-      throw new Error("Page size must be between 1 and 100");
-    }
-
-    queryParams.append("page", page.toString());
-    queryParams.append("page_size", page_size.toString());
 
     if (params?.league_id)
       queryParams.append("league_id", params.league_id.toString());
@@ -137,7 +121,8 @@ export const predictionsApi = {
       );
     if (params?.sort_by) queryParams.append("sort_by", params.sort_by);
     if (params?.sort_order) queryParams.append("sort_order", params.sort_order);
-    // Removed match_date and timezone params - filtering will be done client-side
+    if (params?.match_date) queryParams.append("match_date", params.match_date);
+    if (params?.timezone) queryParams.append("timezone", params.timezone);
 
     const response = await api.get(`/v1/predictions?${queryParams.toString()}`);
     console.log("Raw axios response:", response);
