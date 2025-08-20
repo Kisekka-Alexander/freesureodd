@@ -226,6 +226,49 @@ export function isDateToday(dateString: string): boolean {
 }
 
 /**
+ * Converts a local date to UTC date range for API filtering
+ * @param localDateString - Date string in YYYY-MM-DD format in user's timezone
+ * @returns Object with UTC start and end timestamps for the local date
+ */
+export function getUtcDateRangeForLocalDate(localDateString: string): {
+  startUtc: string;
+  endUtc: string;
+} {
+  // Create date objects for start and end of the local date
+  const startOfDay = new Date(`${localDateString}T00:00:00`);
+  const endOfDay = new Date(`${localDateString}T23:59:59.999`);
+
+  // Convert to UTC by considering the user's timezone
+  // Note: This creates dates in local browser timezone, but we need to adjust for user's timezone
+
+  // For API filtering, we'll send the local date and timezone to the server
+  // and let the server handle the UTC conversion properly
+  return {
+    startUtc: startOfDay.toISOString(),
+    endUtc: endOfDay.toISOString(),
+  };
+}
+
+/**
+ * Prepares date filter parameters for the API
+ * @param selectedDate - Date string in YYYY-MM-DD format in user's timezone (null for no filter)
+ * @returns API parameters object with date filtering
+ */
+export function prepareDateFilterForApi(selectedDate: string | null): {
+  match_date?: string;
+  timezone?: string;
+} {
+  if (!selectedDate) {
+    return {}; // No date filter
+  }
+
+  return {
+    match_date: selectedDate, // Send user's local date
+    timezone: getUserTimezone(), // Send user's timezone for server conversion
+  };
+}
+
+/**
  * Debug function to log timezone information and date comparisons
  * @param matchDateString - UTC match date
  * @param filterDate - Filter date in local timezone

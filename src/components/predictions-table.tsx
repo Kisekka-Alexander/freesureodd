@@ -104,6 +104,9 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
               <th className="text-center p-4 font-semibold text-gray-700 min-w-[80px]">
                 Status
               </th>
+              <th className="text-center p-4 font-semibold text-gray-700 min-w-[80px]">
+                Score
+              </th>
               <th className="text-center p-4 font-semibold text-gray-700 min-w-[120px]">
                 Date/Time
               </th>
@@ -207,6 +210,19 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                   >
                     {prediction.match_status}
                   </span>
+                </td>
+
+                {/* Score */}
+                <td className="p-4 text-center">
+                  {prediction.fulltime_home_score !== undefined &&
+                  prediction.fulltime_away_score !== undefined ? (
+                    <div className="text-sm font-semibold text-gray-900">
+                      {prediction.fulltime_home_score} -{" "}
+                      {prediction.fulltime_away_score}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-400">-</div>
+                  )}
                 </td>
 
                 {/* Date/Time */}

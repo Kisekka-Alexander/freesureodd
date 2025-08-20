@@ -120,6 +120,8 @@ export interface Prediction {
   away_or_draw_odds?: number;
   match_date: string;
   match_status: MatchStatusCode;
+  fulltime_home_score?: number;
+  fulltime_away_score?: number;
   prediction: PredictionData;
 }
 
@@ -133,7 +135,7 @@ export interface PaginationInfo {
 
 export interface PredictionsResponse {
   predictions: Prediction[];
-  pagination: PaginationInfo;
+  pagination?: PaginationInfo; // Made optional since pagination features are removed
 }
 
 // League Types

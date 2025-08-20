@@ -6,29 +6,27 @@ import { PredictionsTable } from "@/components/predictions-table";
 import { DateFilter } from "@/components/date-filter";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
 import { Prediction, League } from "@/types";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   formatCompactDate,
   getRelativeTime,
   isMatchToday,
-  isMatchOnDate,
-  debugTimezoneInfo,
-  getUserTimezone,
+  prepareDateFilterForApi,
+  getTodayLocalDate,
 } from "@/utils/date";
 
 export default function Home() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [allPredictions, setAllPredictions] = useState<Prediction[]>([]); // Store all predictions for calendar indicators
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allPredictionsLoading, setAllPredictionsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [selectedLeague, setSelectedLeague] = useState<number | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPredictions, setTotalPredictions] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [allFetchedPredictions, setAllFetchedPredictions] = useState(0); // Track total fetched from API
-  const predictionsPerPage = 20;
+  const [selectedDate, setSelectedDate] = useState<string | null>(
+    getTodayLocalDate()
+  );
 
   // Fetch leagues on component mount
   useEffect(() => {
@@ -76,59 +74,60 @@ export default function Home() {
     fetchLeagues();
   }, []);
 
-  // Fetch total predictions count on component mount
+  // Fetch all predictions for calendar indicators (without date filter)
   useEffect(() => {
-    const fetchInitialPredictions = async () => {
+    const fetchAllPredictions = async () => {
       try {
-        // Get the first page to initialize pagination info
-        const response = await predictionsApi.getAllPredictions({
-          page: 1,
-          page_size: predictionsPerPage,
-          status: "NS",
-          sort_by: "match_date",
-          sort_order: "asc",
-        });
-
-        if (response.success) {
-          setTotalPredictions(response.data.pagination.total_count);
-          setTotalPages(response.data.pagination.total_pages);
-        }
-      } catch (err) {
-        console.error("Error fetching initial predictions info:", err);
-        // Keep the existing state if this fails
-      }
-    };
-
-    fetchInitialPredictions();
-  }, []);
-
-  // Fetch predictions when filters change
-  useEffect(() => {
-    const fetchPredictions = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Fetch more predictions to account for client-side date filtering
-        // We'll fetch a larger page size and filter locally for timezone accuracy
+        setAllPredictionsLoading(true);
         const params = {
-          page: 1, // Always fetch from page 1 since we'll filter client-side
-          page_size: 100, // Fetch more to ensure we have enough after filtering
-          ...(selectedLeague && { league_id: selectedLeague }),
           status: "NS" as const,
           sort_by: "match_date" as const,
           sort_order: "asc" as const,
         };
 
-        console.log("Fetching predictions with params:", params);
         const response = await predictionsApi.getAllPredictions(params);
-        console.log("Predictions fetched successfully");
+        if (response.success) {
+          setAllPredictions(response.data.predictions);
+        }
+      } catch (err) {
+        console.error("Error fetching all predictions for calendar:", err);
+      } finally {
+        setAllPredictionsLoading(false);
+      }
+    };
+
+    fetchAllPredictions();
+  }, []); // Only fetch once on mount - we want ALL predictions for calendar
+
+  // Fetch predictions when component mounts or filters change
+  useEffect(() => {
+    const fetchPredictions = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        setPredictions([]); // Clear previous predictions immediately when filter changes
+
+        // Prepare date filter parameters for server-side filtering
+        const dateParams = prepareDateFilterForApi(selectedDate);
+
+        const params = {
+          ...(selectedLeague && { league_id: selectedLeague }),
+          status: "NS" as const,
+          sort_by: "match_date" as const,
+          sort_order: "asc" as const,
+          ...dateParams, // Include match_date and timezone for server-side filtering
+        };
+
+        console.log("Fetching predictions with server-side filtering:", params);
+        const response = await predictionsApi.getAllPredictions(params);
+        console.log(
+          "Predictions fetched successfully from server",
+          response.data?.predictions?.length || 0,
+          "predictions"
+        );
 
         if (response.success) {
           setPredictions(response.data.predictions);
-          setAllFetchedPredictions(response.data.predictions.length);
-          // Note: Total predictions will be recalculated after client-side filtering
-          // We'll update pagination info in the filteredPredictions useMemo
         } else {
           throw new Error(response.message || "Failed to fetch predictions");
         }
@@ -137,13 +136,14 @@ export default function Home() {
           err instanceof Error ? err.message : "Failed to fetch predictions";
         setError(errorMessage);
         console.error("Error fetching predictions:", err);
+        setPredictions([]); // Ensure predictions are cleared on error
       } finally {
         setLoading(false);
       }
     };
 
     fetchPredictions();
-  }, [selectedLeague]); // Removed currentPage and selectedDate from deps since filtering is now client-side
+  }, [selectedLeague, selectedDate]); // Now includes selectedDate for server-side filtering
 
   // Note: These functions are kept for potential future use
   // const getCountryFlag = (country: string) => {
@@ -161,125 +161,19 @@ export default function Home() {
 
   // const handleLeagueFilter = (leagueId: number | null) => {
   //   setSelectedLeague(leagueId);
-  //   setCurrentPage(1);
   // };
 
   const handleDateFilter = (date: string | null) => {
     setSelectedDate(date);
-    setCurrentPage(1);
   };
 
-  // Get filtered predictions (without pagination)
-  const allFilteredPredictions = useMemo(() => {
-    let filtered = predictions;
-
-    // Apply date filter if selected
-    if (selectedDate) {
-      filtered = predictions.filter((prediction) => {
-        const matches = isMatchOnDate(prediction.match_date, selectedDate);
-
-        // Debug logging in development (only log first few for brevity)
-        if (
-          process.env.NODE_ENV === "development" &&
-          predictions.indexOf(prediction) < 3
-        ) {
-          debugTimezoneInfo(prediction.match_date, selectedDate);
-        }
-
-        return matches;
-      });
-
-      console.log(
-        `🔍 Timezone filtering: ${filtered.length} of ${
-          predictions.length
-        } matches found for date ${selectedDate} in timezone ${getUserTimezone()}`
-      );
-    }
-
-    return filtered;
-  }, [predictions, selectedDate]);
-
-  // Update pagination info when filtered predictions change
-  useEffect(() => {
-    const totalFiltered = allFilteredPredictions.length;
-    const totalFilteredPages = Math.ceil(totalFiltered / predictionsPerPage);
-
-    setTotalPredictions(totalFiltered);
-    setTotalPages(totalFilteredPages);
-
-    // Reset to page 1 if current page is beyond available pages
-    if (currentPage > totalFilteredPages && totalFilteredPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [allFilteredPredictions.length, currentPage, predictionsPerPage]);
-
-  // Get paginated results from filtered predictions
-  const filteredPredictions = useMemo(() => {
-    const startIndex = (currentPage - 1) * predictionsPerPage;
-    const endIndex = startIndex + predictionsPerPage;
-    return allFilteredPredictions.slice(startIndex, endIndex);
-  }, [allFilteredPredictions, currentPage, predictionsPerPage]);
+  // Server-side filtering: predictions are already filtered
+  // No need for client-side filtering anymore
+  const filteredPredictions = predictions;
 
   return (
     <main className="min-h-screen">
       <Hero predictions={filteredPredictions} />
-
-      {/* Quick Stats Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              📊 Today&apos;s Football Intelligence
-            </h2>
-            <p className="text-gray-600">
-              Real-time statistics and insights from the world of football
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-              <div className="text-3xl font-bold text-green-600 mb-2">
-                {filteredPredictions.length}
-              </div>
-              <div className="text-sm text-green-700">
-                {selectedDate ? "Filtered Tips" : "Today's Tips"}
-              </div>
-            </div>
-            <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-              <div className="text-3xl font-bold text-blue-600 mb-2">
-                {filteredPredictions.length > 0
-                  ? Math.round(
-                      (filteredPredictions.reduce(
-                        (sum, p) => sum + p.prediction.confidence,
-                        0
-                      ) /
-                        filteredPredictions.length) *
-                        100
-                    )
-                  : 0}
-                %
-              </div>
-              <div className="text-sm text-blue-700">Avg Confidence</div>
-            </div>
-            <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
-              <div className="text-3xl font-bold text-purple-600 mb-2">
-                {leagues.length}
-              </div>
-              <div className="text-sm text-purple-700">Leagues Covered</div>
-            </div>
-            <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
-              <div className="text-3xl font-bold text-orange-600 mb-2">
-                {
-                  filteredPredictions.filter(
-                    (p) => p.prediction.confidence > 0.7
-                  ).length
-                }
-              </div>
-              <div className="text-sm text-orange-700">High Confidence</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Predictions Section */}
       <section className="py-16 bg-white">
@@ -319,50 +213,13 @@ export default function Home() {
                 </button>
               </div>
             </div>
-
-            {/* Prediction stats */}
-            {!loading && !error && filteredPredictions.length > 0 && (
-              <div className="flex justify-center space-x-8 text-sm text-gray-600 mb-8">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span>
-                    High confidence:{" "}
-                    {
-                      filteredPredictions.filter(
-                        (p) => p.prediction.confidence > 0.7
-                      ).length
-                    }{" "}
-                    tips
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <span>
-                    Medium confidence:{" "}
-                    {
-                      filteredPredictions.filter(
-                        (p) =>
-                          p.prediction.confidence >= 0.5 &&
-                          p.prediction.confidence <= 0.7
-                      ).length
-                    }{" "}
-                    tips
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span>
-                    Lower confidence:{" "}
-                    {
-                      filteredPredictions.filter(
-                        (p) => p.prediction.confidence < 0.5
-                      ).length
-                    }{" "}
-                    tips
-                  </span>
-                </div>
-              </div>
-            )}
+          </div>
+          <div className="mb-6">
+            <DateFilter
+              selectedDate={selectedDate}
+              onDateChange={handleDateFilter}
+              predictions={allPredictions}
+            />
           </div>
 
           {loading && (
@@ -397,17 +254,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* Date Filter - Always show when predictions are available */}
-          {!loading && !error && predictions.length > 0 && (
-            <div className="mb-6">
-              <DateFilter
-                selectedDate={selectedDate}
-                onDateChange={handleDateFilter}
-              />
-            </div>
-          )}
-
-          {!loading && !error && predictions.length === 0 && (
+          {!allPredictionsLoading && !error && allPredictions.length === 0 && (
             <div className="text-center py-20">
               <div className="text-6xl mb-4">⚽</div>
               <p className="text-gray-600 text-xl mb-4">
@@ -423,7 +270,7 @@ export default function Home() {
           {!loading &&
             !error &&
             filteredPredictions.length === 0 &&
-            predictions.length > 0 && (
+            allPredictions.length > 0 && (
               <div className="text-center py-20">
                 <div className="text-6xl mb-4">⚽</div>
                 <p className="text-gray-600 text-xl mb-4">
@@ -452,7 +299,7 @@ export default function Home() {
 
           {!loading && !error && filteredPredictions.length > 0 && (
             <div>
-              {/* Filter and Pagination Info */}
+              {/* Filter Info */}
               <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                 <div className="text-sm text-gray-600 mb-4 md:mb-0">
                   {selectedLeague || selectedDate ? (
@@ -485,52 +332,11 @@ export default function Home() {
                             })}
                           </span>
                         </>
-                      )}{" "}
-                      (Page {currentPage} of {totalPages})
+                      )}
                     </>
                   ) : (
-                    <>
-                      Showing {filteredPredictions.length} of {totalPredictions}{" "}
-                      {selectedDate ? "filtered " : ""}predictions
-                      {allFetchedPredictions > totalPredictions &&
-                        selectedDate && (
-                          <span className="text-gray-400">
-                            {" "}
-                            (from {allFetchedPredictions} total)
-                          </span>
-                        )}{" "}
-                      (Page {currentPage} of {totalPages})
-                    </>
+                    <>Showing {filteredPredictions.length} predictions</>
                   )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(1, prev - 1))
-                    }
-                    disabled={currentPage <= 1 || loading}
-                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    ← Previous
-                  </button>
-                  <span className="text-sm text-gray-600">
-                    {totalPredictions > 0
-                      ? `${currentPage} / ${totalPages}`
-                      : "0 / 0"}
-                  </span>
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                    }
-                    disabled={
-                      currentPage >= totalPages ||
-                      loading ||
-                      totalPredictions === 0
-                    }
-                    className="px-3 py-1 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    Next →
-                  </button>
                 </div>
               </div>
 
