@@ -4,6 +4,7 @@ import { Hero } from "@/components/hero";
 import { Features } from "@/components/features";
 import { PredictionsTable } from "@/components/predictions-table";
 import { DateFilter } from "@/components/date-filter";
+import { PopularLeaguesSidebar } from "@/components/popular-leagues-sidebar";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
 import { Prediction, League } from "@/types";
 import { useEffect, useState } from "react";
@@ -24,6 +25,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [selectedLeague, setSelectedLeague] = useState<number | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(
     getTodayLocalDate()
   );
@@ -127,7 +129,27 @@ export default function Home() {
         );
 
         if (response.success) {
-          setPredictions(response.data.predictions);
+          let predictions = response.data.predictions;
+
+          // Apply client-side country filtering if country is selected but no specific league
+          if (selectedCountry && !selectedLeague) {
+            const countryLeagueIds = leagues
+              .filter((league) => league.country === selectedCountry)
+              .map((league) => league.league_id);
+
+            predictions = predictions.filter((prediction) => {
+              // Check if the prediction's league belongs to the selected country
+              const leagueForPrediction = leagues.find(
+                (league) => league.league_name === prediction.league_name
+              );
+              return (
+                leagueForPrediction &&
+                countryLeagueIds.includes(leagueForPrediction.league_id)
+              );
+            });
+          }
+
+          setPredictions(predictions);
         } else {
           throw new Error(response.message || "Failed to fetch predictions");
         }
@@ -143,7 +165,7 @@ export default function Home() {
     };
 
     fetchPredictions();
-  }, [selectedLeague, selectedDate]); // Now includes selectedDate for server-side filtering
+  }, [selectedLeague, selectedCountry, selectedDate, leagues]); // Now includes selectedCountry and leagues for client-side filtering
 
   // Note: These functions are kept for potential future use
   // const getCountryFlag = (country: string) => {
@@ -167,6 +189,16 @@ export default function Home() {
     setSelectedDate(date);
   };
 
+  const handleLeagueFilter = (leagueId: number | null) => {
+    setSelectedLeague(leagueId);
+  };
+
+  const handleCountryFilter = (country: string | null) => {
+    setSelectedCountry(country);
+    // Clear popular league selection when a country is selected
+    setSelectedLeague(null);
+  };
+
   // Server-side filtering: predictions are already filtered
   // No need for client-side filtering anymore
   const filteredPredictions = predictions;
@@ -184,7 +216,7 @@ export default function Home() {
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
               Get the edge with our AI-powered predictions. Each tip comes with
-              detailed analysis, confidence levels, and statistical backing to
+              detailed analysis, odds information, and statistical backing to
               help you make informed decisions.
             </p>
 
@@ -214,259 +246,270 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="mb-6">
-            <DateFilter
-              selectedDate={selectedDate}
-              onDateChange={handleDateFilter}
-              predictions={allPredictions}
-            />
-          </div>
 
-          {loading && (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-                <span className="text-lg text-gray-600">
-                  Loading today&apos;s predictions...
-                </span>
-                <div className="text-sm text-gray-500 mt-2">
-                  Analyzing team stats, injuries, and form...
+          {/* Main Content Layout with Sidebar */}
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Left Sidebar - Popular Leagues */}
+            <div className="w-full lg:w-80 flex-shrink-0">
+              <PopularLeaguesSidebar
+                leagues={leagues}
+                selectedLeague={selectedLeague}
+                selectedCountry={selectedCountry}
+                onLeagueSelect={handleLeagueFilter}
+                onCountrySelect={handleCountryFilter}
+                predictions={allPredictions}
+              />
+            </div>
+
+            {/* Right Content - Filters and Predictions */}
+            <div className="flex-1 min-w-0">
+              <div className="mb-6">
+                <DateFilter
+                  selectedDate={selectedDate}
+                  onDateChange={handleDateFilter}
+                  predictions={allPredictions}
+                />
+              </div>
+
+              {loading && (
+                <div className="flex justify-center items-center py-20">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+                    <span className="text-lg text-gray-600">
+                      Loading today&apos;s predictions...
+                    </span>
+                    <div className="text-sm text-gray-500 mt-2">
+                      Analyzing team stats, injuries, and form...
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {error && (
-            <div className="text-center py-20">
-              <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 max-w-md mx-auto">
-                <div className="text-4xl mb-3">⚠️</div>
-                <p className="font-medium text-lg mb-2">
-                  Predictions Temporarily Unavailable
-                </p>
-                <p className="text-sm">{error}</p>
-              </div>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-              >
-                🔄 Try Again
-              </button>
-            </div>
-          )}
-
-          {!allPredictionsLoading && !error && allPredictions.length === 0 && (
-            <div className="text-center py-20">
-              <div className="text-6xl mb-4">⚽</div>
-              <p className="text-gray-600 text-xl mb-4">
-                No predictions available at the moment.
-              </p>
-              <p className="text-gray-500">
-                Check back later for today&apos;s fresh predictions and
-                analysis.
-              </p>
-            </div>
-          )}
-
-          {!loading &&
-            !error &&
-            filteredPredictions.length === 0 &&
-            allPredictions.length > 0 && (
-              <div className="text-center py-20">
-                <div className="text-6xl mb-4">⚽</div>
-                <p className="text-gray-600 text-xl mb-4">
-                  {selectedDate || selectedLeague
-                    ? "No predictions found for the selected filters."
-                    : "No predictions available at the moment."}
-                </p>
-                <p className="text-gray-500">
-                  {selectedDate || selectedLeague
-                    ? "Try adjusting your filters or check back later."
-                    : "Check back later for today's fresh predictions and analysis."}
-                </p>
-                {(selectedDate || selectedLeague) && (
+              {error && (
+                <div className="text-center py-20">
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl mb-6 max-w-md mx-auto">
+                    <div className="text-4xl mb-3">⚠️</div>
+                    <p className="font-medium text-lg mb-2">
+                      Predictions Temporarily Unavailable
+                    </p>
+                    <p className="text-sm">{error}</p>
+                  </div>
                   <button
-                    onClick={() => {
-                      setSelectedDate(null);
-                      setSelectedLeague(null);
-                    }}
-                    className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    onClick={() => window.location.reload()}
+                    className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                   >
-                    Clear Filters
+                    🔄 Try Again
                   </button>
-                )}
-              </div>
-            )}
-
-          {!loading && !error && filteredPredictions.length > 0 && (
-            <div>
-              {/* Filter Info */}
-              <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-                <div className="text-sm text-gray-600 mb-4 md:mb-0">
-                  {selectedLeague || selectedDate ? (
-                    <>
-                      Showing predictions
-                      {selectedLeague && (
-                        <>
-                          {" "}
-                          for{" "}
-                          <span className="font-medium">
-                            {
-                              leagues.find(
-                                (l) => l.league_id === selectedLeague
-                              )?.league_name
-                            }
-                          </span>
-                        </>
-                      )}
-                      {selectedDate && (
-                        <>
-                          {" "}
-                          on{" "}
-                          <span className="font-medium">
-                            {new Date(
-                              selectedDate + "T00:00:00"
-                            ).toLocaleDateString("en-US", {
-                              weekday: "short",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </span>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <>Showing {filteredPredictions.length} predictions</>
-                  )}
                 </div>
-              </div>
+              )}
 
-              {viewMode === "table" ? (
-                <PredictionsTable predictions={filteredPredictions} />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredPredictions.map((prediction) => (
-                    <div
-                      key={prediction.match_id}
-                      className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1"
-                    >
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-2">
-                          <img
-                            src={prediction.league_logo}
-                            alt={`${prediction.league_name} logo`}
-                            className="w-5 h-5 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
-                          />
-                          <div className="text-sm text-gray-500">
-                            <div>{prediction.league_name}</div>
-                            <div className="mt-1">
-                              {formatCompactDate(prediction.match_date)}
-                              {isMatchToday(prediction.match_date) && (
-                                <span className="ml-2 text-blue-600 font-semibold">
-                                  {getRelativeTime(prediction.match_date)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+              {!allPredictionsLoading &&
+                !error &&
+                allPredictions.length === 0 && (
+                  <div className="text-center py-20">
+                    <div className="text-6xl mb-4">⚽</div>
+                    <p className="text-gray-600 text-xl mb-4">
+                      No predictions available at the moment.
+                    </p>
+                    <p className="text-gray-500">
+                      Check back later for today&apos;s fresh predictions and
+                      analysis.
+                    </p>
+                  </div>
+                )}
+
+              {!loading &&
+                !error &&
+                filteredPredictions.length === 0 &&
+                allPredictions.length > 0 && (
+                  <div className="text-center py-20">
+                    <div className="text-6xl mb-4">⚽</div>
+                    <p className="text-gray-600 text-xl mb-4">
+                      {selectedDate || selectedLeague || selectedCountry
+                        ? "No predictions found for the selected filters."
+                        : "No predictions available at the moment."}
+                    </p>
+                    <p className="text-gray-500">
+                      {selectedDate || selectedLeague || selectedCountry
+                        ? "Try adjusting your filters or check back later."
+                        : "Check back later for today's fresh predictions and analysis."}
+                    </p>
+                    {(selectedDate || selectedLeague || selectedCountry) && (
+                      <button
+                        onClick={() => {
+                          setSelectedDate(null);
+                          setSelectedLeague(null);
+                          setSelectedCountry(null);
+                        }}
+                        className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Clear Filters
+                      </button>
+                    )}
+                  </div>
+                )}
+
+              {!loading && !error && filteredPredictions.length > 0 && (
+                <div>
+                  {/* Filter Info */}
+                  <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+                    <div className="text-sm text-gray-600 mb-4 md:mb-0">
+                      {selectedLeague || selectedCountry || selectedDate ? (
+                        <>
+                          Showing predictions
+                          {selectedLeague && (
+                            <>
+                              {" "}
+                              for{" "}
+                              <span className="font-medium">
+                                {
+                                  leagues.find(
+                                    (l) => l.league_id === selectedLeague
+                                  )?.league_name
+                                }
+                              </span>
+                            </>
+                          )}
+                          {selectedCountry && !selectedLeague && (
+                            <>
+                              {" "}
+                              from{" "}
+                              <span className="font-medium">
+                                {selectedCountry}
+                              </span>
+                            </>
+                          )}
+                          {selectedDate && (
+                            <>
+                              {" "}
+                              on{" "}
+                              <span className="font-medium">
+                                {new Date(
+                                  selectedDate + "T00:00:00"
+                                ).toLocaleDateString("en-US", {
+                                  weekday: "short",
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </span>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <>Showing {filteredPredictions.length} predictions</>
+                      )}
+                    </div>
+                  </div>
+
+                  {viewMode === "table" ? (
+                    <PredictionsTable predictions={filteredPredictions} />
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredPredictions.map((prediction) => (
                         <div
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            prediction.prediction.confidence > 0.7
-                              ? "bg-green-100 text-green-800"
-                              : prediction.prediction.confidence >= 0.5
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
+                          key={prediction.match_id}
+                          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1"
                         >
-                          {Math.round(prediction.prediction.confidence * 100)}%
-                          confidence
-                          {prediction.prediction.error && " (Fallback)"}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center space-x-2">
-                            <img
-                              src={prediction.home_team_logo}
-                              alt={`${prediction.home_team} logo`}
-                              className="w-6 h-6 object-contain"
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                              }}
-                            />
-                            <div className="text-lg font-semibold">
-                              {prediction.home_team}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-2">
+                              <img
+                                src={prediction.league_logo}
+                                alt={`${prediction.league_name} logo`}
+                                className="w-5 h-5 object-contain"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                }}
+                              />
+                              <div className="text-sm text-gray-500">
+                                <div>{prediction.league_name}</div>
+                                <div className="mt-1">
+                                  {formatCompactDate(prediction.match_date)}
+                                  {isMatchToday(prediction.match_date) && (
+                                    <span className="ml-2 text-blue-600 font-semibold">
+                                      {getRelativeTime(prediction.match_date)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div className="text-gray-400 font-bold">VS</div>
-                          <div className="flex items-center space-x-2">
-                            <img
-                              src={prediction.away_team_logo}
-                              alt={`${prediction.away_team} logo`}
-                              className="w-6 h-6 object-contain"
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                              }}
-                            />
-                            <div className="text-lg font-semibold">
-                              {prediction.away_team}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center space-x-2">
+                                <img
+                                  src={prediction.home_team_logo}
+                                  alt={`${prediction.home_team} logo`}
+                                  className="w-6 h-6 object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                                <div className="text-lg font-semibold">
+                                  {prediction.home_team}
+                                </div>
+                              </div>
+                              <div className="text-gray-400 font-bold">VS</div>
+                              <div className="flex items-center space-x-2">
+                                <img
+                                  src={prediction.away_team_logo}
+                                  alt={`${prediction.away_team} logo`}
+                                  className="w-6 h-6 object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                                <div className="text-lg font-semibold">
+                                  {prediction.away_team}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                        <div className="text-sm text-gray-600 mb-1">
-                          🎯 AI Prediction:
-                        </div>
-                        <div className="text-xl font-bold text-blue-600">
-                          {prediction.prediction.predicted_outcome}
-                        </div>
-                        {/* <div className="text-xs text-gray-500 mt-1">
+                          <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                            <div className="text-sm text-gray-600 mb-1">
+                              🎯 AI Prediction:
+                            </div>
+                            <div className="text-xl font-bold text-blue-600">
+                              {prediction.prediction.predicted_outcome}
+                            </div>
+                            {/* <div className="text-xs text-gray-500 mt-1">
                           Model: {prediction.prediction.model_info.name} v
                           {prediction.prediction.model_info.version}
                         </div> */}
-                      </div>
-                      <div className="grid grid-cols-3 gap-3 text-sm">
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="text-xs text-gray-500 mb-1">
-                            Home Win
                           </div>
-                          <div className="font-bold text-lg">
-                            {Math.round(
-                              prediction.prediction.probabilities.home * 100
-                            )}
-                            %
-                          </div>
-                        </div>
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="text-xs text-gray-500 mb-1">Draw</div>
-                          <div className="font-bold text-lg">
-                            {Math.round(
-                              prediction.prediction.probabilities.draw * 100
-                            )}
-                            %
-                          </div>
-                        </div>
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="text-xs text-gray-500 mb-1">
-                            Away Win
-                          </div>
-                          <div className="font-bold text-lg">
-                            {Math.round(
-                              prediction.prediction.probabilities.away * 100
-                            )}
-                            %
+                          <div className="grid grid-cols-3 gap-3 text-sm">
+                            <div className="text-center p-2 bg-gray-50 rounded">
+                              <div className="text-xs text-gray-500 mb-1">
+                                Home Win
+                              </div>
+                              <div className="font-bold text-lg">
+                                {prediction.home_odds.toFixed(2)}
+                              </div>
+                            </div>
+                            <div className="text-center p-2 bg-gray-50 rounded">
+                              <div className="text-xs text-gray-500 mb-1">
+                                Draw
+                              </div>
+                              <div className="font-bold text-lg">
+                                {prediction.draw_odds.toFixed(2)}
+                              </div>
+                            </div>
+                            <div className="text-center p-2 bg-gray-50 rounded">
+                              <div className="text-xs text-gray-500 mb-1">
+                                Away Win
+                              </div>
+                              <div className="font-bold text-lg">
+                                {prediction.away_odds.toFixed(2)}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       </section>
 

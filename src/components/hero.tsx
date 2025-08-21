@@ -35,13 +35,6 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
     return "text-gray-600 bg-gray-100";
   };
 
-  const getConfidenceColor = (confidence: number) => {
-    const confidencePercent = confidence * 100; // Convert from 0-1 to 0-100
-    if (confidencePercent >= 70) return "text-green-600 bg-green-100";
-    if (confidencePercent >= 50) return "text-yellow-600 bg-yellow-100";
-    return "text-red-600 bg-red-100";
-  };
-
   const getOutcomeColor = (outcome: string) => {
     switch (outcome) {
       case "Home":
@@ -78,13 +71,6 @@ export function PredictionCard({ prediction }: PredictionCardProps) {
           >
             {match_status}
           </div>
-        </div>
-        <div
-          className={`px-2 py-1 rounded text-xs font-medium ${getConfidenceColor(
-            predictionData.confidence
-          )}`}
-        >
-          {Math.round(predictionData.confidence * 100)}% confidence
         </div>
       </div>
 
@@ -163,10 +149,13 @@ export function Hero({ predictions = [] }: HeroProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [featuredIndex, setFeaturedIndex] = useState(0);
 
-  // Get top 3 highest confidence predictions for cycling
+  // Get top 3 predictions for cycling (by match date)
   const topPredictions = predictions
     .slice() // Create a copy to avoid mutating original array
-    .sort((a, b) => b.prediction.confidence - a.prediction.confidence)
+    .sort(
+      (a, b) =>
+        new Date(a.match_date).getTime() - new Date(b.match_date).getTime()
+    )
     .slice(0, 3);
 
   const displayMatches = topPredictions;
@@ -216,7 +205,7 @@ export function Hero({ predictions = [] }: HeroProps) {
             if (o === "Home or Away") return "12";
             return "?";
           })(),
-          // confidence: Math.round(prediction.prediction.confidence * 100),
+
           homeOdds: prediction.home_odds,
           drawOdds: prediction.draw_odds,
           awayOdds: prediction.away_odds,
@@ -231,7 +220,6 @@ export function Hero({ predictions = [] }: HeroProps) {
       league: "Try adjusting filters",
       time: "--:--",
       prediction: "X",
-      confidence: 0,
       homeOdds: 0,
       drawOdds: 0,
       awayOdds: 0,
