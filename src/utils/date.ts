@@ -64,6 +64,39 @@ export function formatCompactDate(utcDateString: string): string {
 }
 
 /**
+ * Formats a date for table display (date only, no time)
+ * @param utcDateString - ISO 8601 UTC timestamp
+ * @returns Date-only formatted string
+ */
+export function formatDateOnly(utcDateString: string): string {
+  return formatToLocalTimezone(utcDateString, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZoneName: undefined,
+  });
+}
+
+/**
+ * Formats a date and time in MM/dd/yyyy h:mm AM/PM format
+ * @param utcDateString - ISO 8601 UTC timestamp
+ * @returns Formatted date and time string (e.g., "08/20/2025 7:00 PM")
+ */
+export function formatDateTimeAMPM(utcDateString: string): string {
+  const date = new Date(utcDateString);
+
+  return date.toLocaleString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZoneName: undefined,
+  });
+}
+
+/**
  * Formats only the time portion of a date
  * @param utcDateString - ISO 8601 UTC timestamp
  * @returns Time string in user's local timezone (e.g., "14:30")

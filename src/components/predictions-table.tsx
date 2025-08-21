@@ -1,5 +1,9 @@
 import { Prediction } from "@/types";
-import { formatMatchDate, getRelativeTime, isMatchToday } from "@/utils/date";
+import {
+  formatDateTimeAMPM,
+  getRelativeTime,
+  isMatchToday,
+} from "@/utils/date";
 import Image from "next/image";
 
 interface PredictionsTableProps {
@@ -72,26 +76,21 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full table-auto">
+        <table className="w-full table-fixed">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left p-2 md:p-3 font-semibold text-gray-700 w-1/3">
-                Home team
-                <br />
-                <span className="text-sm font-normal text-gray-500">
-                  Away team
-                </span>
+              <th className="text-left p-2 md:p-3 font-semibold text-gray-700 w-2/5">
+                Home team - Away team
               </th>
-
               <th className="text-center p-2 md:p-3 font-semibold text-gray-700">
                 Odds
                 <br />
-                <div className="flex justify-center space-x-1 text-sm font-normal text-gray-500 mt-1">
-                  <span className="text-center w-6">1</span>
-                  <span className="text-center w-6">X</span>
-                  <span className="text-center w-6">2</span>
-                  <span className="text-center w-6">1X</span>
-                  <span className="text-center w-6">X2</span>
+                <div className="flex justify-center space-x-3 text-sm font-normal text-gray-500 mt-1">
+                  <span className="text-center w-8">1</span>
+                  <span className="text-center w-8">X</span>
+                  <span className="text-center w-8">2</span>
+                  <span className="text-center w-8">1X</span>
+                  <span className="text-center w-8">X2</span>
                 </div>
               </th>
 
@@ -106,10 +105,6 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
               <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-12 md:w-16">
                 <span className="hidden md:inline">Score</span>
                 <span className="md:hidden">Sc</span>
-              </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-16 md:w-24">
-                <span className="hidden md:inline">Date/Time</span>
-                <span className="md:hidden">Date</span>
               </th>
             </tr>
           </thead>
@@ -144,7 +139,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center space-x-1 md:space-x-2 mb-1">
+                      <div className="flex items-center space-x-1 md:space-x-2 mb-1 md:mb-2">
                         <Image
                           src={prediction.home_team_logo}
                           alt={`${prediction.home_team} logo`}
@@ -158,8 +153,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                         <div className="font-semibold text-gray-900 text-xs md:text-sm truncate">
                           {prediction.home_team}
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-1 md:space-x-2 mb-1 md:mb-2">
+                        <span className="text-gray-500 mx-1">-</span>
                         <Image
                           src={prediction.away_team_logo}
                           alt={`${prediction.away_team} logo`}
@@ -177,36 +171,44 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                       <div className="text-xs text-gray-500 truncate hidden md:block">
                         {prediction.league_name}
                       </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {formatDateTimeAMPM(prediction.match_date)}
+                        {isMatchToday(prediction.match_date) && (
+                          <span className="ml-2 text-blue-600 font-semibold">
+                            {getRelativeTime(prediction.match_date)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </td>
                 {/* Odds */}
                 <td className="p-1 md:p-3">
-                  <div className="flex justify-center space-x-1 text-sm">
-                    <div className="text-center w-6">
+                  <div className="flex justify-center space-x-3 text-sm">
+                    <div className="text-center w-8">
                       <div className="font-medium text-xs">
                         {prediction.home_odds.toFixed(2)}
                       </div>
                     </div>
-                    <div className="text-center w-6">
+                    <div className="text-center w-8">
                       <div className="font-medium text-xs">
                         {prediction.draw_odds.toFixed(2)}
                       </div>
                     </div>
-                    <div className="text-center w-6">
+                    <div className="text-center w-8">
                       <div className="font-medium text-xs">
                         {prediction.away_odds.toFixed(2)}
                       </div>
                     </div>
                     {typeof prediction.home_or_draw_odds === "number" && (
-                      <div className="text-center w-6">
+                      <div className="text-center w-8">
                         <div className="font-medium text-xs">
                           {prediction.home_or_draw_odds.toFixed(2)}
                         </div>
                       </div>
                     )}
                     {typeof prediction.away_or_draw_odds === "number" && (
-                      <div className="text-center w-6">
+                      <div className="text-center w-8">
                         <div className="font-medium text-xs">
                           {prediction.away_or_draw_odds.toFixed(2)}
                         </div>
@@ -252,25 +254,6 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                   ) : (
                     <div className="text-xs text-gray-400">-</div>
                   )}
-                </td>
-
-                {/* Date/Time */}
-                <td className="p-1 md:p-3 text-center">
-                  <div className="text-xs text-gray-600">
-                    <div className="font-medium">
-                      <span className="hidden md:inline">
-                        {formatMatchDate(prediction.match_date)}
-                      </span>
-                      <span className="md:hidden">
-                        {formatMatchDate(prediction.match_date).split(" ")[0]}
-                      </span>
-                    </div>
-                    {isMatchToday(prediction.match_date) && (
-                      <div className="text-blue-600 font-semibold mt-1 hidden md:block">
-                        {getRelativeTime(prediction.match_date)}
-                      </div>
-                    )}
-                  </div>
                 </td>
               </tr>
             ))}
