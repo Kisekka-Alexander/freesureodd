@@ -1,5 +1,6 @@
 import { Prediction } from "@/types";
 import { formatMatchDate, getRelativeTime, isMatchToday } from "@/utils/date";
+import Image from "next/image";
 
 interface PredictionsTableProps {
   predictions: Prediction[];
@@ -124,9 +125,11 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 <td className="p-2 md:p-3">
                   <div className="flex items-start space-x-1 md:space-x-2">
                     <div className="flex-shrink-0">
-                      <img
+                      <Image
                         src={prediction.league_logo}
                         alt={`${prediction.league_name} logo`}
+                        width={24}
+                        height={24}
                         className="w-4 h-4 md:w-6 md:h-6 object-contain"
                         onError={(e) => {
                           // Fallback to emoji if image fails to load
@@ -142,9 +145,11 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center space-x-1 md:space-x-2 mb-1">
-                        <img
+                        <Image
                           src={prediction.home_team_logo}
                           alt={`${prediction.home_team} logo`}
+                          width={16}
+                          height={16}
                           className="w-3 h-3 md:w-4 md:h-4 object-contain flex-shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
@@ -155,9 +160,11 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                         </div>
                       </div>
                       <div className="flex items-center space-x-1 md:space-x-2 mb-1 md:mb-2">
-                        <img
+                        <Image
                           src={prediction.away_team_logo}
                           alt={`${prediction.away_team} logo`}
+                          width={16}
+                          height={16}
                           className="w-3 h-3 md:w-4 md:h-4 object-contain flex-shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";

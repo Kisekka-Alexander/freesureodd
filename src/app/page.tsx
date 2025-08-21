@@ -8,6 +8,7 @@ import { PopularLeaguesSidebar } from "@/components/popular-leagues-sidebar";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
 import { Prediction, League } from "@/types";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   formatCompactDate,
   getRelativeTime,
@@ -412,9 +413,11 @@ export default function Home() {
                         >
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-2">
-                              <img
+                              <Image
                                 src={prediction.league_logo}
                                 alt={`${prediction.league_name} logo`}
+                                width={20}
+                                height={20}
                                 className="w-5 h-5 object-contain"
                                 onError={(e) => {
                                   e.currentTarget.style.display = "none";
@@ -436,9 +439,11 @@ export default function Home() {
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center space-x-3">
                               <div className="flex items-center space-x-2">
-                                <img
+                                <Image
                                   src={prediction.home_team_logo}
                                   alt={`${prediction.home_team} logo`}
+                                  width={24}
+                                  height={24}
                                   className="w-6 h-6 object-contain"
                                   onError={(e) => {
                                     e.currentTarget.style.display = "none";
@@ -450,9 +455,11 @@ export default function Home() {
                               </div>
                               <div className="text-gray-400 font-bold">VS</div>
                               <div className="flex items-center space-x-2">
-                                <img
+                                <Image
                                   src={prediction.away_team_logo}
                                   alt={`${prediction.away_team} logo`}
+                                  width={24}
+                                  height={24}
                                   className="w-6 h-6 object-contain"
                                   onError={(e) => {
                                     e.currentTarget.style.display = "none";

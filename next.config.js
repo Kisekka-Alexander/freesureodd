@@ -4,7 +4,7 @@ const nextConfig = {
     optimizePackageImports: ["@fortawesome/fontawesome-free"],
   },
   images: {
-    domains: [],
+    domains: ["media.api-sports.io"],
   },
   // Configure webpack for better hot reload in Docker
   webpack: (config, { dev, isServer }) => {

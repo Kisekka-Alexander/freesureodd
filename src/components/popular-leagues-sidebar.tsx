@@ -1,5 +1,6 @@
 import { League } from "@/types";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface PopularLeaguesSidebarProps {
   leagues: League[];
@@ -7,7 +8,7 @@ interface PopularLeaguesSidebarProps {
   selectedCountry: string | null;
   onLeagueSelect: (leagueId: number | null) => void;
   onCountrySelect: (country: string | null) => void;
-  predictions?: any[]; // For calculating match counts
+  predictions?: Array<{ league_name: string; match_date: string }>; // For calculating match counts
 }
 
 export function PopularLeaguesSidebar({
@@ -16,7 +17,6 @@ export function PopularLeaguesSidebar({
   selectedCountry,
   onLeagueSelect,
   onCountrySelect,
-  predictions = [],
 }: PopularLeaguesSidebarProps) {
   const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
   const [isPopularLeaguesExpanded, setIsPopularLeaguesExpanded] =
@@ -238,7 +238,7 @@ export function PopularLeaguesSidebar({
               <div className="text-sm">No leagues available</div>
             </div>
           ) : (
-            popularLeagues.map((league, index) => {
+            popularLeagues.map((league) => {
               const isSelected = selectedPopularLeague === league.league_id;
               return (
                 <button
@@ -249,9 +249,11 @@ export function PopularLeaguesSidebar({
                   )}`}
                 >
                   {/* League Logo */}
-                  <img
+                  <Image
                     src={league.logo_url}
                     alt={`${league.league_name} logo`}
+                    width={20}
+                    height={20}
                     className="w-5 h-5 object-contain flex-shrink-0"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
@@ -386,9 +388,11 @@ export function PopularLeaguesSidebar({
                             }`}
                           >
                             {/* League Logo */}
-                            <img
+                            <Image
                               src={league.logo_url}
                               alt={`${league.league_name} logo`}
+                              width={16}
+                              height={16}
                               className="w-4 h-4 object-contain flex-shrink-0"
                               onError={(e) => {
                                 e.currentTarget.style.display = "none";
