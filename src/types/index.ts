@@ -111,8 +111,11 @@ export interface PredictionData {
 export interface Prediction {
   match_id: number;
   league_name: string;
+  league_logo: string;
   home_team: string;
+  home_team_logo: string;
   away_team: string;
+  away_team_logo: string;
   home_odds: number;
   draw_odds: number;
   away_odds: number;

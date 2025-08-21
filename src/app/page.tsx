@@ -350,15 +350,25 @@ export default function Home() {
                       className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1"
                     >
                       <div className="flex items-center justify-between mb-4">
-                        <div className="text-sm text-gray-500">
-                          <div>{prediction.league_name}</div>
-                          <div className="mt-1">
-                            {formatCompactDate(prediction.match_date)}
-                            {isMatchToday(prediction.match_date) && (
-                              <span className="ml-2 text-blue-600 font-semibold">
-                                {getRelativeTime(prediction.match_date)}
-                              </span>
-                            )}
+                        <div className="flex items-center space-x-2">
+                          <img
+                            src={prediction.league_logo}
+                            alt={`${prediction.league_name} logo`}
+                            className="w-5 h-5 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                          <div className="text-sm text-gray-500">
+                            <div>{prediction.league_name}</div>
+                            <div className="mt-1">
+                              {formatCompactDate(prediction.match_date)}
+                              {isMatchToday(prediction.match_date) && (
+                                <span className="ml-2 text-blue-600 font-semibold">
+                                  {getRelativeTime(prediction.match_date)}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <div
@@ -377,12 +387,32 @@ export default function Home() {
                       </div>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-3">
-                          <div className="text-lg font-semibold">
-                            {prediction.home_team}
+                          <div className="flex items-center space-x-2">
+                            <img
+                              src={prediction.home_team_logo}
+                              alt={`${prediction.home_team} logo`}
+                              className="w-6 h-6 object-contain"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
+                            />
+                            <div className="text-lg font-semibold">
+                              {prediction.home_team}
+                            </div>
                           </div>
                           <div className="text-gray-400 font-bold">VS</div>
-                          <div className="text-lg font-semibold">
-                            {prediction.away_team}
+                          <div className="flex items-center space-x-2">
+                            <img
+                              src={prediction.away_team_logo}
+                              alt={`${prediction.away_team} logo`}
+                              className="w-6 h-6 object-contain"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
+                            />
+                            <div className="text-lg font-semibold">
+                              {prediction.away_team}
+                            </div>
                           </div>
                         </div>
                       </div>

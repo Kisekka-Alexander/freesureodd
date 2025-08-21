@@ -122,18 +122,52 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
               >
                 {/* Teams */}
                 <td className="p-4">
-                  <div className="flex items-start space-x-2">
-                    <span className="text-lg">
-                      {getLeagueIcon(prediction.league_name)}
-                    </span>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-sm">
-                        {prediction.home_team}
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <img
+                        src={prediction.league_logo}
+                        alt={`${prediction.league_name} logo`}
+                        className="w-6 h-6 object-contain"
+                        onError={(e) => {
+                          // Fallback to emoji if image fails to load
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.nextElementSibling?.classList.remove(
+                            "hidden"
+                          );
+                        }}
+                      />
+                      <span className="text-lg hidden">
+                        {getLeagueIcon(prediction.league_name)}
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <img
+                          src={prediction.home_team_logo}
+                          alt={`${prediction.home_team} logo`}
+                          className="w-4 h-4 object-contain flex-shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                        <div className="font-semibold text-gray-900 text-sm truncate">
+                          {prediction.home_team}
+                        </div>
                       </div>
-                      <div className="text-gray-600 text-sm">
-                        {prediction.away_team}
+                      <div className="flex items-center space-x-2 mb-2">
+                        <img
+                          src={prediction.away_team_logo}
+                          alt={`${prediction.away_team} logo`}
+                          className="w-4 h-4 object-contain flex-shrink-0"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                        <div className="text-gray-600 text-sm truncate">
+                          {prediction.away_team}
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-gray-500 truncate">
                         {prediction.league_name}
                       </div>
                     </div>
