@@ -74,21 +74,16 @@ export function PopularLeaguesSidebar({
 
     // Try to match predefined leagues with real league data
     const matchedLeagues = predefinedPopularLeagues.map((predefined) => {
-      // Find matching league in the real data by league_id first, then by name
+      // Find matching league in the real data by league_id first (exact match only)
       const realLeague = leagues.find(
-        (league) =>
-          league.league_id === predefined.league_id ||
-          league.league_name
-            .toLowerCase()
-            .includes(predefined.name.toLowerCase()) ||
-          predefined.name
-            .toLowerCase()
-            .includes(league.league_name.toLowerCase())
+        (league) => league.league_id === predefined.league_id
       );
 
       if (realLeague) {
         return {
           ...realLeague,
+          // Override with our predefined country to ensure consistency
+          country: predefined.country,
           matchCount: predefined.count,
         };
       }
