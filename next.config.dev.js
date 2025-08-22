@@ -4,7 +4,7 @@ const nextConfig = {
     optimizePackageImports: ["@fortawesome/fontawesome-free"],
   },
   images: {
-    domains: [],
+    domains: ["media.api-sports.io"],
   },
   typescript: {
     // Allow type errors during development for faster iteration

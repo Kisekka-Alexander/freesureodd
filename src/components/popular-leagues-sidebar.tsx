@@ -41,29 +41,22 @@ export function PopularLeaguesSidebar({
 
   // Define popular leagues using real league data
   const predefinedPopularLeagues = [
+    { league_id: 135, name: "Serie A", country: "Italy", count: 20 },
+    { league_id: 140, name: "La Liga", country: "Spain", count: 20 },
+    { league_id: 39, name: "Premier League", country: "England", count: 20 },
+    { league_id: 88, name: "Eredivisie", country: "Netherlands", count: 18 },
     {
-      league_id: 128,
-      name: "Liga Profesional Argentina",
-      country: "Argentina",
-      count: 7,
+      league_id: 144,
+      name: "Jupiler Pro League",
+      country: "Belgium",
+      count: 16,
     },
-    { league_id: 186, name: "Ligue 1", country: "Algeria", count: 12 },
-    { league_id: 188, name: "A-League", country: "Australia", count: 24 },
-    { league_id: 310, name: "Superliga", country: "Albania", count: 10 },
-    { league_id: 311, name: "1st Division", country: "Albania", count: 10 },
-    { league_id: 312, name: "1a Divisió", country: "Andorra", count: 9 },
-    { league_id: 342, name: "Premier League", country: "Armenia", count: 10 },
-    { league_id: 397, name: "Girabola", country: "Angola", count: 9 },
-    { league_id: 421, name: "Division di Honor", country: "Aruba", count: 8 },
-    {
-      league_id: 129,
-      name: "Primera Nacional",
-      country: "Argentina",
-      count: 10,
-    },
-    { league_id: 130, name: "Copa Argentina", country: "Argentina", count: 8 },
-    { league_id: 187, name: "Ligue 2", country: "Algeria", count: 6 },
-    { league_id: 313, name: "2a Divisió", country: "Andorra", count: 5 },
+    { league_id: 61, name: "Ligue 1", country: "France", count: 20 },
+    { league_id: 94, name: "Primeira Liga", country: "Portugal", count: 18 },
+    { league_id: 307, name: "Pro League", country: "Saudi Arabia", count: 16 },
+    { league_id: 78, name: "Bundesliga", country: "Germany", count: 18 },
+    { league_id: 71, name: "Serie A", country: "Brazil", count: 20 },
+    { league_id: 179, name: "Premiership", country: "Scotland", count: 12 },
   ];
 
   // Match the predefined leagues with actual league data
@@ -114,6 +107,16 @@ export function PopularLeaguesSidebar({
   };
 
   const popularLeagues = getPopularLeagues();
+
+  // Debug logging to understand what leagues are being used
+  console.log(
+    "Popular leagues loaded:",
+    popularLeagues.map((l) => ({
+      id: l.league_id,
+      name: l.league_name,
+      logo_url: l.logo_url,
+    }))
+  );
 
   // Extract unique countries from leagues
   const getUniqueCountries = () => {
@@ -256,7 +259,17 @@ export function PopularLeaguesSidebar({
                     height={20}
                     className="w-5 h-5 object-contain flex-shrink-0"
                     onError={(e) => {
-                      e.currentTarget.style.display = "none";
+                      console.warn(
+                        `Failed to load logo for ${league.league_name}:`,
+                        league.logo_url
+                      );
+                      e.currentTarget.src = "/placeholder-logo.png";
+                    }}
+                    onLoad={() => {
+                      console.log(
+                        `Successfully loaded logo for ${league.league_name}:`,
+                        league.logo_url
+                      );
                     }}
                   />
 
