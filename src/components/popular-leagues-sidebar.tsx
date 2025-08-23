@@ -1,10 +1,7 @@
-import { League } from "@/types";
 import { useState, useEffect } from "react";
 import { PopularLeagues } from "./sidebar/PopularLeagues";
 import { Countries } from "./sidebar/Countries";
 import { SidebarComponentProps } from "./sidebar/types";
-
-interface PopularLeaguesSidebarProps extends SidebarComponentProps {}
 
 export function PopularLeaguesSidebar({
   leagues,
@@ -13,7 +10,7 @@ export function PopularLeaguesSidebar({
   onLeagueSelect,
   onCountrySelect,
   predictions,
-}: PopularLeaguesSidebarProps) {
+}: SidebarComponentProps) {
   const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
 
   // Separate selection states for each section
