@@ -80,7 +80,8 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left p-2 md:p-3 font-semibold text-gray-700 min-w-[300px]">
-                Home team - Away team
+                <div>Home team</div>
+                <div>Away team</div>
               </th>
               <th className="text-center p-2 md:p-3 font-semibold text-gray-700 min-w-[200px]">
                 Odds
@@ -123,9 +124,10 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                       <Image
                         src={prediction.league_logo}
                         alt={`${prediction.league_name} logo`}
+                        title={prediction.league_name}
                         width={24}
                         height={24}
-                        className="w-4 h-4 md:w-6 md:h-6 object-contain"
+                        className="w-4 h-4 md:w-6 md:h-6 object-contain cursor-help"
                         onError={(e) => {
                           // Fallback to emoji if image fails to load
                           e.currentTarget.style.display = "none";
@@ -134,12 +136,16 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                           );
                         }}
                       />
-                      <span className="text-lg hidden">
+                      <span
+                        className="text-lg hidden cursor-help"
+                        title={prediction.league_name}
+                      >
                         {getLeagueIcon(prediction.league_name)}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center space-x-1 md:space-x-2 mb-1 md:mb-2">
+                      {/* Home team */}
+                      <div className="flex items-center space-x-1 md:space-x-2 mb-1">
                         <Image
                           src={prediction.home_team_logo}
                           alt={`${prediction.home_team} logo`}
@@ -153,7 +159,9 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                         <div className="font-semibold text-gray-900 text-xs md:text-sm truncate">
                           {prediction.home_team}
                         </div>
-                        <span className="text-gray-500 mx-1">-</span>
+                      </div>
+                      {/* Away team */}
+                      <div className="flex items-center space-x-1 md:space-x-2 mb-1">
                         <Image
                           src={prediction.away_team_logo}
                           alt={`${prediction.away_team} logo`}
@@ -167,9 +175,6 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                         <div className="text-gray-600 text-xs md:text-sm truncate">
                           {prediction.away_team}
                         </div>
-                      </div>
-                      <div className="text-xs text-gray-500 truncate hidden md:block">
-                        {prediction.league_name}
                       </div>
                       <div className="text-xs text-gray-400 mt-1">
                         {formatDateTimeAMPM(prediction.match_date)}

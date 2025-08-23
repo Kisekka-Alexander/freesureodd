@@ -12,7 +12,7 @@ export function Header() {
     { name: "Home", href: "/", icon: "🏠" },
     { name: "Predictions", href: "/", icon: "🎯" },
     { name: "Leagues", href: "/leagues", icon: "🏆" },
-    { name: "Analytics", href: "/analytics", icon: "📊" },
+    // { name: "Analytics", href: "/analytics", icon: "📊" },
   ];
 
   const isActive = (href: string) => {
@@ -40,10 +40,11 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive(item.href)
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                  }`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive(item.href)
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
               >
                 <span>{item.icon}</span>
                 <span>{item.name}</span>
@@ -97,10 +98,11 @@ export function Header() {
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(item.href)
-                    ? "bg-blue-100 text-blue-700"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                    }`}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    isActive(item.href)
+                      ? "bg-blue-100 text-blue-700"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
                 >
                   <span className="text-lg">{item.icon}</span>
                   <span>{item.name}</span>
