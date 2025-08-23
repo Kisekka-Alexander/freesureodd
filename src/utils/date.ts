@@ -135,24 +135,35 @@ export function isMatchToday(utcDateString: string): boolean {
 }
 
 /**
- * Gets relative time string (e.g., "in 2 hours", "tomorrow")
+ * Gets relative time string (e.g., "in 2h 30m", "tomorrow")
  * @param utcDateString - ISO 8601 UTC timestamp
- * @returns Relative time string
+ * @returns Relative time string with hours and minutes precision
  */
 export function getRelativeTime(utcDateString: string): string {
   const matchDate = new Date(utcDateString);
   const now = new Date();
-  const diffInHours = (matchDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+  const diffInMinutes = Math.round(
+    (matchDate.getTime() - now.getTime()) / (1000 * 60)
+  );
 
-  if (diffInHours < 1) {
-    const diffInMinutes = Math.round(diffInHours * 60);
-    return diffInMinutes > 0 ? `in ${diffInMinutes}m` : "now";
-  } else if (diffInHours < 24) {
-    return `in ${Math.round(diffInHours)}h`;
-  } else if (diffInHours < 48) {
+  if (diffInMinutes <= 0) {
+    return "now";
+  } else if (diffInMinutes < 60) {
+    return `in ${diffInMinutes}m`;
+  } else if (diffInMinutes < 24 * 60) {
+    // Less than 24 hours - show hours and minutes
+    const hours = Math.floor(diffInMinutes / 60);
+    const minutes = diffInMinutes % 60;
+
+    if (minutes === 0) {
+      return `in ${hours}h`;
+    } else {
+      return `in ${hours}h ${minutes}m`;
+    }
+  } else if (diffInMinutes < 48 * 60) {
     return "tomorrow";
   } else {
-    const diffInDays = Math.round(diffInHours / 24);
+    const diffInDays = Math.round(diffInMinutes / (24 * 60));
     return `in ${diffInDays} days`;
   }
 }

@@ -225,38 +225,12 @@ export default function Home() {
               detailed analysis, odds information, and statistical backing to
               help you make informed decisions.
             </p>
-
-            {/* Enhanced View Toggle */}
-            <div className="flex justify-center mb-8">
-              <div className="bg-gray-100 rounded-xl p-1 shadow-sm border">
-                <button
-                  onClick={() => setViewMode("table")}
-                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    viewMode === "table"
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "text-gray-600 hover:text-gray-800 hover:bg-white"
-                  }`}
-                >
-                  📊 Detailed Table
-                </button>
-                <button
-                  onClick={() => setViewMode("cards")}
-                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    viewMode === "cards"
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "text-gray-600 hover:text-gray-800 hover:bg-white"
-                  }`}
-                >
-                  📋 Quick Cards
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Main Content Layout with Sidebar */}
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left Sidebar - Popular Leagues */}
-            <div className="w-full lg:w-80 flex-shrink-0">
+            <div className="w-full lg:w-72 flex-shrink-0">
               <PopularLeaguesSidebar
                 leagues={leagues}
                 selectedLeague={selectedLeague}
@@ -357,7 +331,7 @@ export default function Home() {
 
               {!loading && !error && filteredPredictions.length > 0 && (
                 <div>
-                  {/* Filter Info */}
+                  {/* View Mode Toggle - Moved here for better UX */}
                   <div className="flex flex-col md:flex-row justify-between items-center mb-6">
                     <div className="text-sm text-gray-600 mb-4 md:mb-0">
                       {selectedLeague || selectedCountry || selectedDate ? (
@@ -404,6 +378,35 @@ export default function Home() {
                       ) : (
                         <>Showing {filteredPredictions.length} predictions</>
                       )}
+                    </div>
+
+                    {/* Enhanced View Toggle - Better positioned */}
+                    <div className="flex items-center space-x-3">
+                      <span className="text-sm text-gray-500 font-medium">
+                        View as:
+                      </span>
+                      <div className="bg-gray-100 rounded-xl p-1 shadow-sm border">
+                        <button
+                          onClick={() => setViewMode("table")}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            viewMode === "table"
+                              ? "bg-blue-500 text-white shadow-md"
+                              : "text-gray-600 hover:text-gray-800 hover:bg-white"
+                          }`}
+                        >
+                          📊 Table
+                        </button>
+                        <button
+                          onClick={() => setViewMode("cards")}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            viewMode === "cards"
+                              ? "bg-blue-500 text-white shadow-md"
+                              : "text-gray-600 hover:text-gray-800 hover:bg-white"
+                          }`}
+                        >
+                          📋 Cards
+                        </button>
+                      </div>
                     </div>
                   </div>
 

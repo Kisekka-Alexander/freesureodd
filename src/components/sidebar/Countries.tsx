@@ -84,7 +84,7 @@ export function Countries({
   };
 
   return (
-    <div className="bg-white w-full lg:w-80 h-fit rounded-lg overflow-hidden shadow-sm border border-gray-200">
+    <div className="bg-white w-full lg:w-72 h-fit rounded-lg overflow-hidden shadow-sm border border-gray-200">
       {/* Header */}
       <div className="bg-gray-50 border-b border-gray-200 px-3 py-2">
         <button
