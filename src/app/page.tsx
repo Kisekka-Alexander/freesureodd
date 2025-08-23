@@ -61,6 +61,7 @@ export default function Home() {
                   league_name: uniqueLeague.league_name,
                   country: uniqueLeague.country,
                   logo_url: uniqueLeague.logo_url,
+                  country_flag: uniqueLeague.country_flag,
                   season_name: currentSeason?.season_name || null,
                   team_count: currentSeason?.team_count || 0,
                 };

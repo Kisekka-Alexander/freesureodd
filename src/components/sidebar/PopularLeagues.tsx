@@ -177,9 +177,11 @@ export function PopularLeagues({
                   </div>
                   <div className="text-xs text-gray-500 text-left truncate flex items-center space-x-1">
                     {league.country_flag && (
-                      <img
+                      <Image
                         src={league.country_flag}
                         alt={`${league.country} flag`}
+                        width={12}
+                        height={8}
                         className="w-3 h-2 object-cover rounded-sm flex-shrink-0"
                         onError={(e) => {
                           const target = e.target as HTMLElement;

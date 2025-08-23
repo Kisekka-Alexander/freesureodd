@@ -16,7 +16,8 @@ export interface PopularLeaguesProps
   onClearPopularLeague: () => void;
 }
 
-export interface CountriesProps extends SidebarComponentProps {
+export interface CountriesProps
+  extends Omit<SidebarComponentProps, "selectedLeague"> {
   expandedCountry: string | null;
   selectedCountryLeague: number | null;
   onExpandCountry: (country: string | null) => void;

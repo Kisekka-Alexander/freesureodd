@@ -4,7 +4,6 @@ import { CountriesProps } from "./types";
 
 export function Countries({
   leagues,
-  selectedLeague,
   selectedCountry,
   expandedCountry,
   selectedCountryLeague,
@@ -150,9 +149,11 @@ export function Countries({
                         (league) => league.country === country
                       );
                       return sampleLeague?.country_flag ? (
-                        <img
+                        <Image
                           src={sampleLeague.country_flag}
                           alt={`${country} flag`}
+                          width={16}
+                          height={12}
                           className="w-4 h-3 object-cover rounded-sm flex-shrink-0"
                           onError={(e) => {
                             const target = e.target as HTMLElement;

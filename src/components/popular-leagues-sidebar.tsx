@@ -62,7 +62,6 @@ export function PopularLeaguesSidebar({
 
       <Countries
         leagues={leagues}
-        selectedLeague={selectedLeague}
         selectedCountry={selectedCountry}
         expandedCountry={expandedCountry}
         selectedCountryLeague={selectedCountryLeague}

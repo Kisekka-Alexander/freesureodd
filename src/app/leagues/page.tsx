@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { League } from "@/types";
 import { leaguesApi } from "@/lib/axios";
 import Link from "next/link";
+import Image from "next/image";
 
 interface LeagueWithSeasons extends League {
   seasons: {
@@ -130,9 +131,11 @@ export default function LeaguesPage() {
     // Use the flag from API if available, fallback to emoji for backward compatibility
     if (league.country_flag) {
       return (
-        <img
+        <Image
           src={league.country_flag}
           alt={`${league.country} flag`}
+          width={32}
+          height={24}
           className="w-8 h-6 object-cover rounded-sm"
           onError={(e) => {
             // Fallback to emoji if image fails to load
@@ -475,9 +478,11 @@ export default function LeaguesPage() {
                       {/* League Logo and Name */}
                       <div className="mb-4 flex items-center space-x-3">
                         <div className="flex-shrink-0">
-                          <img
+                          <Image
                             src={league.logo_url}
                             alt={`${league.league_name} logo`}
+                            width={48}
+                            height={48}
                             className="w-12 h-12 object-contain rounded-lg bg-gray-50 p-1"
                             onError={(e) => {
                               // Fallback to generic football icon if logo fails to load
