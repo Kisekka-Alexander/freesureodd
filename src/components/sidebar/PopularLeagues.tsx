@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
-import { PopularLeaguesProps, PredefinedLeague } from "./types";
+import { PopularLeaguesProps } from "./types";
 
 import { predefinedPopularLeagues } from "@/constants/leagues";
 

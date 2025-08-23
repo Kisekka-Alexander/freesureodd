@@ -1,8 +1,7 @@
 import { Prediction, League } from "@/types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   formatTimeOnly,
-  isMatchToday,
   addDays,
   getTodayLocalDate,
   prepareDateFilterForApi,
@@ -10,16 +9,11 @@ import {
 import { predefinedPopularLeagues } from "@/constants/leagues";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
 
-interface HeroProps {
-  predictions?: Prediction[];
-}
-
-export function Hero({ predictions = [] }: HeroProps) {
+export function Hero() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [featuredIndex, setFeaturedIndex] = useState(0);
 
   const [displayMatches, setDisplayMatches] = useState<Prediction[]>([]);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [leagues, setLeagues] = useState<League[]>([]);
 
   // Fetch leagues on component mount
@@ -70,8 +64,7 @@ export function Hero({ predictions = [] }: HeroProps) {
   };
 
   // Load predictions for multiple days until we find enough matches
-  const loadPredictionsUntilEnough = async () => {
-    setIsLoadingMore(true);
+  const loadPredictionsUntilEnough = useCallback(async () => {
     try {
       let currentDate = getTodayLocalDate();
       let allPredictions: Prediction[] = [];
@@ -97,15 +90,13 @@ export function Hero({ predictions = [] }: HeroProps) {
       setDisplayMatches(sortedPredictions);
     } catch (error) {
       console.error("Error loading predictions:", error);
-    } finally {
-      setIsLoadingMore(false);
     }
-  };
+  }, [leagues]);
 
   // Load predictions when component mounts or predictions change
   useEffect(() => {
     loadPredictionsUntilEnough();
-  }, []);
+  }, [loadPredictionsUntilEnough]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);

@@ -236,7 +236,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
-      <Hero predictions={filteredPredictions} />
+      <Hero />
 
       {/* Predictions Section */}
       <section id="predictions" className="py-16 bg-white">
