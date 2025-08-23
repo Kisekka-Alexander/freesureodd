@@ -70,7 +70,7 @@ body {
 .scrolling-countries-track {
   display: flex;
   align-items: center;
-  animation: scroll-left 120s linear infinite;
+  animation: scroll-left 150s linear infinite;
   will-change: transform;
 }
 
