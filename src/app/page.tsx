@@ -241,12 +241,6 @@ export default function Home() {
       {/* Predictions Section */}
       <section id="predictions" className="py-16 bg-white">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              ⚽ AI-Powered Football Match Predictions
-            </h2>
-          </div>
-
           {/* Main Content Layout with Sidebar */}
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left Sidebar - Popular Leagues */}

@@ -31,7 +31,14 @@ export function Header() {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">FSO</span>
             </div>
-            <span className="text-xl font-bold text-gray-900">FreeSureOdd</span>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-gray-900">
+                FreeSureOdd
+              </span>
+              <span className="text-sm text-gray-600">
+                AI-Powered Football Match Predictions
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}

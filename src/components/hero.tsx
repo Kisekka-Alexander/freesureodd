@@ -167,11 +167,11 @@ export function Hero({ predictions = [] }: HeroProps) {
   const featuredMatch = getFeaturedMatch();
 
   return (
-    <section className="bg-gradient-to-br from-green-600 via-blue-700 to-purple-800 text-white py-4 lg:py-6">
+    <section className="bg-gradient-to-br from-green-600 via-blue-700 to-purple-800 text-white py-2 lg:py-3">
       <div className="container mx-auto max-w-5xl px-4">
-        <div className="grid lg:grid-cols-2 gap-4 items-center">
+        <div className="grid lg:grid-cols-[2fr,auto,2fr] gap-2 items-center">
           <div className="text-left">
-            <div className="flex items-center space-x-2 mb-2">
+            <div className="flex items-center space-x-2 mb-1">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
               <span className="text-xs font-medium bg-red-500/20 px-1.5 py-0.5 rounded-full">
                 LIVE
@@ -181,73 +181,70 @@ export function Hero({ predictions = [] }: HeroProps) {
               </span>
             </div>
 
-            <h1 className="mb-3 text-2xl lg:text-3xl font-bold leading-tight">
+            <h1 className="mb-2 text-xl lg:text-2xl xl:text-3xl font-bold leading-tight">
               <span className="inline lg:block">Win More with </span>
-              <span className="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
-                Smart Football
+              <span className="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent font-extrabold">
+                Smart Predictions
               </span>
-              <span className="inline lg:block"> Predictions ⚽</span>
+              <span className="inline lg:block">⚽</span>
             </h1>
+          </div>
 
-            <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-              <div>
-                <div className="text-lg font-bold text-yellow-300">98%</div>
-                <div className="text-xs text-white/80">Accuracy</div>
+          <div className="hidden lg:flex flex-col gap-3 py-3 px-5 bg-white/10 rounded-2xl backdrop-blur-sm self-center border border-white/20 shadow-lg shadow-white/5">
+            <div className="text-center transform hover:scale-105 transition-transform">
+              <div className="text-2xl font-extrabold bg-gradient-to-r from-yellow-300 to-yellow-400 bg-clip-text text-transparent mb-0.5">
+                98%
               </div>
-              <div>
-                <div className="text-lg font-bold text-green-300">50K+</div>
-                <div className="text-xs text-white/80">Users</div>
-              </div>
-              <div>
-                <div className="text-lg font-bold text-blue-300">15+</div>
-                <div className="text-xs text-white/80">Leagues</div>
-              </div>
+              <div className="text-xs font-medium text-white/90">Accuracy</div>
             </div>
-
-            <button
-              onClick={() =>
-                document
-                  .getElementById("predictions")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-              className="lg:hidden text-white/90 hover:text-white text-sm underline underline-offset-4"
-            >
-              ⬇️ View Predictions
-            </button>
+            <div className="text-center transform hover:scale-105 transition-transform">
+              <div className="text-2xl font-extrabold text-green-300">50K+</div>
+              <div className="text-xs font-medium text-white/90">Users</div>
+            </div>
+            <div className="text-center transform hover:scale-105 transition-transform">
+              <div className="text-2xl font-extrabold text-blue-300">15+</div>
+              <div className="text-xs font-medium text-white/90">Leagues</div>
+            </div>
           </div>
 
           <div className="hidden lg:block">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20 shadow-lg shadow-white/5">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold">🔥 Featured Match</span>
-                <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded">
+                <span className="text-sm font-semibold bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
+                  🔥 Featured Match
+                </span>
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-medium">
                   {featuredMatch.league}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2">
                 <div className="text-right flex-1">
-                  <div className="text-sm font-bold">
+                  <div className="text-xs font-bold">
                     {featuredMatch.homeTeam}
                   </div>
                 </div>
-                <div className="mx-2">
-                  <div className="text-sm">VS</div>
-                  <div className="text-xs text-white/70">
+                <div className="mx-3">
+                  <div className="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded">
+                    VS
+                  </div>
+                  <div className="text-xs text-white/80 text-center mt-0.5">
                     {featuredMatch.time}
                   </div>
                 </div>
                 <div className="text-left flex-1">
-                  <div className="text-sm font-bold">
+                  <div className="text-xs font-bold">
                     {featuredMatch.awayTeam}
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white/20 rounded p-2 mb-2">
+              <div className="bg-white/20 rounded-xl p-2 mb-2">
                 <div className="text-center">
-                  <div className="text-xs text-white/80">AI Prediction</div>
-                  <div className="text-lg font-bold text-yellow-300">
+                  <div className="text-xs text-white/90 font-medium mb-0.5">
+                    AI Prediction
+                  </div>
+                  <div className="text-base font-extrabold bg-gradient-to-r from-yellow-300 to-yellow-400 bg-clip-text text-transparent">
                     {featuredMatch.prediction === "1"
                       ? "HOME WIN"
                       : featuredMatch.prediction === "X"
@@ -260,18 +257,24 @@ export function Hero({ predictions = [] }: HeroProps) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-xs mt-1.5">
-                  <div className="text-center">
-                    <div className="text-white/70">Home</div>
-                    <div className="font-bold">{featuredMatch.homeOdds}</div>
+                <div className="grid grid-cols-3 gap-2 text-xs mt-2">
+                  <div className="text-center transform hover:scale-105 transition-transform">
+                    <div className="text-white/90 font-medium">Home</div>
+                    <div className="font-bold text-xs">
+                      {featuredMatch.homeOdds}
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-white/70">Draw</div>
-                    <div className="font-bold">{featuredMatch.drawOdds}</div>
+                  <div className="text-center transform hover:scale-105 transition-transform">
+                    <div className="text-white/90 font-medium">Draw</div>
+                    <div className="font-bold text-xs">
+                      {featuredMatch.drawOdds}
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-white/70">Away</div>
-                    <div className="font-bold">{featuredMatch.awayOdds}</div>
+                  <div className="text-center transform hover:scale-105 transition-transform">
+                    <div className="text-white/90 font-medium">Away</div>
+                    <div className="font-bold text-xs">
+                      {featuredMatch.awayOdds}
+                    </div>
                   </div>
                 </div>
               </div>
