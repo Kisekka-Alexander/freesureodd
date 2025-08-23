@@ -114,6 +114,7 @@ export default function Home() {
         const dateParams = prepareDateFilterForApi(selectedDate);
 
         const params = {
+          status: "NS" as const,
           ...(selectedLeague && { league_id: selectedLeague }),
           sort_by: "match_date" as const,
           sort_order: "asc" as const,
