@@ -126,7 +126,30 @@ export default function LeaguesPage() {
     fetchLeagues();
   }, []);
 
-  const getCountryFlag = (country: string) => {
+  const getCountryFlag = (league: LeagueWithSeasons) => {
+    // Use the flag from API if available, fallback to emoji for backward compatibility
+    if (league.country_flag) {
+      return (
+        <img
+          src={league.country_flag}
+          alt={`${league.country} flag`}
+          className="w-8 h-6 object-cover rounded-sm"
+          onError={(e) => {
+            // Fallback to emoji if image fails to load
+            const target = e.target as HTMLElement;
+            target.style.display = "none";
+            const parent = target.parentElement;
+            if (parent) {
+              parent.innerHTML = getCountryFlagEmoji(league.country);
+            }
+          }}
+        />
+      );
+    }
+    return getCountryFlagEmoji(league.country);
+  };
+
+  const getCountryFlagEmoji = (country: string) => {
     const flags: Record<string, string> = {
       England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
       Spain: "🇪🇸",
@@ -367,20 +390,62 @@ export default function LeaguesPage() {
                     >
                       All Countries
                     </button>
-                    {getUniqueCountries().map((country) => (
-                      <button
-                        key={country}
-                        onClick={() => setSelectedCountry(country)}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${
-                          selectedCountry === country
-                            ? "bg-blue-600 text-white"
-                            : "text-gray-600 hover:text-gray-800"
-                        }`}
-                      >
-                        <span>{getCountryFlag(country)}</span>
-                        <span>{country}</span>
-                      </button>
-                    ))}
+                  </div>
+                </div>
+
+                {/* Continuously Scrolling Countries */}
+                <div className="w-full overflow-hidden mb-6">
+                  <div className="scrolling-countries">
+                    <div className="scrolling-countries-track">
+                      {/* First set of countries */}
+                      {getUniqueCountries().map((country) => {
+                        const sampleLeague = leagues.find(
+                          (league) => league.country === country
+                        );
+                        return (
+                          <button
+                            key={`first-${country}`}
+                            onClick={() => setSelectedCountry(country)}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 flex-shrink-0 mx-2 ${
+                              selectedCountry === country
+                                ? "bg-blue-600 text-white"
+                                : "text-gray-600 hover:text-gray-800 bg-white border border-gray-200"
+                            }`}
+                          >
+                            <span>
+                              {sampleLeague
+                                ? getCountryFlag(sampleLeague)
+                                : getCountryFlagEmoji(country)}
+                            </span>
+                            <span>{country}</span>
+                          </button>
+                        );
+                      })}
+                      {/* Duplicate set for seamless loop */}
+                      {getUniqueCountries().map((country) => {
+                        const sampleLeague = leagues.find(
+                          (league) => league.country === country
+                        );
+                        return (
+                          <button
+                            key={`second-${country}`}
+                            onClick={() => setSelectedCountry(country)}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 flex-shrink-0 mx-2 ${
+                              selectedCountry === country
+                                ? "bg-blue-600 text-white"
+                                : "text-gray-600 hover:text-gray-800 bg-white border border-gray-200"
+                            }`}
+                          >
+                            <span>
+                              {sampleLeague
+                                ? getCountryFlag(sampleLeague)
+                                : getCountryFlagEmoji(country)}
+                            </span>
+                            <span>{country}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -395,8 +460,8 @@ export default function LeaguesPage() {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1 group-hover:shadow-lg">
                       {/* Header with Country Flag and Tier Badge */}
                       <div className="flex items-center justify-between mb-4">
-                        <div className="text-3xl">
-                          {getCountryFlag(league.country)}
+                        <div className="text-3xl flex items-center">
+                          {getCountryFlag(league)}
                         </div>
                         <div
                           className={`px-3 py-1 rounded-full text-xs font-medium ${getTierBadgeColor(
@@ -407,22 +472,37 @@ export default function LeaguesPage() {
                         </div>
                       </div>
 
-                      {/* League Info */}
-                      <div className="mb-4">
-                        <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-                          {league.league_name}
-                        </h3>
-                        <p className="text-sm text-gray-500 flex items-center">
-                          <span>{league.country}</span>
-                          {league.currentSeason?.season_name && (
-                            <>
-                              <span className="mx-2">•</span>
-                              <span className="font-medium">
-                                {league.currentSeason.season_name}
-                              </span>
-                            </>
-                          )}
-                        </p>
+                      {/* League Logo and Name */}
+                      <div className="mb-4 flex items-center space-x-3">
+                        <div className="flex-shrink-0">
+                          <img
+                            src={league.logo_url}
+                            alt={`${league.league_name} logo`}
+                            className="w-12 h-12 object-contain rounded-lg bg-gray-50 p-1"
+                            onError={(e) => {
+                              // Fallback to generic football icon if logo fails to load
+                              const target = e.target as HTMLImageElement;
+                              target.src =
+                                "/icons/icons8-football-pastel-color-72.png";
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors truncate">
+                            {league.league_name}
+                          </h3>
+                          <p className="text-sm text-gray-500 flex items-center">
+                            <span>{league.country}</span>
+                            {league.currentSeason?.season_name && (
+                              <>
+                                <span className="mx-2">•</span>
+                                <span className="font-medium">
+                                  {league.currentSeason.season_name}
+                                </span>
+                              </>
+                            )}
+                          </p>
+                        </div>
                       </div>
 
                       {/* Statistics */}

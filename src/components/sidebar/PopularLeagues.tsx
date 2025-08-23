@@ -38,6 +38,7 @@ export function PopularLeagues({
         league_name: league.name,
         country: league.country,
         logo_url: "/placeholder-logo.png",
+        country_flag: "", // Empty placeholder for flag
         matchCount: league.count,
       }));
     }
@@ -64,6 +65,7 @@ export function PopularLeagues({
         league_name: predefined.name,
         country: predefined.country,
         logo_url: `https://media.api-sports.io/football/leagues/${predefined.league_id}.png`,
+        country_flag: "", // Will be filled by API if available
         matchCount: predefined.count,
       };
     });
@@ -173,8 +175,19 @@ export function PopularLeagues({
                   <div className="text-sm font-medium text-left truncate">
                     {league.league_name}
                   </div>
-                  <div className="text-xs text-gray-500 text-left truncate">
-                    {league.country}
+                  <div className="text-xs text-gray-500 text-left truncate flex items-center space-x-1">
+                    {league.country_flag && (
+                      <img
+                        src={league.country_flag}
+                        alt={`${league.country} flag`}
+                        className="w-3 h-2 object-cover rounded-sm flex-shrink-0"
+                        onError={(e) => {
+                          const target = e.target as HTMLElement;
+                          target.style.display = "none";
+                        }}
+                      />
+                    )}
+                    <span>{league.country}</span>
                   </div>
                 </div>
               </button>

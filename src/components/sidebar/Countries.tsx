@@ -4,6 +4,7 @@ import { CountriesProps } from "./types";
 
 export function Countries({
   leagues,
+  selectedLeague,
   selectedCountry,
   expandedCountry,
   selectedCountryLeague,
@@ -64,15 +65,15 @@ export function Countries({
     } else {
       console.log("Selecting league:", leagueId);
       onCountryLeagueSelect(leagueId);
-      onLeagueSelect(leagueId);
 
       // Find the country for this league and select it
       const league = leagues.find((l) => l.league_id === leagueId);
-      console.log("Found league for country selection:", league);
       if (league && league.country) {
-        console.log("Setting country:", league.country);
         onCountrySelect(league.country);
       }
+
+      // Call onLeagueSelect AFTER setting country to ensure proper state order
+      onLeagueSelect(leagueId);
     }
   };
 
@@ -142,7 +143,26 @@ export function Countries({
                       : "text-gray-600 hover:bg-gray-50"
                   }`}
                 >
-                  <span className="text-xs font-medium">{country}</span>
+                  <div className="flex items-center space-x-2">
+                    {/* Country Flag */}
+                    {(() => {
+                      const sampleLeague = leagues?.find(
+                        (league) => league.country === country
+                      );
+                      return sampleLeague?.country_flag ? (
+                        <img
+                          src={sampleLeague.country_flag}
+                          alt={`${country} flag`}
+                          className="w-4 h-3 object-cover rounded-sm flex-shrink-0"
+                          onError={(e) => {
+                            const target = e.target as HTMLElement;
+                            target.style.display = "none";
+                          }}
+                        />
+                      ) : null;
+                    })()}
+                    <span className="text-xs font-medium">{country}</span>
+                  </div>
                   <svg
                     className={`w-4 h-4 transition-transform duration-200 ${
                       isExpanded ? "rotate-180" : ""

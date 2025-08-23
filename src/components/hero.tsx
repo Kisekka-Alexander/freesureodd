@@ -149,16 +149,17 @@ export function Hero({ predictions = [] }: HeroProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [featuredIndex, setFeaturedIndex] = useState(0);
 
-  // Get top 3 predictions for cycling (by match date)
-  const topPredictions = predictions
+  // Get today's predictions - filter by today's date and take top 3
+  const todaysPredictions = predictions
     .slice() // Create a copy to avoid mutating original array
+    .filter((prediction) => isMatchToday(prediction.match_date)) // Filter for today's matches
     .sort(
       (a, b) =>
         new Date(a.match_date).getTime() - new Date(b.match_date).getTime()
     )
-    .slice(0, 3);
+    .slice(0, 3); // Take only the first 3 matches
 
-  const displayMatches = topPredictions;
+  const displayMatches = todaysPredictions;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -169,7 +170,7 @@ export function Hero({ predictions = [] }: HeroProps) {
       if (displayMatches.length > 0) {
         setFeaturedIndex((prev) => (prev + 1) % displayMatches.length);
       }
-    }, 4000);
+    }, 6000); // Increased from 4000ms to 6000ms (6 seconds) for longer display time
 
     return () => {
       clearInterval(timer);
@@ -184,10 +185,10 @@ export function Hero({ predictions = [] }: HeroProps) {
     }
   }, [displayMatches.length, featuredIndex]);
 
-  // Convert real prediction data to match interface
+  // Convert real prediction data to match interface for current featured match
   const getFeaturedMatch = () => {
-    if (topPredictions.length > 0 && featuredIndex < topPredictions.length) {
-      const prediction = topPredictions[featuredIndex];
+    if (displayMatches.length > 0 && featuredIndex < displayMatches.length) {
+      const prediction = displayMatches[featuredIndex];
       // Additional safety check to ensure prediction exists
       if (prediction && prediction.home_team && prediction.away_team) {
         return {
@@ -205,7 +206,6 @@ export function Hero({ predictions = [] }: HeroProps) {
             if (o === "Home or Away") return "12";
             return "?";
           })(),
-
           homeOdds: prediction.home_odds,
           drawOdds: prediction.draw_odds,
           awayOdds: prediction.away_odds,

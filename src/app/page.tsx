@@ -83,7 +83,6 @@ export default function Home() {
       try {
         setAllPredictionsLoading(true);
         const params = {
-          status: "NS" as const,
           sort_by: "match_date" as const,
           sort_order: "asc" as const,
         };
@@ -114,7 +113,6 @@ export default function Home() {
         const dateParams = prepareDateFilterForApi(selectedDate);
 
         const params = {
-          status: "NS" as const,
           ...(selectedLeague && { league_id: selectedLeague }),
           sort_by: "match_date" as const,
           sort_order: "asc" as const,
@@ -201,8 +199,12 @@ export default function Home() {
   const handleCountryFilter = (country: string | null) => {
     console.log("Country filter changed:", country);
     setSelectedCountry(country);
-    // Clear popular league selection when a country is selected
-    setSelectedLeague(null);
+
+    // Only clear league selection when explicitly clearing country (country = null)
+    // Don't clear when setting a country as part of league selection
+    if (country === null) {
+      setSelectedLeague(null);
+    }
   };
 
   // Server-side filtering: predictions are already filtered
@@ -445,35 +447,43 @@ export default function Home() {
                             </div>
                           </div>
                           <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center space-x-3">
-                              <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 min-w-0 flex-1">
+                              <div className="flex items-center space-x-2 min-w-0 flex-1">
                                 <Image
                                   src={prediction.home_team_logo}
                                   alt={`${prediction.home_team} logo`}
                                   width={24}
                                   height={24}
-                                  className="w-6 h-6 object-contain"
+                                  className="w-6 h-6 object-contain flex-shrink-0"
                                   onError={(e) => {
                                     e.currentTarget.style.display = "none";
                                   }}
                                 />
-                                <div className="text-lg font-semibold">
+                                <div
+                                  className="text-sm font-semibold truncate max-w-[100px]"
+                                  title={prediction.home_team}
+                                >
                                   {prediction.home_team}
                                 </div>
                               </div>
-                              <div className="text-gray-400 font-bold">VS</div>
-                              <div className="flex items-center space-x-2">
+                              <div className="text-gray-400 font-bold flex-shrink-0 text-sm">
+                                VS
+                              </div>
+                              <div className="flex items-center space-x-2 min-w-0 flex-1">
                                 <Image
                                   src={prediction.away_team_logo}
                                   alt={`${prediction.away_team} logo`}
                                   width={24}
                                   height={24}
-                                  className="w-6 h-6 object-contain"
+                                  className="w-6 h-6 object-contain flex-shrink-0"
                                   onError={(e) => {
                                     e.currentTarget.style.display = "none";
                                   }}
                                 />
-                                <div className="text-lg font-semibold">
+                                <div
+                                  className="text-sm font-semibold truncate max-w-[100px]"
+                                  title={prediction.away_team}
+                                >
                                   {prediction.away_team}
                                 </div>
                               </div>

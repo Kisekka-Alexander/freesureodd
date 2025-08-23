@@ -56,3 +56,33 @@ body {
   background: hsl(var(--background));
   font-feature-settings: "rlig" 1, "calt" 1;
 }
+
+/* Continuously scrolling countries */
+.scrolling-countries {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.scrolling-countries-track {
+  display: flex;
+  align-items: center;
+  animation: scroll-left 30s linear infinite;
+  will-change: transform;
+}
+
+.scrolling-countries:hover .scrolling-countries-track {
+  animation-play-state: paused;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

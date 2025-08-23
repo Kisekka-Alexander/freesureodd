@@ -200,6 +200,7 @@ export const leaguesApi = {
           league_name: league.league_name,
           country: league.country,
           logo_url: league.logo_url,
+          country_flag: league.country_flag,
           seasons: [],
         });
       }

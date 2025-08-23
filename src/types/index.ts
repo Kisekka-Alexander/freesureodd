@@ -148,6 +148,7 @@ export interface League {
   country: string;
   team_count?: number; // Made optional as new API doesn't always include this
   logo_url: string;
+  country_flag: string; // Country flag URL from API
   season_name?: string | null;
 }
 
@@ -162,6 +163,7 @@ export interface UniqueLeague {
   league_name: string;
   country: string;
   logo_url: string;
+  country_flag: string; // Country flag URL from API
   seasons: LeagueSeason[];
 }
 
