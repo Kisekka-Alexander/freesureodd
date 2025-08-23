@@ -1,4 +1,4 @@
-import { Prediction, League } from "@/types";
+import { Prediction } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 import {
   formatTimeOnly,
@@ -7,29 +7,13 @@ import {
   prepareDateFilterForApi,
 } from "@/utils/date";
 import { predefinedPopularLeagues } from "@/constants/leagues";
-import { predictionsApi, leaguesApi } from "@/lib/axios";
+import { predictionsApi } from "@/lib/axios";
 
 export function Hero() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [featuredIndex, setFeaturedIndex] = useState(0);
 
   const [displayMatches, setDisplayMatches] = useState<Prediction[]>([]);
-  const [leagues, setLeagues] = useState<League[]>([]);
-
-  // Fetch leagues on component mount
-  useEffect(() => {
-    const fetchLeagues = async () => {
-      try {
-        const response = await leaguesApi.getLeagues();
-        if (response.success) {
-          setLeagues(response.data.leagues);
-        }
-      } catch (err) {
-        console.error("Error fetching leagues:", err);
-      }
-    };
-    fetchLeagues();
-  }, []);
 
   // Determine if a league is popular using fuzzy name matching to accommodate API naming differences
   const isPopularLeague = useCallback((leagueName: string) => {
@@ -51,23 +35,26 @@ export function Hero() {
   };
 
   // Fetch predictions for a specific date
-  const fetchPredictionsForDate = async (date: string) => {
-    try {
-      const params = {
-        ...prepareDateFilterForApi(date),
-        sort_by: "match_date" as const,
-        sort_order: "asc" as const,
-      };
-      const response = await predictionsApi.getAllPredictions(params);
-      if (response.success) {
-        return filterPopularLeaguePredictions(response.data.predictions);
+  const fetchPredictionsForDate = useCallback(
+    async (date: string) => {
+      try {
+        const params = {
+          ...prepareDateFilterForApi(date),
+          sort_by: "match_date" as const,
+          sort_order: "asc" as const,
+        };
+        const response = await predictionsApi.getAllPredictions(params);
+        if (response.success) {
+          return filterPopularLeaguePredictions(response.data.predictions);
+        }
+        return [];
+      } catch (error) {
+        console.error("Error fetching predictions:", error);
+        return [];
       }
-      return [];
-    } catch (error) {
-      console.error("Error fetching predictions:", error);
-      return [];
-    }
-  };
+    },
+    [isPopularLeague]
+  );
 
   // Load predictions for multiple days until we find enough matches
   const loadPredictionsUntilEnough = useCallback(async () => {
@@ -97,7 +84,7 @@ export function Hero() {
     } catch (error) {
       console.error("Error loading predictions:", error);
     }
-  }, [isPopularLeague]);
+  }, [fetchPredictionsForDate]);
 
   // Load predictions when component mounts or predictions change
   useEffect(() => {
