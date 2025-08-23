@@ -318,6 +318,18 @@ export function prepareDateFilterForApi(selectedDate: string | null): {
  * @param matchDateString - UTC match date
  * @param filterDate - Filter date in local timezone
  */
+/**
+ * Adds a specified number of days to a date string
+ * @param dateString - Date string in YYYY-MM-DD format
+ * @param days - Number of days to add
+ * @returns New date string in YYYY-MM-DD format
+ */
+export function addDays(dateString: string, days: number): string {
+  const date = new Date(dateString);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split("T")[0];
+}
+
 export function debugTimezoneInfo(
   matchDateString: string,
   filterDate: string

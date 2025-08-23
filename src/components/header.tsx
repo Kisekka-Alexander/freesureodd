@@ -11,7 +11,7 @@ export function Header() {
   const navigation = [
     { name: "Home", href: "/", icon: "🏠" },
     { name: "Predictions", href: "/", icon: "🎯" },
-    { name: "Leagues", href: "/leagues", icon: "🏆" },
+    // { name: "Leagues", href: "/leagues", icon: "🏆" },
     // { name: "Analytics", href: "/analytics", icon: "📊" },
   ];
 

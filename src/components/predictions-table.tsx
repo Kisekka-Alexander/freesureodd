@@ -1,3 +1,5 @@
+"use client";
+
 import { Prediction } from "@/types";
 import {
   formatDateTimeAMPM,
@@ -5,6 +7,72 @@ import {
   isMatchToday,
 } from "@/utils/date";
 import Image from "next/image";
+import { useLayoutEffect, useRef, useState } from "react";
+
+interface AutoScaleProps {
+  children: React.ReactNode;
+}
+
+function AutoScaleContainer({ children }: AutoScaleProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = useState(1);
+  const [scaledHeight, setScaledHeight] = useState<number | undefined>(
+    undefined
+  );
+
+  const recomputeScale = () => {
+    const container = containerRef.current;
+    const content = contentRef.current;
+    if (!container || !content) return;
+
+    // Temporarily reset transform to measure natural size
+    const previousTransform = content.style.transform;
+    content.style.transform = "scale(1)";
+
+    const containerWidth = container.clientWidth;
+    const naturalWidth = content.scrollWidth || content.clientWidth;
+    const naturalHeight = content.scrollHeight || content.clientHeight;
+
+    const nextScale = naturalWidth > 0 ? containerWidth / naturalWidth : 1;
+    setScale(nextScale);
+    setScaledHeight(Math.ceil(naturalHeight * nextScale));
+
+    // Restore transform for visual update handled by state
+    content.style.transform = previousTransform;
+  };
+
+  useLayoutEffect(() => {
+    recomputeScale();
+  }, []);
+
+  useLayoutEffect(() => {
+    const ro = new ResizeObserver(() => recomputeScale());
+    if (containerRef.current) ro.observe(containerRef.current);
+    if (contentRef.current) ro.observe(contentRef.current);
+    window.addEventListener("resize", recomputeScale);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", recomputeScale);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full overflow-hidden"
+      style={{ height: scaledHeight }}
+    >
+      <div
+        ref={contentRef}
+        className="inline-block"
+        style={{ transform: `scale(${scale})`, transformOrigin: "top left" }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
 
 interface PredictionsTableProps {
   predictions: Prediction[];
@@ -75,37 +143,36 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
-        <table className="min-w-[800px] w-full">
+      <AutoScaleContainer>
+        <table className="min-w-[1040px] table-fixed">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left p-2 md:p-3 font-semibold text-gray-700 min-w-[300px]">
-                <div>Home team</div>
-                <div>Away team</div>
-              </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 min-w-[200px]">
-                Odds
-                <br />
-                <div className="flex justify-center space-x-2 md:space-x-3 text-sm font-normal text-gray-500 mt-1">
-                  <span className="text-center w-8 md:w-10">1</span>
-                  <span className="text-center w-8 md:w-10">X</span>
-                  <span className="text-center w-8 md:w-10">2</span>
-                  <span className="text-center w-8 md:w-10">1X</span>
-                  <span className="text-center w-8 md:w-10">X2</span>
+              <th className="text-left p-2 md:p-3 font-semibold text-gray-700 w-[260px]">
+                <div className="text-xs">
+                  <div className="font-semibold text-gray-900 leading-tight">
+                    Home team
+                  </div>
+                  <div className="text-gray-600 leading-tight">Away team</div>
                 </div>
               </th>
-
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 min-w-[80px]">
-                <span className="hidden md:inline">Pred</span>
-                <span className="md:hidden">P</span>
+              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-[540px]">
+                <div className="text-xs">Odds</div>
+                <div className="grid grid-cols-5 gap-1 text-xs font-normal text-gray-500 mt-1">
+                  <span className="text-center">1</span>
+                  <span className="text-center">X</span>
+                  <span className="text-center">2</span>
+                  <span className="text-center">1X</span>
+                  <span className="text-center">X2</span>
+                </div>
               </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 min-w-[100px]">
-                <span className="hidden md:inline">Status</span>
-                <span className="md:hidden">St</span>
+              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-[70px]">
+                <span className="text-xs">Pred</span>
               </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 min-w-[80px]">
-                <span className="hidden md:inline">Score</span>
-                <span className="md:hidden">Sc</span>
+              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-[110px]">
+                <span className="text-xs">Status</span>
+              </th>
+              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-[60px]">
+                <span className="text-xs">Score</span>
               </th>
             </tr>
           </thead>
@@ -118,8 +185,8 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 }`}
               >
                 {/* Teams */}
-                <td className="p-2 md:p-3 min-w-[300px]">
-                  <div className="flex items-start space-x-1 md:space-x-2">
+                <td className="p-2 md:p-3 w-[260px]">
+                  <div className="flex items-start space-x-2">
                     <div className="flex-shrink-0">
                       <Image
                         src={prediction.league_logo}
@@ -127,7 +194,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                         title={prediction.league_name}
                         width={24}
                         height={24}
-                        className="w-4 h-4 md:w-6 md:h-6 object-contain cursor-help"
+                        className="w-6 h-6 object-contain cursor-help"
                         onError={(e) => {
                           // Fallback to emoji if image fails to load
                           e.currentTarget.style.display = "none";
@@ -137,96 +204,107 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                         }}
                       />
                       <span
-                        className="text-lg hidden cursor-help"
+                        className="text-sm hidden cursor-help"
                         title={prediction.league_name}
                       >
                         {getLeagueIcon(prediction.league_name)}
                       </span>
                     </div>
-                    <div className="min-w-0 flex-1">
+                    <div className="flex-1 min-w-0">
                       {/* Home team */}
-                      <div className="flex items-center space-x-1 md:space-x-2 mb-1">
+                      <div className="flex items-center space-x-2 mb-1.5">
                         <Image
                           src={prediction.home_team_logo}
                           alt={`${prediction.home_team} logo`}
-                          width={16}
-                          height={16}
-                          className="w-3 h-3 md:w-4 md:h-4 object-contain flex-shrink-0"
+                          width={20}
+                          height={20}
+                          className="w-5 h-5 object-contain flex-shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                           }}
                         />
-                        <div className="font-semibold text-gray-900 text-xs md:text-sm truncate">
+                        <div className="font-semibold text-gray-900 text-xs leading-tight truncate">
                           {prediction.home_team}
                         </div>
                       </div>
                       {/* Away team */}
-                      <div className="flex items-center space-x-1 md:space-x-2 mb-1">
+                      <div className="flex items-center space-x-2 mb-1.5">
                         <Image
                           src={prediction.away_team_logo}
                           alt={`${prediction.away_team} logo`}
-                          width={16}
-                          height={16}
-                          className="w-3 h-3 md:w-4 md:h-4 object-contain flex-shrink-0"
+                          width={20}
+                          height={20}
+                          className="w-5 h-5 object-contain flex-shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                           }}
                         />
-                        <div className="text-gray-600 text-xs md:text-sm truncate">
+                        <div className="text-gray-600 text-xs leading-tight truncate">
                           {prediction.away_team}
                         </div>
                       </div>
-                      <div className="text-xs text-gray-400 mt-1">
-                        {formatDateTimeAMPM(prediction.match_date)}
-                        {isMatchToday(prediction.match_date) && (
-                          <span className="ml-2 text-blue-600 font-semibold">
-                            {getRelativeTime(prediction.match_date)}
-                          </span>
-                        )}
+                      <div className="text-xs text-gray-400 leading-tight">
+                        <div className="truncate">
+                          {formatDateTimeAMPM(prediction.match_date)}
+                          {isMatchToday(prediction.match_date) &&
+                            prediction.match_status !== "FT" && (
+                              <span className="text-blue-600 font-semibold ml-1">
+                                {getRelativeTime(prediction.match_date)}
+                              </span>
+                            )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </td>
                 {/* Odds */}
-                <td className="p-1 md:p-3 min-w-[200px]">
-                  <div className="flex justify-center space-x-2 md:space-x-3 text-sm">
-                    <div className="text-center w-8 md:w-10">
-                      <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
+                <td className="p-2 md:p-3 w-[540px]">
+                  <div className="grid grid-cols-5 gap-1 text-sm">
+                    <div className="text-center">
+                      <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
                         {prediction.home_odds.toFixed(2)}
                       </div>
                     </div>
-                    <div className="text-center w-8 md:w-10">
-                      <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
+                    <div className="text-center">
+                      <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
                         {prediction.draw_odds.toFixed(2)}
                       </div>
                     </div>
-                    <div className="text-center w-8 md:w-10">
-                      <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
+                    <div className="text-center">
+                      <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
                         {prediction.away_odds.toFixed(2)}
                       </div>
                     </div>
-                    {typeof prediction.home_or_draw_odds === "number" && (
-                      <div className="text-center w-8 md:w-10">
-                        <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
+                    <div className="text-center">
+                      {typeof prediction.home_or_draw_odds === "number" ? (
+                        <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
                           {prediction.home_or_draw_odds.toFixed(2)}
                         </div>
-                      </div>
-                    )}
-                    {typeof prediction.away_or_draw_odds === "number" && (
-                      <div className="text-center w-8 md:w-10">
-                        <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
+                      ) : (
+                        <div className="font-medium text-xs text-gray-400">
+                          -
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      {typeof prediction.away_or_draw_odds === "number" ? (
+                        <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
                           {prediction.away_or_draw_odds.toFixed(2)}
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="font-medium text-xs text-gray-400">
+                          -
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </td>
 
                 {/* Prediction */}
-                <td className="p-1 md:p-3 min-w-[80px]">
+                <td className="p-2 md:p-3 text-center w-[70px]">
                   <div className="flex justify-center">
                     <span
-                      className={`inline-flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full text-xs md:text-sm font-bold ${getPredictionColor(
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${getPredictionColor(
                         prediction.prediction.predicted_outcome
                       )}`}
                     >
@@ -238,9 +316,9 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 </td>
 
                 {/* Status */}
-                <td className="p-1 md:p-3 text-center min-w-[100px]">
+                <td className="p-2 md:p-3 text-center w-[110px]">
                   <span
-                    className={`inline-flex px-1 md:px-2 py-1 rounded-full text-xs font-medium uppercase ${getStatusColor(
+                    className={`inline-flex px-2 py-1 rounded-full text-xs font-medium uppercase ${getStatusColor(
                       prediction.match_status
                     )}`}
                   >
@@ -249,11 +327,11 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 </td>
 
                 {/* Score */}
-                <td className="p-1 md:p-3 text-center min-w-[80px]">
+                <td className="p-2 md:p-3 text-center w-[60px]">
                   {prediction.fulltime_home_score !== undefined &&
                   prediction.fulltime_away_score !== undefined ? (
-                    <div className="text-sm font-semibold text-gray-900">
-                      {prediction.fulltime_home_score} -{" "}
+                    <div className="text-xs font-semibold text-gray-900">
+                      {prediction.fulltime_home_score}-
                       {prediction.fulltime_away_score}
                     </div>
                   ) : (
@@ -264,7 +342,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
             ))}
           </tbody>
         </table>
-      </div>
+      </AutoScaleContainer>
     </div>
   );
 }

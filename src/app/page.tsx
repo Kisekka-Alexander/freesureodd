@@ -16,6 +16,7 @@ import {
   prepareDateFilterForApi,
   getTodayLocalDate,
 } from "@/utils/date";
+import { predefinedPopularLeagues } from "@/constants/leagues";
 
 export default function Home() {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -208,26 +209,42 @@ export default function Home() {
     }
   };
 
-  // Server-side filtering: predictions are already filtered
-  // No need for client-side filtering anymore
-  const filteredPredictions = predictions;
+  // Helper function to check if a league is popular
+  const isPopularLeague = (leagueName: string) => {
+    return predefinedPopularLeagues.some((league) => {
+      // Check if the league name contains the predefined league name or vice versa
+      const normalizedLeagueName = leagueName.toLowerCase();
+      const normalizedPredefinedName = league.name.toLowerCase();
+      return (
+        normalizedLeagueName.includes(normalizedPredefinedName) ||
+        normalizedPredefinedName.includes(normalizedLeagueName)
+      );
+    });
+  };
+
+  // Sort predictions with popular leagues at the top
+  const filteredPredictions = [...predictions].sort((a, b) => {
+    const isAPopular = isPopularLeague(a.league_name);
+    const isBPopular = isPopularLeague(b.league_name);
+
+    if (isAPopular && !isBPopular) return -1;
+    if (!isAPopular && isBPopular) return 1;
+
+    // If both are popular or both are not popular, maintain the original order by match date
+    return new Date(a.match_date).getTime() - new Date(b.match_date).getTime();
+  });
 
   return (
     <main className="min-h-screen">
       <Hero predictions={filteredPredictions} />
 
       {/* Predictions Section */}
-      <section className="py-16 bg-white">
+      <section id="predictions" className="py-16 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              ⚽ Latest Match Predictions
+              ⚽ AI-Powered Football Match Predictions
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
-              Get the edge with our AI-powered predictions. Each tip comes with
-              detailed analysis, odds information, and statistical backing to
-              help you make informed decisions.
-            </p>
           </div>
 
           {/* Main Content Layout with Sidebar */}
@@ -420,9 +437,9 @@ export default function Home() {
                       {filteredPredictions.map((prediction) => (
                         <div
                           key={prediction.match_id}
-                          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1"
+                          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1 group"
                         >
-                          <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center justify-between mb-4 transition-transform duration-300 ease-in-out transform group-hover:scale-105">
                             <div className="flex items-center space-x-2">
                               <Image
                                 src={prediction.league_logo}
@@ -447,50 +464,48 @@ export default function Home() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center justify-between mb-4 transition-transform duration-300 ease-in-out transform group-hover:scale-110">
                             <div className="flex items-center space-x-2 min-w-0 flex-1">
-                              <div className="flex items-center space-x-2 min-w-0 flex-1">
-                                <Image
-                                  src={prediction.home_team_logo}
-                                  alt={`${prediction.home_team} logo`}
-                                  width={24}
-                                  height={24}
-                                  className="w-6 h-6 object-contain flex-shrink-0"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                  }}
-                                />
-                                <div
-                                  className="text-sm font-semibold truncate max-w-[100px]"
-                                  title={prediction.home_team}
-                                >
-                                  {prediction.home_team}
+                              <div className="flex flex-col items-center space-y-2 flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <Image
+                                    src={prediction.home_team_logo}
+                                    alt={`${prediction.home_team} logo`}
+                                    width={24}
+                                    height={24}
+                                    className="w-6 h-6 object-contain flex-shrink-0"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                    }}
+                                  />
+                                  <div className="text-sm font-semibold text-center break-words">
+                                    {prediction.home_team}
+                                  </div>
                                 </div>
                               </div>
-                              <div className="text-gray-400 font-bold flex-shrink-0 text-sm">
+                              <div className="text-gray-400 font-bold flex-shrink-0 text-sm px-2">
                                 VS
                               </div>
-                              <div className="flex items-center space-x-2 min-w-0 flex-1">
-                                <Image
-                                  src={prediction.away_team_logo}
-                                  alt={`${prediction.away_team} logo`}
-                                  width={24}
-                                  height={24}
-                                  className="w-6 h-6 object-contain flex-shrink-0"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                  }}
-                                />
-                                <div
-                                  className="text-sm font-semibold truncate max-w-[100px]"
-                                  title={prediction.away_team}
-                                >
-                                  {prediction.away_team}
+                              <div className="flex flex-col items-center space-y-2 flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <Image
+                                    src={prediction.away_team_logo}
+                                    alt={`${prediction.away_team} logo`}
+                                    width={24}
+                                    height={24}
+                                    className="w-6 h-6 object-contain flex-shrink-0"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                    }}
+                                  />
+                                  <div className="text-sm font-semibold text-center break-words">
+                                    {prediction.away_team}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                          <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg transition-transform duration-300 ease-in-out transform group-hover:scale-115">
                             <div className="text-sm text-gray-600 mb-1">
                               🎯 AI Prediction:
                             </div>
@@ -502,7 +517,7 @@ export default function Home() {
                           {prediction.prediction.model_info.version}
                         </div> */}
                           </div>
-                          <div className="grid grid-cols-3 gap-3 text-sm">
+                          <div className="grid grid-cols-3 gap-3 text-sm transition-transform duration-300 ease-in-out transform group-hover:scale-108">
                             <div className="text-center p-2 bg-gray-50 rounded">
                               <div className="text-xs text-gray-500 mb-1">
                                 Home Win
