@@ -45,6 +45,7 @@ export function PopularLeaguesSidebar({
   const handleCountryLeagueSelect = (leagueId: number | null) => {
     setSelectedCountryLeague(leagueId);
     setSelectedPopularLeague(null); // Clear popular league selection
+    onLeagueSelect(leagueId); // This is the missing call that triggers the API request
   };
 
   return (

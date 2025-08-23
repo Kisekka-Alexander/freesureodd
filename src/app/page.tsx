@@ -230,7 +230,7 @@ export default function Home() {
           {/* Main Content Layout with Sidebar */}
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left Sidebar - Popular Leagues */}
-            <div className="w-full lg:w-72 flex-shrink-0">
+            <div className="w-full lg:w-64 flex-shrink-0">
               <PopularLeaguesSidebar
                 leagues={leagues}
                 selectedLeague={selectedLeague}

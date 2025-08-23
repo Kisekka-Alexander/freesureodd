@@ -101,14 +101,14 @@ export function PopularLeagues({
   };
 
   return (
-    <div className="bg-white w-full lg:w-72 h-fit rounded-lg overflow-hidden shadow-sm border border-gray-200">
+    <div className="bg-white w-full lg:w-64 h-fit rounded-lg overflow-hidden shadow-sm border border-gray-200">
       {/* Header */}
-      <div className="bg-gray-50 border-b border-gray-200 px-3 py-2">
+      <div className="bg-gray-50 border-b border-gray-200 px-2 py-2">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-between text-left lg:cursor-default"
         >
-          <h3 className="text-base font-semibold text-gray-700 tracking-wide">
+          <h3 className="text-sm font-semibold text-gray-700 tracking-wide">
             Popular Leagues
           </h3>
           <svg
@@ -142,7 +142,7 @@ export function PopularLeagues({
               <button
                 key={league.league_id}
                 onClick={() => handleLeagueClick(league.league_id)}
-                className={`w-full px-3 py-3 flex items-center space-x-3 transition-colors duration-200 ${getBackgroundColor(
+                className={`w-full px-2 py-2 flex items-center space-x-2 transition-colors duration-200 ${getBackgroundColor(
                   isSelected
                 )}`}
               >
@@ -150,9 +150,9 @@ export function PopularLeagues({
                 <Image
                   src={league.logo_url}
                   alt={`${league.league_name} logo`}
-                  width={20}
-                  height={20}
-                  className="w-5 h-5 object-contain flex-shrink-0"
+                  width={16}
+                  height={16}
+                  className="w-4 h-4 object-contain flex-shrink-0"
                   onError={(e) => {
                     console.warn(
                       `Failed to load logo for ${league.league_name}:`,
@@ -186,13 +186,13 @@ export function PopularLeagues({
       {/* Clear Filter Button */}
       {selectedPopularLeague && (
         <div
-          className={`p-3 border-t border-gray-200 lg:block ${
+          className={`p-2 border-t border-gray-200 lg:block ${
             isExpanded ? "block" : "hidden"
           }`}
         >
           <button
             onClick={onClearPopularLeague}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition-colors duration-200 text-sm font-medium shadow-sm"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-2 rounded-lg transition-colors duration-200 text-xs font-medium shadow-sm"
           >
             Clear League Filter
           </button>

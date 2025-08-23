@@ -84,14 +84,14 @@ export function Countries({
   };
 
   return (
-    <div className="bg-white w-full lg:w-72 h-fit rounded-lg overflow-hidden shadow-sm border border-gray-200">
+    <div className="bg-white w-full lg:w-64 h-fit rounded-lg overflow-hidden shadow-sm border border-gray-200">
       {/* Header */}
-      <div className="bg-gray-50 border-b border-gray-200 px-3 py-2">
+      <div className="bg-gray-50 border-b border-gray-200 px-2 py-2">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-between text-left lg:cursor-default"
         >
-          <h3 className="text-base font-semibold text-gray-700 tracking-wide">
+          <h3 className="text-sm font-semibold text-gray-700 tracking-wide">
             Countries
           </h3>
           <svg
@@ -136,13 +136,13 @@ export function Countries({
                 {/* Country Header */}
                 <button
                   onClick={() => handleCountryClick(country)}
-                  className={`w-full px-3 py-2 flex items-center justify-between text-left transition-colors duration-200 ${
+                  className={`w-full px-2 py-2 flex items-center justify-between text-left transition-colors duration-200 ${
                     isSelected
                       ? "bg-gray-100 text-gray-800"
                       : "text-gray-600 hover:bg-gray-50"
                   }`}
                 >
-                  <span className="text-sm font-medium">{country}</span>
+                  <span className="text-xs font-medium">{country}</span>
                   <svg
                     className={`w-4 h-4 transition-transform duration-200 ${
                       isExpanded ? "rotate-180" : ""
@@ -172,7 +172,7 @@ export function Countries({
                           onClick={() =>
                             handleCountryLeagueClick(league.league_id)
                           }
-                          className={`w-full px-6 py-2 flex items-center space-x-3 text-left transition-colors duration-200 ${
+                          className={`w-full px-4 py-1.5 flex items-center space-x-2 text-left transition-colors duration-200 ${
                             isLeagueSelected
                               ? "bg-blue-500 text-white"
                               : "text-gray-600 hover:bg-gray-100"
@@ -182,9 +182,9 @@ export function Countries({
                           <Image
                             src={league.logo_url}
                             alt={`${league.league_name} logo`}
-                            width={16}
-                            height={16}
-                            className="w-4 h-4 object-contain flex-shrink-0"
+                            width={14}
+                            height={14}
+                            className="w-3.5 h-3.5 object-contain flex-shrink-0"
                             onError={(e) => {
                               e.currentTarget.style.display = "none";
                             }}
@@ -192,7 +192,7 @@ export function Countries({
 
                           {/* League Name */}
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs truncate">
+                            <div className="text-xs truncate leading-tight">
                               {league.league_name}
                             </div>
                           </div>
@@ -210,13 +210,13 @@ export function Countries({
       {/* Clear Country Filter Button */}
       {selectedCountry && (
         <div
-          className={`p-3 border-t border-gray-200 lg:block ${
+          className={`p-2 border-t border-gray-200 lg:block ${
             isExpanded ? "block" : "hidden"
           }`}
         >
           <button
             onClick={handleClearCountryFilter}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition-colors duration-200 text-sm font-medium shadow-sm"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-2 rounded-lg transition-colors duration-200 text-xs font-medium shadow-sm"
           >
             Clear Country Filter
           </button>
