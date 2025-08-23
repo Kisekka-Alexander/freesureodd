@@ -209,28 +209,38 @@ export default function Home() {
     }
   };
 
-  // Helper function to check if a league is popular
-  const isPopularLeague = (leagueName: string) => {
-    return predefinedPopularLeagues.some((league) => {
-      // Check if the league name contains the predefined league name or vice versa
-      const normalizedLeagueName = leagueName.toLowerCase();
-      const normalizedPredefinedName = league.name.toLowerCase();
-      return (
-        normalizedLeagueName.includes(normalizedPredefinedName) ||
-        normalizedPredefinedName.includes(normalizedLeagueName)
-      );
-    });
+  // Extract league id from logo url if present
+  const extractLeagueIdFromLogo = (logoUrl?: string | null) => {
+    if (!logoUrl) return null;
+    const match = logoUrl.match(/\/leagues\/(\d+)\.png(?:\?.*)?$/);
+    return match ? Number(match[1]) : null;
   };
 
-  // Sort predictions with popular leagues at the top
+  // Get league priority based on predefined popular leagues order; non-popular => Infinity
+  const getLeaguePriority = (
+    leagueName: string,
+    leagueLogo?: string | null
+  ) => {
+    const leagueId = extractLeagueIdFromLogo(leagueLogo);
+    if (leagueId !== null) {
+      const idxById = predefinedPopularLeagues.findIndex(
+        (l) => l.league_id === leagueId
+      );
+      if (idxById !== -1) return idxById;
+    }
+    // Fallback by league name contains
+    const normalized = leagueName.toLowerCase();
+    const idxByName = predefinedPopularLeagues.findIndex((l) =>
+      normalized.includes(l.name.toLowerCase())
+    );
+    return idxByName !== -1 ? idxByName : Number.POSITIVE_INFINITY;
+  };
+
+  // Sort predictions: by league priority (popular leagues in given order), then by match time
   const filteredPredictions = [...predictions].sort((a, b) => {
-    const isAPopular = isPopularLeague(a.league_name);
-    const isBPopular = isPopularLeague(b.league_name);
-
-    if (isAPopular && !isBPopular) return -1;
-    if (!isAPopular && isBPopular) return 1;
-
-    // If both are popular or both are not popular, maintain the original order by match date
+    const aPriority = getLeaguePriority(a.league_name, a.league_logo);
+    const bPriority = getLeaguePriority(b.league_name, b.league_logo);
+    if (aPriority !== bPriority) return aPriority - bPriority;
     return new Date(a.match_date).getTime() - new Date(b.match_date).getTime();
   });
 

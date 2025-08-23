@@ -8,6 +8,7 @@ import {
 } from "@/utils/date";
 import Image from "next/image";
 import { useLayoutEffect, useRef, useState } from "react";
+import { predefinedPopularLeagues } from "@/constants/leagues";
 
 interface AutoScaleProps {
   children: React.ReactNode;
@@ -130,15 +131,32 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
 
   const getLeagueIcon = (league: string) => {
     if (league.includes("Champions") || league.includes("UCL")) return "⚽";
-    if (league.includes("Premier")) return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
+    if (league.includes("Premier")) return "🏴";
     if (league.includes("La Liga")) return "🇪🇸";
     if (league.includes("Bundesliga")) return "🇩🇪";
     if (league.includes("Serie A")) return "🇮🇹";
     if (league.includes("Ligue 1")) return "🇫🇷";
-    if (league.includes("Championship")) return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
+    if (league.includes("Championship")) return "🏴";
     if (league.includes("Eredivisie")) return "🇳🇱";
-    if (league.includes("Scottish")) return "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
+    if (league.includes("Scottish")) return "🏴";
     return "⚽";
+  };
+
+  const deriveLeagueName = (prediction: Prediction) => {
+    const logoUrl = prediction.league_logo || "";
+    const idMatch = logoUrl.match(/\/leagues\/(\d+)\.png(?:\?.*)?$/);
+    if (idMatch) {
+      const leagueId = Number(idMatch[1]);
+      const mapped = predefinedPopularLeagues.find(
+        (l) => l.league_id === leagueId
+      );
+      if (mapped) return mapped.name;
+    }
+    // Fallback: remove common season suffixes if present
+    return (prediction.league_name || "")
+      .replace(/\s*-\s*\d{4}[-\/]\d{4}$/i, "")
+      .replace(/\s*\(\d{4}[-\/]\d{4}\)$/i, "")
+      .trim();
   };
 
   return (
@@ -191,7 +209,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                       <Image
                         src={prediction.league_logo}
                         alt={`${prediction.league_name} logo`}
-                        title={prediction.league_name}
+                        title={deriveLeagueName(prediction)}
                         width={24}
                         height={24}
                         className="w-6 h-6 object-contain cursor-help"
@@ -205,7 +223,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                       />
                       <span
                         className="text-sm hidden cursor-help"
-                        title={prediction.league_name}
+                        title={deriveLeagueName(prediction)}
                       >
                         {getLeagueIcon(prediction.league_name)}
                       </span>

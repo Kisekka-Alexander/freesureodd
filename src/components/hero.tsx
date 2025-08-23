@@ -31,17 +31,23 @@ export function Hero() {
     fetchLeagues();
   }, []);
 
-  // Filter predictions to only include popular leagues
-  const filterPopularLeaguePredictions = (preds: Prediction[]) => {
-    const popularLeagueIds = predefinedPopularLeagues.map(
-      (league) => league.league_id
-    );
-    return preds.filter((prediction) => {
-      const league = leagues.find(
-        (l: League) => l.league_name === prediction.league_name
+  // Determine if a league is popular using fuzzy name matching to accommodate API naming differences
+  const isPopularLeague = useCallback((leagueName: string) => {
+    const normalizedLeagueName = leagueName.toLowerCase();
+    return predefinedPopularLeagues.some((league) => {
+      const normalizedPredefinedName = league.name.toLowerCase();
+      return (
+        normalizedLeagueName.includes(normalizedPredefinedName) ||
+        normalizedPredefinedName.includes(normalizedLeagueName)
       );
-      return league && popularLeagueIds.includes(league.league_id);
     });
+  }, []);
+
+  // Filter predictions to only include popular leagues (by name, not ID)
+  const filterPopularLeaguePredictions = (preds: Prediction[]) => {
+    return preds.filter((prediction) =>
+      isPopularLeague(prediction.league_name)
+    );
   };
 
   // Fetch predictions for a specific date
@@ -91,7 +97,7 @@ export function Hero() {
     } catch (error) {
       console.error("Error loading predictions:", error);
     }
-  }, [leagues]);
+  }, [isPopularLeague]);
 
   // Load predictions when component mounts or predictions change
   useEffect(() => {
@@ -133,7 +139,7 @@ export function Hero() {
             if (o === "Draw") return "X";
             if (o === "Away") return "2";
             if (o === "Home or Draw") return "1X";
-            if (o === "Away or Draw") return "X2";
+            if (o === "Away or Draw") return "2X";
             if (o === "Home or Away") return "12";
             return "?";
           })(),
