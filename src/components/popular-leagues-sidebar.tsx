@@ -174,19 +174,24 @@ export function PopularLeaguesSidebar({
   };
 
   const handleCountryLeagueClick = (leagueId: number) => {
+    console.log("Country league clicked:", leagueId);
     // If the same league is clicked, deselect it
     if (selectedCountryLeague === leagueId) {
+      console.log("Deselecting league:", leagueId);
       setSelectedCountryLeague(null);
       onLeagueSelect(null);
       onCountrySelect(null); // Clear country selection when deselecting league
     } else {
+      console.log("Selecting league:", leagueId);
       setSelectedCountryLeague(leagueId);
       setSelectedPopularLeague(null); // Clear popular league selection
       onLeagueSelect(leagueId);
 
       // Find the country for this league and select it
       const league = leagues.find((l) => l.league_id === leagueId);
+      console.log("Found league for country selection:", league);
       if (league && league.country) {
+        console.log("Setting country:", league.country);
         onCountrySelect(league.country);
       }
     }

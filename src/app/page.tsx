@@ -115,12 +115,14 @@ export default function Home() {
 
         const params = {
           ...(selectedLeague && { league_id: selectedLeague }),
-          status: "NS" as const,
           sort_by: "match_date" as const,
           sort_order: "asc" as const,
           ...dateParams, // Include match_date and timezone for server-side filtering
         };
 
+        console.log("DEBUG: selectedLeague:", selectedLeague);
+        console.log("DEBUG: selectedCountry:", selectedCountry);
+        console.log("DEBUG: dateParams:", dateParams);
         console.log("Fetching predictions with server-side filtering:", params);
         const response = await predictionsApi.getAllPredictions(params);
         console.log(
@@ -191,10 +193,12 @@ export default function Home() {
   };
 
   const handleLeagueFilter = (leagueId: number | null) => {
+    console.log("League filter changed:", leagueId);
     setSelectedLeague(leagueId);
   };
 
   const handleCountryFilter = (country: string | null) => {
+    console.log("Country filter changed:", country);
     setSelectedCountry(country);
     // Clear popular league selection when a country is selected
     setSelectedLeague(null);

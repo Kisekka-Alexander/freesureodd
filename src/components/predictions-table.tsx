@@ -75,34 +75,34 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full table-fixed">
+      <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
+        <table className="min-w-[800px] w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left p-2 md:p-3 font-semibold text-gray-700 w-2/5">
+              <th className="text-left p-2 md:p-3 font-semibold text-gray-700 min-w-[300px]">
                 Home team - Away team
               </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700">
+              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 min-w-[200px]">
                 Odds
                 <br />
-                <div className="flex justify-center space-x-3 text-sm font-normal text-gray-500 mt-1">
-                  <span className="text-center w-8">1</span>
-                  <span className="text-center w-8">X</span>
-                  <span className="text-center w-8">2</span>
-                  <span className="text-center w-8">1X</span>
-                  <span className="text-center w-8">X2</span>
+                <div className="flex justify-center space-x-2 md:space-x-3 text-sm font-normal text-gray-500 mt-1">
+                  <span className="text-center w-8 md:w-10">1</span>
+                  <span className="text-center w-8 md:w-10">X</span>
+                  <span className="text-center w-8 md:w-10">2</span>
+                  <span className="text-center w-8 md:w-10">1X</span>
+                  <span className="text-center w-8 md:w-10">X2</span>
                 </div>
               </th>
 
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-12 md:w-16">
+              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 min-w-[80px]">
                 <span className="hidden md:inline">Pred</span>
                 <span className="md:hidden">P</span>
               </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-16 md:w-20">
+              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 min-w-[100px]">
                 <span className="hidden md:inline">Status</span>
                 <span className="md:hidden">St</span>
               </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-12 md:w-16">
+              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 min-w-[80px]">
                 <span className="hidden md:inline">Score</span>
                 <span className="md:hidden">Sc</span>
               </th>
@@ -117,7 +117,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 }`}
               >
                 {/* Teams */}
-                <td className="p-2 md:p-3">
+                <td className="p-2 md:p-3 min-w-[300px]">
                   <div className="flex items-start space-x-1 md:space-x-2">
                     <div className="flex-shrink-0">
                       <Image
@@ -183,33 +183,33 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                   </div>
                 </td>
                 {/* Odds */}
-                <td className="p-1 md:p-3">
-                  <div className="flex justify-center space-x-3 text-sm">
-                    <div className="text-center w-8">
-                      <div className="font-medium text-xs">
+                <td className="p-1 md:p-3 min-w-[200px]">
+                  <div className="flex justify-center space-x-2 md:space-x-3 text-sm">
+                    <div className="text-center w-8 md:w-10">
+                      <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
                         {prediction.home_odds.toFixed(2)}
                       </div>
                     </div>
-                    <div className="text-center w-8">
-                      <div className="font-medium text-xs">
+                    <div className="text-center w-8 md:w-10">
+                      <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
                         {prediction.draw_odds.toFixed(2)}
                       </div>
                     </div>
-                    <div className="text-center w-8">
-                      <div className="font-medium text-xs">
+                    <div className="text-center w-8 md:w-10">
+                      <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
                         {prediction.away_odds.toFixed(2)}
                       </div>
                     </div>
                     {typeof prediction.home_or_draw_odds === "number" && (
-                      <div className="text-center w-8">
-                        <div className="font-medium text-xs">
+                      <div className="text-center w-8 md:w-10">
+                        <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
                           {prediction.home_or_draw_odds.toFixed(2)}
                         </div>
                       </div>
                     )}
                     {typeof prediction.away_or_draw_odds === "number" && (
-                      <div className="text-center w-8">
-                        <div className="font-medium text-xs">
+                      <div className="text-center w-8 md:w-10">
+                        <div className="font-medium text-xs md:text-sm bg-gray-50 rounded px-1 py-1">
                           {prediction.away_or_draw_odds.toFixed(2)}
                         </div>
                       </div>
@@ -218,7 +218,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 </td>
 
                 {/* Prediction */}
-                <td className="p-1 md:p-3">
+                <td className="p-1 md:p-3 min-w-[80px]">
                   <div className="flex justify-center">
                     <span
                       className={`inline-flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full text-xs md:text-sm font-bold ${getPredictionColor(
@@ -233,7 +233,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 </td>
 
                 {/* Status */}
-                <td className="p-1 md:p-3 text-center">
+                <td className="p-1 md:p-3 text-center min-w-[100px]">
                   <span
                     className={`inline-flex px-1 md:px-2 py-1 rounded-full text-xs font-medium uppercase ${getStatusColor(
                       prediction.match_status
@@ -244,7 +244,7 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 </td>
 
                 {/* Score */}
-                <td className="p-1 md:p-3 text-center">
+                <td className="p-1 md:p-3 text-center min-w-[80px]">
                   {prediction.fulltime_home_score !== undefined &&
                   prediction.fulltime_away_score !== undefined ? (
                     <div className="text-sm font-semibold text-gray-900">
