@@ -281,23 +281,39 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                 <td className="p-2 md:p-3 w-[540px]">
                   <div className="grid grid-cols-5 gap-1 text-sm">
                     <div className="text-center">
-                      <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
+                      <div className={`font-medium text-xs rounded px-1 py-1 ${
+                        prediction.prediction.predicted_outcome === "Home" 
+                          ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
+                          : "bg-gray-50"
+                      }`}>
                         {prediction.home_odds.toFixed(2)}
                       </div>
                     </div>
                     <div className="text-center">
-                      <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
+                      <div className={`font-medium text-xs rounded px-1 py-1 ${
+                        prediction.prediction.predicted_outcome === "Draw" 
+                          ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
+                          : "bg-gray-50"
+                      }`}>
                         {prediction.draw_odds.toFixed(2)}
                       </div>
                     </div>
                     <div className="text-center">
-                      <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
+                      <div className={`font-medium text-xs rounded px-1 py-1 ${
+                        prediction.prediction.predicted_outcome === "Away" 
+                          ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
+                          : "bg-gray-50"
+                      }`}>
                         {prediction.away_odds.toFixed(2)}
                       </div>
                     </div>
                     <div className="text-center">
                       {typeof prediction.home_or_draw_odds === "number" ? (
-                        <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
+                        <div className={`font-medium text-xs rounded px-1 py-1 ${
+                          prediction.prediction.predicted_outcome === "Home or Draw" 
+                            ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
+                            : "bg-gray-50"
+                        }`}>
                           {prediction.home_or_draw_odds.toFixed(2)}
                         </div>
                       ) : (
@@ -308,7 +324,11 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                     </div>
                     <div className="text-center">
                       {typeof prediction.away_or_draw_odds === "number" ? (
-                        <div className="font-medium text-xs bg-gray-50 rounded px-1 py-1">
+                        <div className={`font-medium text-xs rounded px-1 py-1 ${
+                          prediction.prediction.predicted_outcome === "Away or Draw" 
+                            ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
+                            : "bg-gray-50"
+                        }`}>
                           {prediction.away_or_draw_odds.toFixed(2)}
                         </div>
                       ) : (

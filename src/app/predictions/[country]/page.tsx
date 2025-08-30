@@ -1,6 +1,6 @@
 "use client";
 
-import { Hero } from "@/components/hero";
+import dynamic from "next/dynamic";
 import { Features } from "@/components/features";
 import { PredictionsTable } from "@/components/predictions-table";
 import { DateFilter } from "@/components/date-filter";
@@ -13,10 +13,25 @@ import Image from "next/image";
 import {
   formatCompactDate,
   isMatchToday,
-  prepareDateFilterForApi,
   getTodayLocalDate,
+  formatDateTimeAMPM,
+  prepareDateFilterForApi
 } from "@/utils/date";
 import { parseCountryParams } from "@/utils/slugs";
+
+// Dynamic import for Hero component to prevent hydration issues
+const Hero = dynamic(() => import("@/components/hero").then((mod) => ({ default: mod.Hero })), {
+  ssr: false,
+  loading: () => (
+    <section className="bg-gradient-to-br from-green-600 via-blue-700 to-purple-800 text-white py-2 lg:py-3">
+      <div className="container mx-auto max-w-5xl px-4">
+        <div className="flex justify-center items-center h-32">
+          <div className="text-white/80">Loading...</div>
+        </div>
+      </div>
+    </section>
+  )
+});
 
 export default function CountryPredictionsPage() {
   const router = useRouter();
@@ -436,18 +451,93 @@ export default function CountryPredictionsPage() {
                               </div>
                             </div>
                             
-                            <div className="grid grid-cols-3 gap-3 text-sm transition-transform duration-300 ease-in-out transform group-hover:scale-108">
-                              <div className="text-center p-2 bg-gray-50 rounded">
-                                <div className="text-xs text-gray-500 mb-1">Home Win</div>
-                                <div className="font-bold text-lg">{prediction.home_odds.toFixed(2)}</div>
+                            <div className="space-y-3 text-sm transition-transform duration-300 ease-in-out transform group-hover:scale-108">
+                              {/* Main betting options */}
+                              <div className="grid grid-cols-3 gap-3">
+                                <div className="text-center p-2 rounded">
+                                  <div className={`${
+                                    prediction.prediction.predicted_outcome === "Home"
+                                      ? "bg-green-100 border border-green-300 rounded p-2"
+                                      : "bg-gray-50 p-2"
+                                  }`}>
+                                    <div className="text-xs text-gray-500 mb-1">Home Win</div>
+                                    <div className={`font-bold text-lg ${
+                                      prediction.prediction.predicted_outcome === "Home"
+                                        ? "text-green-800"
+                                        : ""
+                                    }`}>
+                                      {prediction.home_odds.toFixed(2)}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-center p-2 rounded">
+                                  <div className={`${
+                                    prediction.prediction.predicted_outcome === "Draw"
+                                      ? "bg-green-100 border border-green-300 rounded p-2"
+                                      : "bg-gray-50 p-2"
+                                  }`}>
+                                    <div className="text-xs text-gray-500 mb-1">Draw</div>
+                                    <div className={`font-bold text-lg ${
+                                      prediction.prediction.predicted_outcome === "Draw"
+                                        ? "text-green-800"
+                                        : ""
+                                    }`}>
+                                      {prediction.draw_odds.toFixed(2)}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-center p-2 rounded">
+                                  <div className={`${
+                                    prediction.prediction.predicted_outcome === "Away"
+                                      ? "bg-green-100 border border-green-300 rounded p-2"
+                                      : "bg-gray-50 p-2"
+                                  }`}>
+                                    <div className="text-xs text-gray-500 mb-1">Away Win</div>
+                                    <div className={`font-bold text-lg ${
+                                      prediction.prediction.predicted_outcome === "Away"
+                                        ? "text-green-800"
+                                        : ""
+                                    }`}>
+                                      {prediction.away_odds.toFixed(2)}
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="text-center p-2 bg-gray-50 rounded">
-                                <div className="text-xs text-gray-500 mb-1">Draw</div>
-                                <div className="font-bold text-lg">{prediction.draw_odds.toFixed(2)}</div>
-                              </div>
-                              <div className="text-center p-2 bg-gray-50 rounded">
-                                <div className="text-xs text-gray-500 mb-1">Away Win</div>
-                                <div className="font-bold text-lg">{prediction.away_odds.toFixed(2)}</div>
+                              
+                              {/* Double chance options */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="text-center p-2 rounded border border-blue-100">
+                                  <div className={`${
+                                    prediction.prediction.predicted_outcome === "Home or Draw"
+                                      ? "bg-green-100 border border-green-300 rounded p-2"
+                                      : "bg-blue-50 p-2"
+                                  }`}>
+                                    <div className="text-xs text-blue-600 mb-1">Home or Draw (1X)</div>
+                                    <div className={`font-bold text-lg ${
+                                      prediction.prediction.predicted_outcome === "Home or Draw"
+                                        ? "text-green-800"
+                                        : "text-blue-700"
+                                    }`}>
+                                      {prediction.home_or_draw_odds ? prediction.home_or_draw_odds.toFixed(2) : 'N/A'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-center p-2 rounded border border-blue-100">
+                                  <div className={`${
+                                    prediction.prediction.predicted_outcome === "Away or Draw"
+                                      ? "bg-green-100 border border-green-300 rounded p-2"
+                                      : "bg-blue-50 p-2"
+                                  }`}>
+                                    <div className="text-xs text-blue-600 mb-1">Away or Draw (X2)</div>
+                                    <div className={`font-bold text-lg ${
+                                      prediction.prediction.predicted_outcome === "Away or Draw"
+                                        ? "text-green-800"
+                                        : "text-blue-700"
+                                    }`}>
+                                      {prediction.away_or_draw_odds ? prediction.away_or_draw_odds.toFixed(2) : 'N/A'}
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
