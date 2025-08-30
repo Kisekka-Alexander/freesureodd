@@ -112,7 +112,16 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
     }
   };
 
-  const getPredictionColor = (outcome: string) => {
+  const getPredictionColor = (outcome: string, correct?: "y" | "n" | null) => {
+    // If we have a correctness indicator, override the color
+    if (correct === "y") {
+      return "bg-green-500 text-white border-2 border-green-600";
+    }
+    if (correct === "n") {
+      return "bg-red-500 text-white border-2 border-red-600";
+    }
+    
+    // Default colors for predictions without results
     switch (outcome) {
       case "Home":
         return "bg-green-100 text-green-800";
@@ -320,16 +329,26 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
 
                 {/* Prediction */}
                 <td className="p-2 md:p-3 text-center w-[70px]">
-                  <div className="flex justify-center">
+                  <div className="flex flex-col items-center space-y-1">
                     <span
                       className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${getPredictionColor(
-                        prediction.prediction.predicted_outcome
+                        prediction.prediction.predicted_outcome,
+                        prediction.prediction.correct
                       )}`}
                     >
                       {getPredictionNumber(
                         prediction.prediction.predicted_outcome
                       )}
                     </span>
+                    {prediction.prediction.correct && (
+                      <div className="text-xs">
+                        {prediction.prediction.correct === "y" ? (
+                          <span className="text-green-600 font-bold">✓</span>
+                        ) : (
+                          <span className="text-red-600 font-bold">✗</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </td>
 

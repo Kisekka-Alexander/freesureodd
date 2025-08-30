@@ -8,6 +8,7 @@ import { PopularLeaguesSidebar } from "@/components/popular-leagues-sidebar";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
 import { Prediction, League } from "@/types";
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   formatCompactDate,
@@ -16,9 +17,13 @@ import {
   prepareDateFilterForApi,
   getTodayLocalDate,
 } from "@/utils/date";
+import { generateLeagueUrl, generateCountryUrl } from "@/utils/slugs";
 import { predefinedPopularLeagues } from "@/constants/leagues";
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [allPredictions, setAllPredictions] = useState<Prediction[]>([]); // Store all predictions for calendar indicators
   const [leagues, setLeagues] = useState<League[]>([]);
@@ -32,6 +37,76 @@ export default function Home() {
     getTodayLocalDate()
   );
   const [accuracyRate, setAccuracyRate] = useState<number | null>(null);
+
+  // Function to update URL parameters
+  const updateURL = (params: {
+    league?: number | null;
+    country?: string | null;
+    date?: string | null;
+    view?: string;
+  }) => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    
+    // Update or remove league parameter
+    if (params.league !== undefined) {
+      if (params.league) {
+        currentParams.set('league', params.league.toString());
+      } else {
+        currentParams.delete('league');
+      }
+    }
+    
+    // Update or remove country parameter
+    if (params.country !== undefined) {
+      if (params.country) {
+        currentParams.set('country', params.country);
+      } else {
+        currentParams.delete('country');
+      }
+    }
+    
+    // Update or remove date parameter
+    if (params.date !== undefined) {
+      if (params.date && params.date !== getTodayLocalDate()) {
+        currentParams.set('date', params.date);
+      } else {
+        currentParams.delete('date');
+      }
+    }
+    
+    // Update or remove view parameter
+    if (params.view !== undefined) {
+      if (params.view !== 'cards') { // Only set if not default
+        currentParams.set('view', params.view);
+      } else {
+        currentParams.delete('view');
+      }
+    }
+    
+    const newURL = currentParams.toString() ? `?${currentParams.toString()}` : '';
+    router.replace(newURL, { scroll: false });
+  };
+
+  // Initialize state from URL parameters on component mount
+  useEffect(() => {
+    const league = searchParams.get('league');
+    const country = searchParams.get('country');
+    const date = searchParams.get('date');
+    const view = searchParams.get('view');
+    
+    if (league) {
+      setSelectedLeague(parseInt(league, 10));
+    }
+    if (country) {
+      setSelectedCountry(country);
+    }
+    if (date) {
+      setSelectedDate(date);
+    }
+    if (view && (view === 'table' || view === 'cards')) {
+      setViewMode(view as "table" | "cards");
+    }
+  }, []); // Only run on mount
 
   // Fetch leagues on component mount
   useEffect(() => {
@@ -177,25 +252,57 @@ export default function Home() {
     fetchPredictions();
   }, [selectedLeague, selectedCountry, selectedDate, leagues]); // Now includes selectedCountry and leagues for client-side filtering
 
-  // Set default view mode based on screen size
+  // Set default view mode based on screen size (only if not set via URL)
   useEffect(() => {
     const setInitialViewMode = () => {
-      const isMobile = window.innerWidth < 768; // md breakpoint in Tailwind
-      setViewMode(isMobile ? "cards" : "table");
+      // Only auto-set view mode if it's not already set from URL parameters
+      if (!searchParams.get('view')) {
+        const isMobile = window.innerWidth < 768; // md breakpoint in Tailwind
+        const newViewMode = isMobile ? "cards" : "table";
+        setViewMode(newViewMode);
+        updateURL({ view: newViewMode });
+      }
     };
 
     // Set initial view mode
     setInitialViewMode();
 
-    // Listen for resize events to update view mode if needed
+    // Listen for resize events to update view mode if needed (only if not manually set)
     const handleResize = () => {
-      const isMobile = window.innerWidth < 768;
-      setViewMode(isMobile ? "cards" : "table");
+      if (!searchParams.get('view')) {
+        const isMobile = window.innerWidth < 768;
+        const newViewMode = isMobile ? "cards" : "table";
+        setViewMode(newViewMode);
+        updateURL({ view: newViewMode });
+      }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []); // Only run once on mount
+  }, [searchParams]); // Include searchParams in dependency array
+
+  // Update document title based on selected filters
+  useEffect(() => {
+    let title = "SureWin - AI Football Predictions";
+    
+    if (selectedLeague) {
+      const league = leagues.find(l => l.league_id === selectedLeague);
+      if (league) {
+        title = `${league.league_name} Predictions - SureWin`;
+      }
+    } else if (selectedCountry) {
+      title = `${selectedCountry} Football Predictions - SureWin`;
+    } else if (selectedDate && selectedDate !== getTodayLocalDate()) {
+      const date = new Date(selectedDate + "T00:00:00").toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      });
+      title = `${date} Football Predictions - SureWin`;
+    }
+    
+    document.title = title;
+  }, [selectedLeague, selectedCountry, selectedDate, leagues]);
 
   // Note: These functions are kept for potential future use
   // const getCountryFlag = (country: string) => {
@@ -217,21 +324,43 @@ export default function Home() {
 
   const handleDateFilter = (date: string | null) => {
     setSelectedDate(date);
+    updateURL({ date });
   };
 
   const handleLeagueFilter = (leagueId: number | null) => {
     console.log("League filter changed:", leagueId);
+    
+    if (leagueId) {
+      const league = leagues.find(l => l.league_id === leagueId);
+      if (league) {
+        const url = generateLeagueUrl(league.country, league.league_name);
+        router.push(url);
+        return;
+      }
+    }
+    
+    // Fallback: update state and URL params (for backwards compatibility)
     setSelectedLeague(leagueId);
+    updateURL({ league: leagueId });
   };
 
   const handleCountryFilter = (country: string | null) => {
     console.log("Country filter changed:", country);
+    
+    if (country) {
+      const url = generateCountryUrl(country);
+      router.push(url);
+      return;
+    }
+    
+    // Fallback: update state and URL params (for backwards compatibility)
     setSelectedCountry(country);
+    updateURL({ country });
 
     // Only clear league selection when explicitly clearing country (country = null)
-    // Don't clear when setting a country as part of league selection
     if (country === null) {
       setSelectedLeague(null);
+      updateURL({ league: null });
     }
   };
 
@@ -370,6 +499,7 @@ export default function Home() {
                           setSelectedDate(null);
                           setSelectedLeague(null);
                           setSelectedCountry(null);
+                          updateURL({ date: null, league: null, country: null });
                         }}
                         className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                       >
@@ -442,6 +572,21 @@ export default function Home() {
                           </div>
                         </div>
                       )}
+
+                      {/* Clear Filters / View All Button */}
+                      {(selectedLeague || selectedCountry || (selectedDate && selectedDate !== getTodayLocalDate())) && (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => {
+                              window.location.href = '/predictions/all';
+                            }}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center space-x-1"
+                          >
+                            <span>🌍</span>
+                            <span>View All</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Enhanced View Toggle - Better positioned */}
@@ -451,7 +596,10 @@ export default function Home() {
                       </span>
                       <div className="bg-gray-100 rounded-xl p-1 shadow-sm border">
                         <button
-                          onClick={() => setViewMode("table")}
+                          onClick={() => {
+                            setViewMode("table");
+                            updateURL({ view: "table" });
+                          }}
                           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                             viewMode === "table"
                               ? "bg-blue-500 text-white shadow-md"
@@ -461,7 +609,10 @@ export default function Home() {
                           📊 Table
                         </button>
                         <button
-                          onClick={() => setViewMode("cards")}
+                          onClick={() => {
+                            setViewMode("cards");
+                            updateURL({ view: "cards" });
+                          }}
                           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                             viewMode === "cards"
                               ? "bg-blue-500 text-white shadow-md"
@@ -583,12 +734,31 @@ export default function Home() {
                               </div>
                             </div>
                           </div>
-                          <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg transition-transform duration-300 ease-in-out transform group-hover:scale-115">
+                          <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg transition-transform duration-300 ease-in-out transform group-hover:scale-115 relative">
                             <div className="text-sm text-gray-600 mb-1">
                               🎯 AI Prediction:
                             </div>
-                            <div className="text-xl font-bold text-blue-600">
-                              {prediction.prediction.predicted_outcome}
+                            <div className="flex items-center justify-between">
+                              <div className="text-xl font-bold text-blue-600">
+                                {prediction.prediction.predicted_outcome}
+                              </div>
+                              {/* Prediction Accuracy Indicator */}
+                              {prediction.prediction.correct && (
+                                <div className="flex items-center space-x-1">
+                                  {prediction.prediction.correct === "y" ? (
+                                    <div className="bg-green-500 text-white rounded-full p-1.5 flex items-center justify-center">
+                                      <span className="text-sm font-bold">✓</span>
+                                    </div>
+                                  ) : (
+                                    <div className="bg-red-500 text-white rounded-full p-1.5 flex items-center justify-center">
+                                      <span className="text-sm font-bold">✗</span>
+                                    </div>
+                                  )}
+                                  <span className="text-xs font-medium text-gray-600">
+                                    {prediction.prediction.correct === "y" ? "Correct" : "Wrong"}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                             {/* <div className="text-xs text-gray-500 mt-1">
                           Model: {prediction.prediction.model_info.name} v

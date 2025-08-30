@@ -101,7 +101,7 @@ export interface PredictionData {
     | "Away or Draw"
     | "Home or Away";
   confidence: number;
-
+  correct?: "y" | "n" | null;
   probabilities: Probabilities;
   model_info?: ModelInfo; // Some responses may omit model info
   predicted_at?: string;

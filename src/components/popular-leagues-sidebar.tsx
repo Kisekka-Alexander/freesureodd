@@ -50,6 +50,34 @@ export function PopularLeaguesSidebar({
 
   return (
     <div className="space-y-4">
+      {/* View All Predictions Section */}
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-gray-900">🌍 All Predictions</h3>
+        </div>
+        <button
+          onClick={() => {
+            setSelectedPopularLeague(null);
+            setSelectedCountryLeague(null);
+            onLeagueSelect(null);
+            onCountrySelect(null);
+            window.location.href = '/predictions/all';
+          }}
+          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors duration-200 ${
+            selectedLeague === null && selectedCountry === null
+              ? "bg-blue-100 text-blue-700 font-medium"
+              : "text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span>View All Predictions</span>
+            <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
+              {predictions?.length || 0}
+            </span>
+          </div>
+        </button>
+      </div>
+
       <PopularLeagues
         leagues={leagues}
         selectedLeague={selectedLeague}
