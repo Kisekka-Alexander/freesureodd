@@ -135,40 +135,6 @@ export function isMatchToday(utcDateString: string): boolean {
 }
 
 /**
- * Gets relative time string (e.g., "in 2h 30m", "tomorrow")
- * @param utcDateString - ISO 8601 UTC timestamp
- * @returns Relative time string with hours and minutes precision
- */
-export function getRelativeTime(utcDateString: string): string {
-  const matchDate = new Date(utcDateString);
-  const now = new Date();
-  const diffInMinutes = Math.round(
-    (matchDate.getTime() - now.getTime()) / (1000 * 60)
-  );
-
-  if (diffInMinutes <= 0) {
-    return "now";
-  } else if (diffInMinutes < 60) {
-    return `in ${diffInMinutes}m`;
-  } else if (diffInMinutes < 24 * 60) {
-    // Less than 24 hours - show hours and minutes
-    const hours = Math.floor(diffInMinutes / 60);
-    const minutes = diffInMinutes % 60;
-
-    if (minutes === 0) {
-      return `in ${hours}h`;
-    } else {
-      return `in ${hours}h ${minutes}m`;
-    }
-  } else if (diffInMinutes < 48 * 60) {
-    return "tomorrow";
-  } else {
-    const diffInDays = Math.round(diffInMinutes / (24 * 60));
-    return `in ${diffInDays} days`;
-  }
-}
-
-/**
  * Gets a date string for API filtering (YYYY-MM-DD format) in user's local timezone
  * @param daysOffset - Number of days to offset from today (can be negative)
  * @returns Date string in YYYY-MM-DD format in user's timezone

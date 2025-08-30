@@ -12,13 +12,11 @@ import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import {
   formatCompactDate,
-  getRelativeTime,
   isMatchToday,
   prepareDateFilterForApi,
   getTodayLocalDate,
 } from "@/utils/date";
 import { parseCountryParams } from "@/utils/slugs";
-import { predefinedPopularLeagues } from "@/constants/leagues";
 
 export default function CountryPredictionsPage() {
   const router = useRouter();
@@ -59,7 +57,7 @@ export default function CountryPredictionsPage() {
       try {
         setAllPredictionsLoading(true);
         const params = {
-          sort_by: "match_date" as const,
+          sort_by: "correct" as const,
           sort_order: "asc" as const,
         };
 
@@ -86,7 +84,7 @@ export default function CountryPredictionsPage() {
         const dateParams = prepareDateFilterForApi(selectedDate);
         const params = {
           ...(selectedLeague && { league_id: selectedLeague }),
-          sort_by: "match_date" as const,
+          sort_by: "correct" as const,
           sort_order: "asc" as const,
           ...dateParams,
         };
@@ -177,32 +175,8 @@ export default function CountryPredictionsPage() {
     }
   };
 
-  // League priority and sorting logic (same as main page)
-  const extractLeagueIdFromLogo = (logoUrl?: string | null) => {
-    if (!logoUrl) return null;
-    const match = logoUrl.match(/\/leagues\/(\d+)\.png(?:\?.*)?$/);
-    return match ? Number(match[1]) : null;
-  };
-
-  const getLeaguePriority = (leagueName: string, leagueLogo?: string | null) => {
-    const leagueId = extractLeagueIdFromLogo(leagueLogo);
-    if (leagueId !== null) {
-      const idxById = predefinedPopularLeagues.findIndex((l) => l.league_id === leagueId);
-      if (idxById !== -1) return idxById;
-    }
-    const normalized = leagueName.toLowerCase();
-    const idxByName = predefinedPopularLeagues.findIndex((l) =>
-      normalized.includes(l.name.toLowerCase())
-    );
-    return idxByName !== -1 ? idxByName : Number.POSITIVE_INFINITY;
-  };
-
-  const filteredPredictions = [...predictions].sort((a, b) => {
-    const aPriority = getLeaguePriority(a.league_name, a.league_logo);
-    const bPriority = getLeaguePriority(b.league_name, b.league_logo);
-    if (aPriority !== bPriority) return aPriority - bPriority;
-    return new Date(a.match_date).getTime() - new Date(b.match_date).getTime();
-  });
+  // Use predictions directly as returned by backend (already optimally sorted)
+  const filteredPredictions = predictions;
 
   return (
     <main className="min-h-screen">
@@ -372,11 +346,6 @@ export default function CountryPredictionsPage() {
                                   <div>{prediction.league_name}</div>
                                   <div className="mt-1">
                                     {formatCompactDate(prediction.match_date)}
-                                    {isMatchToday(prediction.match_date) && (
-                                      <span className="ml-2 text-blue-600 font-semibold">
-                                        {getRelativeTime(prediction.match_date)}
-                                      </span>
-                                    )}
                                   </div>
                                 </div>
                               </div>

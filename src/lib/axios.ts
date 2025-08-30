@@ -101,7 +101,7 @@ export const predictionsApi = {
     league_id?: number;
     status?: MatchStatusCode;
     confidence_threshold?: number;
-    sort_by?: "match_date" | "confidence" | "league";
+    sort_by?: "match_date" | "confidence" | "league" | "correct";
     sort_order?: "asc" | "desc";
     match_date?: string; // Date in YYYY-MM-DD format in user's timezone
     timezone?: string; // User's timezone identifier (e.g., "America/New_York")

@@ -8,19 +8,18 @@ import { PopularLeaguesSidebar } from "@/components/popular-leagues-sidebar";
 import { predictionsApi, leaguesApi } from "@/lib/axios";
 import { Prediction, League } from "@/types";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   formatCompactDate,
-  getRelativeTime,
   isMatchToday,
   prepareDateFilterForApi,
   getTodayLocalDate,
 } from "@/utils/date";
-import { predefinedPopularLeagues } from "@/constants/leagues";
 
 export default function AllPredictionsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [allPredictions, setAllPredictions] = useState<Prediction[]>([]);
@@ -35,6 +34,14 @@ export default function AllPredictionsPage() {
   // No filters selected - show all predictions
   const selectedLeague = null;
   const selectedCountry = null;
+
+  // Initialize date from URL parameters on component mount
+  useEffect(() => {
+    const date = searchParams.get('date');
+    if (date) {
+      setSelectedDate(date);
+    }
+  }, [searchParams]);
 
   // Fetch leagues and predictions logic
   useEffect(() => {
@@ -56,7 +63,7 @@ export default function AllPredictionsPage() {
       try {
         setAllPredictionsLoading(true);
         const params = {
-          sort_by: "match_date" as const,
+          sort_by: "correct" as const,
           sort_order: "asc" as const,
         };
 
@@ -82,7 +89,7 @@ export default function AllPredictionsPage() {
 
         const dateParams = prepareDateFilterForApi(selectedDate);
         const params = {
-          sort_by: "match_date" as const,
+          sort_by: "correct" as const,
           sort_order: "asc" as const,
           ...dateParams,
         };
@@ -139,6 +146,17 @@ export default function AllPredictionsPage() {
 
   const handleDateFilter = (date: string | null) => {
     setSelectedDate(date);
+    
+    // Update URL parameters
+    const currentParams = new URLSearchParams(searchParams.toString());
+    if (date && date !== getTodayLocalDate()) {
+      currentParams.set('date', date);
+    } else {
+      currentParams.delete('date');
+    }
+    
+    const newURL = currentParams.toString() ? `?${currentParams.toString()}` : '';
+    router.replace(`/predictions/all${newURL}`, { scroll: false });
   };
 
   const handleLeagueFilter = (leagueId: number | null) => {
@@ -159,32 +177,8 @@ export default function AllPredictionsPage() {
     }
   };
 
-  // League priority and sorting logic
-  const extractLeagueIdFromLogo = (logoUrl?: string | null) => {
-    if (!logoUrl) return null;
-    const match = logoUrl.match(/\/leagues\/(\d+)\.png(?:\?.*)?$/);
-    return match ? Number(match[1]) : null;
-  };
-
-  const getLeaguePriority = (leagueName: string, leagueLogo?: string | null) => {
-    const leagueId = extractLeagueIdFromLogo(leagueLogo);
-    if (leagueId !== null) {
-      const idxById = predefinedPopularLeagues.findIndex((l) => l.league_id === leagueId);
-      if (idxById !== -1) return idxById;
-    }
-    const normalized = leagueName.toLowerCase();
-    const idxByName = predefinedPopularLeagues.findIndex((l) =>
-      normalized.includes(l.name.toLowerCase())
-    );
-    return idxByName !== -1 ? idxByName : Number.POSITIVE_INFINITY;
-  };
-
-  const filteredPredictions = [...predictions].sort((a, b) => {
-    const aPriority = getLeaguePriority(a.league_name, a.league_logo);
-    const bPriority = getLeaguePriority(b.league_name, b.league_logo);
-    if (aPriority !== bPriority) return aPriority - bPriority;
-    return new Date(a.match_date).getTime() - new Date(b.match_date).getTime();
-  });
+  // Use predictions directly as returned by backend (already optimally sorted)
+  const filteredPredictions = predictions;
 
   return (
     <main className="min-h-screen">
@@ -353,11 +347,6 @@ export default function AllPredictionsPage() {
                                   <div>{prediction.league_name}</div>
                                   <div className="mt-1">
                                     {formatCompactDate(prediction.match_date)}
-                                    {isMatchToday(prediction.match_date) && (
-                                      <span className="ml-2 text-blue-600 font-semibold">
-                                        {getRelativeTime(prediction.match_date)}
-                                      </span>
-                                    )}
                                   </div>
                                 </div>
                               </div>

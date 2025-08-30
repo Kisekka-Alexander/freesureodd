@@ -1,4 +1,4 @@
-import { Prediction } from "@/types";
+import { Prediction, League } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 import {
   formatTimeOnly,
@@ -7,13 +7,20 @@ import {
   prepareDateFilterForApi,
 } from "@/utils/date";
 import { predefinedPopularLeagues } from "@/constants/leagues";
-import { predictionsApi } from "@/lib/axios";
+import { predictionsApi, leaguesApi } from "@/lib/axios";
+import Image from "next/image";
 
 export function Hero() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [featuredIndex, setFeaturedIndex] = useState(0);
-
   const [displayMatches, setDisplayMatches] = useState<Prediction[]>([]);
+  const [leagues, setLeagues] = useState<League[]>([]);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure we're on the client side before doing time-based operations
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Determine if a league is popular using fuzzy name matching to accommodate API naming differences
   const isPopularLeague = useCallback((leagueName: string) => {
@@ -27,11 +34,24 @@ export function Hero() {
     });
   }, []);
 
-  // Filter predictions to only include popular leagues (by name, not ID)
+  // Filter predictions to only include popular leagues (by name, not ID) and future matches
   const filterPopularLeaguePredictions = (preds: Prediction[]) => {
-    return preds.filter((prediction) =>
-      isPopularLeague(prediction.league_name)
-    );
+    return preds.filter((prediction) => {
+      // Check if league is popular
+      const isPopular = isPopularLeague(prediction.league_name);
+      
+      // Only do time filtering on client side to avoid hydration issues
+      if (!isClient) {
+        return isPopular;
+      }
+      
+      // Check if match is in the future
+      const matchDate = new Date(prediction.match_date);
+      const now = new Date();
+      const isFuture = matchDate > now;
+      
+      return isPopular && isFuture;
+    });
   };
 
   // Fetch predictions for a specific date
@@ -40,7 +60,7 @@ export function Hero() {
       try {
         const params = {
           ...prepareDateFilterForApi(date),
-          sort_by: "match_date" as const,
+          sort_by: "correct" as const,
           sort_order: "asc" as const,
         };
         const response = await predictionsApi.getAllPredictions(params);
@@ -53,7 +73,7 @@ export function Hero() {
         return [];
       }
     },
-    [isPopularLeague]
+    [isPopularLeague, isClient]
   );
 
   // Load predictions for multiple days until we find enough matches
@@ -72,19 +92,29 @@ export function Hero() {
         }
       }
 
-      // Sort by date and take the first 3
-      const sortedPredictions = allPredictions
-        .sort(
-          (a, b) =>
-            new Date(a.match_date).getTime() - new Date(b.match_date).getTime()
-        )
-        .slice(0, 3);
+      // Take the first 3 predictions (backend provides them optimally sorted)
+      const topPredictions = allPredictions.slice(0, 3);
 
-      setDisplayMatches(sortedPredictions);
+      setDisplayMatches(topPredictions);
     } catch (error) {
       console.error("Error loading predictions:", error);
     }
   }, [fetchPredictionsForDate]);
+
+  // Fetch leagues data
+  useEffect(() => {
+    const fetchLeagues = async () => {
+      try {
+        const response = await leaguesApi.getLeagues();
+        if (response.success) {
+          setLeagues(response.data.leagues);
+        }
+      } catch (error) {
+        console.error("Error fetching leagues:", error);
+      }
+    };
+    fetchLeagues();
+  }, []);
 
   // Load predictions when component mounts or predictions change
   useEffect(() => {
@@ -115,10 +145,17 @@ export function Hero() {
     if (displayMatches.length > 0 && featuredIndex < displayMatches.length) {
       const prediction = displayMatches[featuredIndex];
       if (prediction && prediction.home_team && prediction.away_team) {
+        // Find the country for this league
+        const league = leagues.find(l => l.league_name === prediction.league_name);
+        const country = league?.country || '';
+        const leagueDisplayName = country ? `${country} - ${prediction.league_name}` : prediction.league_name;
+        
         return {
           homeTeam: prediction.home_team,
           awayTeam: prediction.away_team,
-          league: prediction.league_name,
+          homeTeamLogo: prediction.home_team_logo,
+          awayTeamLogo: prediction.away_team_logo,
+          league: leagueDisplayName,
           time: formatTimeOnly(prediction.match_date),
           prediction: (() => {
             const o = prediction.prediction.predicted_outcome;
@@ -139,6 +176,8 @@ export function Hero() {
     return {
       homeTeam: "No matches",
       awayTeam: "available",
+      homeTeamLogo: "",
+      awayTeamLogo: "",
       league: "Try adjusting filters",
       time: "--:--",
       prediction: "X",
@@ -197,13 +236,25 @@ export function Hero() {
                 <span className="text-sm font-semibold bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
                   🔥 Featured Match
                 </span>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-medium">
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-medium truncate max-w-[120px]" title={featuredMatch.league}>
                   {featuredMatch.league}
                 </span>
               </div>
 
               <div className="flex items-center justify-between mb-2">
-                <div className="text-right flex-1">
+                <div className="text-right flex-1 flex items-center justify-end space-x-2">
+                  {featuredMatch.homeTeamLogo && (
+                    <Image
+                      src={featuredMatch.homeTeamLogo}
+                      alt={`${featuredMatch.homeTeam} logo`}
+                      width={16}
+                      height={16}
+                      className="w-4 h-4 object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  )}
                   <div className="text-xs font-bold">
                     {featuredMatch.homeTeam}
                   </div>
@@ -216,10 +267,22 @@ export function Hero() {
                     {featuredMatch.time}
                   </div>
                 </div>
-                <div className="text-left flex-1">
+                <div className="text-left flex-1 flex items-center space-x-2">
                   <div className="text-xs font-bold">
                     {featuredMatch.awayTeam}
                   </div>
+                  {featuredMatch.awayTeamLogo && (
+                    <Image
+                      src={featuredMatch.awayTeamLogo}
+                      alt={`${featuredMatch.awayTeam} logo`}
+                      width={16}
+                      height={16}
+                      className="w-4 h-4 object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  )}
                 </div>
               </div>
 

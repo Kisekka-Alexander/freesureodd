@@ -3,7 +3,6 @@
 import { Prediction } from "@/types";
 import {
   formatDateTimeAMPM,
-  getRelativeTime,
   isMatchToday,
 } from "@/utils/date";
 import Image from "next/image";
@@ -273,12 +272,6 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                       <div className="text-xs text-gray-400 leading-tight">
                         <div className="truncate">
                           {formatDateTimeAMPM(prediction.match_date)}
-                          {isMatchToday(prediction.match_date) &&
-                            prediction.match_status !== "FT" && (
-                              <span className="text-blue-600 font-semibold ml-1">
-                                {getRelativeTime(prediction.match_date)}
-                              </span>
-                            )}
                         </div>
                       </div>
                     </div>

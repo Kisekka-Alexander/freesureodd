@@ -12,13 +12,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   formatCompactDate,
-  getRelativeTime,
   isMatchToday,
   prepareDateFilterForApi,
   getTodayLocalDate,
 } from "@/utils/date";
 import { generateLeagueUrl, generateCountryUrl } from "@/utils/slugs";
-import { predefinedPopularLeagues } from "@/constants/leagues";
 
 export default function Home() {
   const router = useRouter();
@@ -37,6 +35,7 @@ export default function Home() {
     getTodayLocalDate()
   );
   const [accuracyRate, setAccuracyRate] = useState<number | null>(null);
+  const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
 
   // Function to update URL parameters
   const updateURL = (params: {
@@ -94,6 +93,24 @@ export default function Home() {
     const date = searchParams.get('date');
     const view = searchParams.get('view');
     
+    console.log('Homepage useEffect - league:', league, 'country:', country, 'date:', date);
+    
+    // If no specific league or country is selected, redirect to /predictions/all
+    // This ensures consistency whether it's today's date or any other date
+    if (!league && !country) {
+      let url = '/predictions/all';
+      if (date && date !== getTodayLocalDate()) {
+        url += `?date=${date}`;
+      }
+      console.log('Redirecting to:', url);
+      router.replace(url);
+      return;
+    }
+    
+    // No redirect needed, continue with normal initialization
+    console.log('No redirect needed, initializing homepage');
+    setIsCheckingRedirect(false);
+    
     if (league) {
       setSelectedLeague(parseInt(league, 10));
     }
@@ -106,7 +123,19 @@ export default function Home() {
     if (view && (view === 'table' || view === 'cards')) {
       setViewMode(view as "table" | "cards");
     }
-  }, []); // Only run on mount
+  }, [searchParams, router]); // Include searchParams as dependency
+
+  // Fallback timeout to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isCheckingRedirect) {
+        console.log('Timeout reached, stopping redirect check');
+        setIsCheckingRedirect(false);
+      }
+    }, 2000); // 2 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [isCheckingRedirect]);
 
   // Fetch leagues on component mount
   useEffect(() => {
@@ -161,7 +190,7 @@ export default function Home() {
       try {
         setAllPredictionsLoading(true);
         const params = {
-          sort_by: "match_date" as const,
+          sort_by: "correct" as const,
           sort_order: "asc" as const,
         };
 
@@ -192,7 +221,7 @@ export default function Home() {
 
         const params = {
           ...(selectedLeague && { league_id: selectedLeague }),
-          sort_by: "match_date" as const,
+          sort_by: "correct" as const,
           sort_order: "asc" as const,
           ...dateParams, // Include match_date and timezone for server-side filtering
         };
@@ -323,6 +352,14 @@ export default function Home() {
   // };
 
   const handleDateFilter = (date: string | null) => {
+    if (date && date !== getTodayLocalDate()) {
+      // Navigate to /predictions/all with the date parameter
+      const url = `/predictions/all?date=${date}`;
+      router.push(url);
+      return;
+    }
+    
+    // If date is null or today's date, stay on homepage
     setSelectedDate(date);
     updateURL({ date });
   };
@@ -364,40 +401,24 @@ export default function Home() {
     }
   };
 
-  // Extract league id from logo url if present
-  const extractLeagueIdFromLogo = (logoUrl?: string | null) => {
-    if (!logoUrl) return null;
-    const match = logoUrl.match(/\/leagues\/(\d+)\.png(?:\?.*)?$/);
-    return match ? Number(match[1]) : null;
-  };
+  // Use predictions directly as returned by backend (already optimally sorted)
+  const filteredPredictions = predictions;
 
-  // Get league priority based on predefined popular leagues order; non-popular => Infinity
-  const getLeaguePriority = (
-    leagueName: string,
-    leagueLogo?: string | null
-  ) => {
-    const leagueId = extractLeagueIdFromLogo(leagueLogo);
-    if (leagueId !== null) {
-      const idxById = predefinedPopularLeagues.findIndex(
-        (l) => l.league_id === leagueId
-      );
-      if (idxById !== -1) return idxById;
-    }
-    // Fallback by league name contains
-    const normalized = leagueName.toLowerCase();
-    const idxByName = predefinedPopularLeagues.findIndex((l) =>
-      normalized.includes(l.name.toLowerCase())
+  // Show loading while checking for redirect to prevent hydration issues
+  if (isCheckingRedirect) {
+    return (
+      <main className="min-h-screen">
+        <Hero />
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="flex justify-center items-center h-64">
+              <div className="text-gray-500">Loading...</div>
+            </div>
+          </div>
+        </section>
+      </main>
     );
-    return idxByName !== -1 ? idxByName : Number.POSITIVE_INFINITY;
-  };
-
-  // Sort predictions: by league priority (popular leagues in given order), then by match time
-  const filteredPredictions = [...predictions].sort((a, b) => {
-    const aPriority = getLeaguePriority(a.league_name, a.league_logo);
-    const bPriority = getLeaguePriority(b.league_name, b.league_logo);
-    if (aPriority !== bPriority) return aPriority - bPriority;
-    return new Date(a.match_date).getTime() - new Date(b.match_date).getTime();
-  });
+  }
 
   return (
     <main className="min-h-screen">
@@ -665,11 +686,6 @@ export default function Home() {
                                 <div>{prediction.league_name}</div>
                                 <div className="mt-1">
                                   {formatCompactDate(prediction.match_date)}
-                                  {isMatchToday(prediction.match_date) && (
-                                    <span className="ml-2 text-blue-600 font-semibold">
-                                      {getRelativeTime(prediction.match_date)}
-                                    </span>
-                                  )}
                                 </div>
                               </div>
                             </div>
