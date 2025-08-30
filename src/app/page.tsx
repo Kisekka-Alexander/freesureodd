@@ -25,12 +25,13 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [allPredictionsLoading, setAllPredictionsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [viewMode, setViewMode] = useState<"table" | "cards">("cards"); // Default to cards, will be updated based on screen size
   const [selectedLeague, setSelectedLeague] = useState<number | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(
     getTodayLocalDate()
   );
+  const [accuracyRate, setAccuracyRate] = useState<number | null>(null);
 
   // Fetch leagues on component mount
   useEffect(() => {
@@ -135,6 +136,11 @@ export default function Home() {
         if (response.success) {
           let predictions = response.data.predictions;
 
+          // Store accuracy data if available
+          if (response.data.accuracy_percentage !== undefined) {
+            setAccuracyRate(response.data.accuracy_percentage);
+          }
+
           // Apply client-side country filtering if country is selected but no specific league
           if (selectedCountry && !selectedLeague) {
             const countryLeagueIds = leagues
@@ -170,6 +176,26 @@ export default function Home() {
 
     fetchPredictions();
   }, [selectedLeague, selectedCountry, selectedDate, leagues]); // Now includes selectedCountry and leagues for client-side filtering
+
+  // Set default view mode based on screen size
+  useEffect(() => {
+    const setInitialViewMode = () => {
+      const isMobile = window.innerWidth < 768; // md breakpoint in Tailwind
+      setViewMode(isMobile ? "cards" : "table");
+    };
+
+    // Set initial view mode
+    setInitialViewMode();
+
+    // Listen for resize events to update view mode if needed
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768;
+      setViewMode(isMobile ? "cards" : "table");
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // Only run once on mount
 
   // Note: These functions are kept for potential future use
   // const getCountryFlag = (country: string) => {
@@ -357,50 +383,64 @@ export default function Home() {
                 <div>
                   {/* View Mode Toggle - Moved here for better UX */}
                   <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-                    <div className="text-sm text-gray-600 mb-4 md:mb-0">
-                      {selectedLeague || selectedCountry || selectedDate ? (
-                        <>
-                          Showing predictions
-                          {selectedLeague && (
-                            <>
-                              {" "}
-                              for{" "}
-                              <span className="font-medium">
-                                {
-                                  leagues.find(
-                                    (l) => l.league_id === selectedLeague
-                                  )?.league_name
-                                }
-                              </span>
-                            </>
-                          )}
-                          {selectedCountry && !selectedLeague && (
-                            <>
-                              {" "}
-                              from{" "}
-                              <span className="font-medium">
-                                {selectedCountry}
-                              </span>
-                            </>
-                          )}
-                          {selectedDate && (
-                            <>
-                              {" "}
-                              on{" "}
-                              <span className="font-medium">
-                                {new Date(
-                                  selectedDate + "T00:00:00"
-                                ).toLocaleDateString("en-US", {
-                                  weekday: "short",
-                                  month: "short",
-                                  day: "numeric",
-                                })}
-                              </span>
-                            </>
-                          )}
-                        </>
-                      ) : (
-                        <>Showing {filteredPredictions.length} predictions</>
+                    <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4 md:mb-0">
+                      <div className="text-sm text-gray-600">
+                        {selectedLeague || selectedCountry || selectedDate ? (
+                          <>
+                            Showing predictions
+                            {selectedLeague && (
+                              <>
+                                {" "}
+                                for{" "}
+                                <span className="font-medium">
+                                  {
+                                    leagues.find(
+                                      (l) => l.league_id === selectedLeague
+                                    )?.league_name
+                                  }
+                                </span>
+                              </>
+                            )}
+                            {selectedCountry && !selectedLeague && (
+                              <>
+                                {" "}
+                                from{" "}
+                                <span className="font-medium">
+                                  {selectedCountry}
+                                </span>
+                              </>
+                            )}
+                            {selectedDate && (
+                              <>
+                                {" "}
+                                on{" "}
+                                <span className="font-medium">
+                                  {new Date(
+                                    selectedDate + "T00:00:00"
+                                  ).toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
+                                </span>
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          <>Showing {filteredPredictions.length} predictions</>
+                        )}
+                      </div>
+                      
+                      {/* AI Accuracy Badge */}
+                      {accuracyRate !== null && (
+                        <div className="flex items-center space-x-2">
+                          <div className="bg-gradient-to-r from-green-100 to-blue-100 border border-green-200 rounded-full px-3 py-1 flex items-center space-x-1">
+                            <span className="text-xs">🎯</span>
+                            <span className="text-xs font-medium text-green-700">
+                              AI Accuracy: {accuracyRate.toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
                       )}
                     </div>
 
@@ -438,13 +478,28 @@ export default function Home() {
                     <PredictionsTable predictions={filteredPredictions} />
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredPredictions.map((prediction) => (
+                      {filteredPredictions.map((prediction) => {
+                        // Status color function (same as in PredictionsTable)
+                        const getStatusColor = (status: string) => {
+                          const liveStatuses = new Set(["LIVE", "1H", "2H", "HT", "ET", "P"]);
+                          const upcomingStatuses = new Set(["NS", "TBD"]);
+                          const completedStatuses = new Set(["FT"]);
+                          const canceledStatuses = new Set(["CANC", "PST", "A", "ABD", "INT"]);
+
+                          if (liveStatuses.has(status)) return "bg-red-100 text-red-800";
+                          if (upcomingStatuses.has(status)) return "bg-blue-100 text-blue-800";
+                          if (completedStatuses.has(status)) return "bg-gray-100 text-gray-800";
+                          if (canceledStatuses.has(status)) return "bg-gray-100 text-gray-800";
+                          return "bg-gray-100 text-gray-800";
+                        };
+
+                        return (
                         <div
                           key={prediction.match_id}
                           className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1 group"
                         >
                           <div className="flex items-center justify-between mb-4 transition-transform duration-300 ease-in-out transform group-hover:scale-105">
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 flex-1">
                               <Image
                                 src={prediction.league_logo}
                                 alt={`${prediction.league_name} logo`}
@@ -455,7 +510,7 @@ export default function Home() {
                                   e.currentTarget.style.display = "none";
                                 }}
                               />
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-gray-500 flex-1">
                                 <div>{prediction.league_name}</div>
                                 <div className="mt-1">
                                   {formatCompactDate(prediction.match_date)}
@@ -466,6 +521,25 @@ export default function Home() {
                                   )}
                                 </div>
                               </div>
+                            </div>
+                            <div className="flex flex-col items-end space-y-2">
+                              {/* Match Status */}
+                              <span
+                                className={`inline-flex px-2 py-1 rounded-full text-xs font-medium uppercase ${getStatusColor(
+                                  prediction.match_status
+                                )}`}
+                              >
+                                {prediction.match_status}
+                              </span>
+                              {/* Score */}
+                              {prediction.fulltime_home_score !== undefined &&
+                              prediction.fulltime_away_score !== undefined ? (
+                                <div className="text-sm font-bold text-gray-900">
+                                  {prediction.fulltime_home_score}-{prediction.fulltime_away_score}
+                                </div>
+                              ) : (
+                                <div className="text-sm text-gray-400">-</div>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center justify-between mb-4 transition-transform duration-300 ease-in-out transform group-hover:scale-110">
@@ -548,7 +622,8 @@ export default function Home() {
                             </div>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

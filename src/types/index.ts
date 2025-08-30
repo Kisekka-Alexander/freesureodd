@@ -139,6 +139,10 @@ export interface PaginationInfo {
 export interface PredictionsResponse {
   predictions: Prediction[];
   pagination?: PaginationInfo; // Made optional since pagination features are removed
+  total_predictions?: number;
+  correct_predictions?: number;
+  total_with_results?: number;
+  accuracy_percentage?: number;
 }
 
 // League Types
