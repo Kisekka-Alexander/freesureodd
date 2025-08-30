@@ -209,7 +209,7 @@ export function Hero() {
                   </div>
                 </div>
                 <div className="mx-3">
-                  <div className="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded">
+                  <div className="text-xs font-semibold bg-white/20 px-2 py-0.5 rounded text-center">
                     VS
                   </div>
                   <div className="text-xs text-white/80 text-center mt-0.5">
