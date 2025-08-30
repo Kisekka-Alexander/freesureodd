@@ -327,7 +327,7 @@ export default function LeaguePredictionsPage() {
                   {viewMode === "table" ? (
                     <PredictionsTable predictions={filteredPredictions} />
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                       {filteredPredictions.map((prediction) => {
                         const getStatusColor = (status: string) => {
                           const liveStatuses = new Set(["LIVE", "1H", "2H", "HT", "ET", "P"]);
@@ -345,30 +345,30 @@ export default function LeaguePredictionsPage() {
                         return (
                           <div
                             key={prediction.match_id}
-                            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1 group"
+                            className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-4 hover:shadow-lg hover:border-blue-300 transition-all hover:-translate-y-1 group"
                           >
-                            <div className="flex items-center justify-between mb-4 transition-transform duration-300 ease-in-out transform group-hover:scale-105">
-                              <div className="flex items-center space-x-2 flex-1">
+                            <div className="flex items-center justify-between mb-2 transition-transform duration-300 ease-in-out transform group-hover:scale-105">
+                              <div className="flex items-center space-x-1 flex-1">
                                 <Image
                                   src={prediction.league_logo}
                                   alt={`${prediction.league_name} logo`}
-                                  width={20}
-                                  height={20}
-                                  className="w-5 h-5 object-contain"
+                                  width={16}
+                                  height={16}
+                                  className="w-3 h-3 sm:w-4 sm:h-4 object-contain"
                                   onError={(e) => {
                                     e.currentTarget.style.display = "none";
                                   }}
                                 />
-                                <div className="text-sm text-gray-500 flex-1">
-                                  <div>{prediction.league_name}</div>
-                                  <div className="mt-1">
+                                <div className="text-xs sm:text-sm text-gray-500 flex-1">
+                                  <div className="truncate text-xs">{prediction.league_name}</div>
+                                  <div className="text-xs">
                                     {formatCompactDate(prediction.match_date)}
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex flex-col items-end space-y-2">
+                              <div className="flex flex-col items-end space-y-1">
                                 <span
-                                  className={`inline-flex px-2 py-1 rounded-full text-xs font-medium uppercase ${getStatusColor(
+                                  className={`inline-flex px-1 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium uppercase ${getStatusColor(
                                     prediction.match_status
                                   )}`}
                                 >
@@ -376,94 +376,87 @@ export default function LeaguePredictionsPage() {
                                 </span>
                                 {prediction.fulltime_home_score !== undefined &&
                                 prediction.fulltime_away_score !== undefined ? (
-                                  <div className="text-sm font-bold text-gray-900">
+                                  <div className="text-xs sm:text-sm font-bold text-gray-900">
                                     {prediction.fulltime_home_score}-{prediction.fulltime_away_score}
                                   </div>
                                 ) : (
-                                  <div className="text-sm text-gray-400">-</div>
+                                  <div className="text-xs text-gray-400">-</div>
                                 )}
                               </div>
                             </div>
                             
-                            <div className="flex items-center justify-between mb-4 transition-transform duration-300 ease-in-out transform group-hover:scale-110">
-                              <div className="flex items-center space-x-2 min-w-0 flex-1">
-                                <div className="flex flex-col items-center space-y-2 flex-1">
-                                  <div className="flex items-center space-x-2">
-                                    <Image
-                                      src={prediction.home_team_logo}
-                                      alt={`${prediction.home_team} logo`}
-                                      width={24}
-                                      height={24}
-                                      className="w-6 h-6 object-contain flex-shrink-0"
-                                      onError={(e) => {
-                                        e.currentTarget.style.display = "none";
-                                      }}
-                                    />
-                                    <div className="text-sm font-semibold text-center break-words">
-                                      {prediction.home_team}
-                                    </div>
+                            <div className="flex items-center justify-center mb-2 transition-transform duration-300 ease-in-out transform group-hover:scale-110">
+                              <div className="flex items-center justify-center space-x-1 w-full">
+                                <div className="flex flex-col items-center flex-1 min-w-0">
+                                  <Image
+                                    src={prediction.home_team_logo}
+                                    alt={`${prediction.home_team} logo`}
+                                    width={20}
+                                    height={20}
+                                    className="w-4 h-4 sm:w-5 sm:h-5 object-contain mb-1"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                    }}
+                                  />
+                                  <div className="text-xs font-semibold text-center truncate w-full">
+                                    {prediction.home_team}
                                   </div>
                                 </div>
-                                <div className="text-gray-400 font-bold flex-shrink-0 text-sm px-2">
+                                <div className="text-gray-400 font-bold text-xs px-1">
                                   VS
                                 </div>
-                                <div className="flex flex-col items-center space-y-2 flex-1">
-                                  <div className="flex items-center space-x-2">
-                                    <Image
-                                      src={prediction.away_team_logo}
-                                      alt={`${prediction.away_team} logo`}
-                                      width={24}
-                                      height={24}
-                                      className="w-6 h-6 object-contain flex-shrink-0"
-                                      onError={(e) => {
-                                        e.currentTarget.style.display = "none";
-                                      }}
-                                    />
-                                    <div className="text-sm font-semibold text-center break-words">
-                                      {prediction.away_team}
-                                    </div>
+                                <div className="flex flex-col items-center flex-1 min-w-0">
+                                  <Image
+                                    src={prediction.away_team_logo}
+                                    alt={`${prediction.away_team} logo`}
+                                    width={20}
+                                    height={20}
+                                    className="w-4 h-4 sm:w-5 sm:h-5 object-contain mb-1"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                    }}
+                                  />
+                                  <div className="text-xs font-semibold text-center truncate w-full">
+                                    {prediction.away_team}
                                   </div>
                                 </div>
                               </div>
                             </div>
                             
-                            <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg transition-transform duration-300 ease-in-out transform group-hover:scale-115 relative">
-                              <div className="text-sm text-gray-600 mb-1">🎯 AI Prediction:</div>
+                            <div className="mb-2 p-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg transition-transform duration-300 ease-in-out transform group-hover:scale-115 relative">
+                              <div className="text-xs text-gray-600 mb-1">🎯 Prediction:</div>
                               <div className="flex items-center justify-between">
-                                <div className="text-xl font-bold text-blue-600">
+                                <div className="text-sm sm:text-lg font-bold text-blue-600 truncate">
                                   {prediction.prediction.predicted_outcome}
                                 </div>
                                 {/* Prediction Accuracy Indicator */}
                                 {prediction.prediction.correct && (
                                   <div className="flex items-center space-x-1">
                                     {prediction.prediction.correct === "y" ? (
-                                      <div className="bg-green-500 text-white rounded-full p-1.5 flex items-center justify-center">
-                                        <span className="text-sm font-bold">✓</span>
+                                      <div className="bg-green-500 text-white rounded-full p-1 flex items-center justify-center">
+                                        <span className="text-xs font-bold">✓</span>
                                       </div>
                                     ) : (
-                                      <div className="bg-red-500 text-white rounded-full p-1.5 flex items-center justify-center">
-                                        <span className="text-sm font-bold">✗</span>
+                                      <div className="bg-red-500 text-white rounded-full p-1 flex items-center justify-center">
+                                        <span className="text-xs font-bold">✗</span>
                                       </div>
                                     )}
-                                    <span className="text-xs font-medium text-gray-600">
-                                      {prediction.prediction.correct === "y" ? "Correct" : "Wrong"}
-                                    </span>
                                   </div>
                                 )}
                               </div>
                             </div>
                             
-                            <div className="space-y-3 text-sm transition-transform duration-300 ease-in-out transform group-hover:scale-108">
+                            <div className="space-y-2 text-xs transition-transform duration-300 ease-in-out transform group-hover:scale-108">
                               {/* Main betting options */}
-                              <div className="grid grid-cols-3 gap-3">
-                                <div className="text-center p-2 rounded">
+                              <div className="grid grid-cols-3 gap-1">
+                                <div className="text-center p-1 rounded">
                                   <div className={`${
                                     prediction.prediction.predicted_outcome === "Home"
-                                      ? "bg-green-100 border border-green-300 rounded p-2"
-                                      : "bg-gray-50 p-2"
+                                      ? "bg-green-100 border border-green-300 rounded p-1"
+                                      : "bg-gray-50 p-1"
                                   }`}>
-                                    <div className="text-xs text-gray-500 mb-1">Home Win</div>
-                                    <div className={`font-bold text-lg ${
+                                    <div className="text-xs text-gray-500 mb-0.5">Home</div>
+                                    <div className={`font-bold text-sm ${
                                       prediction.prediction.predicted_outcome === "Home"
                                         ? "text-green-800"
                                         : ""
@@ -472,14 +465,14 @@ export default function LeaguePredictionsPage() {
                                     </div>
                                   </div>
                                 </div>
-                                <div className="text-center p-2 rounded">
+                                <div className="text-center p-1 rounded">
                                   <div className={`${
                                     prediction.prediction.predicted_outcome === "Draw"
-                                      ? "bg-green-100 border border-green-300 rounded p-2"
-                                      : "bg-gray-50 p-2"
+                                      ? "bg-green-100 border border-green-300 rounded p-1"
+                                      : "bg-gray-50 p-1"
                                   }`}>
-                                    <div className="text-xs text-gray-500 mb-1">Draw</div>
-                                    <div className={`font-bold text-lg ${
+                                    <div className="text-xs text-gray-500 mb-0.5">Draw</div>
+                                    <div className={`font-bold text-sm ${
                                       prediction.prediction.predicted_outcome === "Draw"
                                         ? "text-green-800"
                                         : ""
@@ -488,14 +481,14 @@ export default function LeaguePredictionsPage() {
                                     </div>
                                   </div>
                                 </div>
-                                <div className="text-center p-2 rounded">
+                                <div className="text-center p-1 rounded">
                                   <div className={`${
                                     prediction.prediction.predicted_outcome === "Away"
-                                      ? "bg-green-100 border border-green-300 rounded p-2"
-                                      : "bg-gray-50 p-2"
+                                      ? "bg-green-100 border border-green-300 rounded p-1"
+                                      : "bg-gray-50 p-1"
                                   }`}>
-                                    <div className="text-xs text-gray-500 mb-1">Away Win</div>
-                                    <div className={`font-bold text-lg ${
+                                    <div className="text-xs text-gray-500 mb-0.5">Away</div>
+                                    <div className={`font-bold text-sm ${
                                       prediction.prediction.predicted_outcome === "Away"
                                         ? "text-green-800"
                                         : ""
@@ -506,16 +499,16 @@ export default function LeaguePredictionsPage() {
                                 </div>
                               </div>
                               
-                              {/* Double chance options */}
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="text-center p-2 rounded border border-blue-100">
+                              {/* Double chance options - only show on larger screens */}
+                              <div className="hidden sm:grid sm:grid-cols-2 gap-2">
+                                <div className="text-center p-1 rounded border border-blue-100">
                                   <div className={`${
                                     prediction.prediction.predicted_outcome === "Home or Draw"
-                                      ? "bg-green-100 border border-green-300 rounded p-2"
-                                      : "bg-blue-50 p-2"
+                                      ? "bg-green-100 border border-green-300 rounded p-1"
+                                      : "bg-blue-50 p-1"
                                   }`}>
-                                    <div className="text-xs text-blue-600 mb-1">Home or Draw (1X)</div>
-                                    <div className={`font-bold text-lg ${
+                                    <div className="text-xs text-blue-600 mb-0.5">1X</div>
+                                    <div className={`font-bold text-sm ${
                                       prediction.prediction.predicted_outcome === "Home or Draw"
                                         ? "text-green-800"
                                         : "text-blue-700"
@@ -524,14 +517,14 @@ export default function LeaguePredictionsPage() {
                                     </div>
                                   </div>
                                 </div>
-                                <div className="text-center p-2 rounded border border-blue-100">
+                                <div className="text-center p-1 rounded border border-blue-100">
                                   <div className={`${
                                     prediction.prediction.predicted_outcome === "Away or Draw"
-                                      ? "bg-green-100 border border-green-300 rounded p-2"
-                                      : "bg-blue-50 p-2"
+                                      ? "bg-green-100 border border-green-300 rounded p-1"
+                                      : "bg-blue-50 p-1"
                                   }`}>
-                                    <div className="text-xs text-blue-600 mb-1">Away or Draw (X2)</div>
-                                    <div className={`font-bold text-lg ${
+                                    <div className="text-xs text-blue-600 mb-0.5">X2</div>
+                                    <div className={`font-bold text-sm ${
                                       prediction.prediction.predicted_outcome === "Away or Draw"
                                         ? "text-green-800"
                                         : "text-blue-700"
