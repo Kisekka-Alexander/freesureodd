@@ -6,7 +6,7 @@ import { League, Prediction, Standing, StandingsResponse } from "@/types";
 import { leaguesApi, predictionsApi } from "@/lib/axios";
 import { PredictionsTable } from "@/components/predictions-table";
 import Link from "next/link";
-import { formatCompactDate, isMatchToday } from "@/utils/date";
+import { formatCompactDate } from "@/utils/date";
 
 export default function LeagueDetailPage() {
   const params = useParams();
@@ -112,13 +112,13 @@ export default function LeagueDetailPage() {
 
   const getCountryFlag = (country: string) => {
     const flags: Record<string, string> = {
-      England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      England: "🏴",
       Spain: "🇪🇸",
       Italy: "🇮🇹",
       Germany: "🇩🇪",
       France: "🇫🇷",
       Netherlands: "🇳🇱",
-      Scotland: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+      Scotland: "🏴",
     };
     return flags[country] || "🌍";
   };

@@ -3,7 +3,6 @@
 import { Prediction } from "@/types";
 import {
   formatDateTimeAMPM,
-  isMatchToday,
 } from "@/utils/date";
 import Image from "next/image";
 import { useLayoutEffect, useRef, useState } from "react";

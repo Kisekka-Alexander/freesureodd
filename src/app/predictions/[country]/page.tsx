@@ -12,9 +12,7 @@ import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import {
   formatCompactDate,
-  isMatchToday,
   getTodayLocalDate,
-  formatDateTimeAMPM,
   prepareDateFilterForApi
 } from "@/utils/date";
 import { parseCountryParams } from "@/utils/slugs";
@@ -41,7 +39,6 @@ export default function CountryPredictionsPage() {
   const [allPredictions, setAllPredictions] = useState<Prediction[]>([]);
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
-  const [allPredictionsLoading, setAllPredictionsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
   const [selectedLeague, setSelectedLeague] = useState<number | null>(null);
@@ -70,7 +67,7 @@ export default function CountryPredictionsPage() {
   useEffect(() => {
     const fetchAllPredictions = async () => {
       try {
-        setAllPredictionsLoading(true);
+        setLoading(true);
         const params = {
           sort_by: "correct" as const,
           sort_order: "asc" as const,
@@ -83,7 +80,7 @@ export default function CountryPredictionsPage() {
       } catch (err) {
         console.error("Error fetching all predictions for calendar:", err);
       } finally {
-        setAllPredictionsLoading(false);
+        setLoading(false);
       }
     };
     fetchAllPredictions();
