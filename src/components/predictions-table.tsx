@@ -75,9 +75,10 @@ function AutoScaleContainer({ children }: AutoScaleProps) {
 
 interface PredictionsTableProps {
   predictions: Prediction[];
+  leagues?: { league_id: number; league_name: string; country: string }[];
 }
 
-export function PredictionsTable({ predictions }: PredictionsTableProps) {
+export function PredictionsTable({ predictions, leagues }: PredictionsTableProps) {
   const getStatusColor = (status: string) => {
     const liveStatuses = new Set(["LIVE", "1H", "2H", "HT", "ET", "P"]);
     const upcomingStatuses = new Set(["NS", "TBD"]);
@@ -136,34 +137,29 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
     }
   };
 
-  const getLeagueIcon = (league: string) => {
-    if (league.includes("Champions") || league.includes("UCL")) return "⚽";
-    if (league.includes("Premier")) return "🏴";
-    if (league.includes("La Liga")) return "🇪🇸";
-    if (league.includes("Bundesliga")) return "🇩🇪";
-    if (league.includes("Serie A")) return "🇮🇹";
-    if (league.includes("Ligue 1")) return "🇫🇷";
-    if (league.includes("Championship")) return "🏴";
-    if (league.includes("Eredivisie")) return "🇳🇱";
-    if (league.includes("Scottish")) return "🏴";
-    return "⚽";
-  };
-
-  const deriveLeagueName = (prediction: Prediction) => {
-    const logoUrl = prediction.league_logo || "";
-    const idMatch = logoUrl.match(/\/leagues\/(\d+)\.png(?:\?.*)?$/);
-    if (idMatch) {
-      const leagueId = Number(idMatch[1]);
-      const mapped = predefinedPopularLeagues.find(
-        (l) => l.league_id === leagueId
-      );
-      if (mapped) return mapped.name;
-    }
-    // Fallback: remove common season suffixes if present
-    return (prediction.league_name || "")
+  const deriveLeagueLabel = (prediction: Prediction) => {
+    const leagueName = (prediction.league_name || "")
       .replace(/\s*-\s*\d{4}[-\/]\d{4}$/i, "")
       .replace(/\s*\(\d{4}[-\/]\d{4}\)$/i, "")
       .trim();
+
+    // Extract league_id from logo URL for precise matching
+    const logoUrl = prediction.league_logo || "";
+    const idMatch = logoUrl.match(/\/leagues\/(\d+)\.png(?:\?.*)?$/);
+    const leagueId = idMatch ? Number(idMatch[1]) : null;
+
+    if (leagues && leagueId !== null) {
+      const match = leagues.find((l) => l.league_id === leagueId);
+      if (match?.country) return `${match.country} \u00b7 ${leagueName}`;
+    }
+
+    // Fall back to predefined list
+    if (leagueId !== null) {
+      const mapped = predefinedPopularLeagues.find((l) => l.league_id === leagueId);
+      if (mapped) return `${mapped.country} \u00b7 ${leagueName}`;
+    }
+
+    return leagueName;
   };
 
   return (
@@ -211,31 +207,10 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
               >
                 {/* Teams */}
                 <td className="p-2 md:p-3 w-[260px]">
-                  <div className="flex items-start space-x-2">
-                    <div className="flex-shrink-0">
-                      <Image
-                        src={prediction.league_logo}
-                        alt={`${prediction.league_name} logo`}
-                        title={deriveLeagueName(prediction)}
-                        width={24}
-                        height={24}
-                        className="w-6 h-6 object-contain cursor-help"
-                        onError={(e) => {
-                          // Fallback to emoji if image fails to load
-                          e.currentTarget.style.display = "none";
-                          e.currentTarget.nextElementSibling?.classList.remove(
-                            "hidden"
-                          );
-                        }}
-                      />
-                      <span
-                        className="text-sm hidden cursor-help"
-                        title={deriveLeagueName(prediction)}
-                      >
-                        {getLeagueIcon(prediction.league_name)}
-                      </span>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-medium text-gray-400 leading-tight truncate mb-1">
+                      {deriveLeagueLabel(prediction)}
                     </div>
-                    <div className="flex-1 min-w-0">
                       {/* Home team */}
                       <div className="flex items-center space-x-2 mb-1.5">
                         <Image
@@ -273,7 +248,6 @@ export function PredictionsTable({ predictions }: PredictionsTableProps) {
                           {formatDateTimeAMPM(prediction.match_date)}
                         </div>
                       </div>
-                    </div>
                   </div>
                 </td>
                 {/* Odds */}

@@ -321,7 +321,7 @@ export default function AllPredictionsPage() {
                   </div>
 
                   {viewMode === "table" ? (
-                    <PredictionsTable predictions={filteredPredictions} />
+                    <PredictionsTable predictions={filteredPredictions} leagues={leagues} />
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {filteredPredictions.map((prediction) => {

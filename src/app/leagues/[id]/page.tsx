@@ -315,7 +315,7 @@ export default function LeagueDetailPage() {
                   </p>
                 </div>
               ) : (
-                <PredictionsTable predictions={predictions} />
+                <PredictionsTable predictions={predictions} leagues={league ? [league] : []} />
               )}
             </div>
           )}

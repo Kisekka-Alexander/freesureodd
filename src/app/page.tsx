@@ -260,19 +260,16 @@ export default function Home() {
 
           // Apply client-side country filtering if country is selected but no specific league
           if (selectedCountry && !selectedLeague) {
-            const countryLeagueIds = leagues
-              .filter((league) => league.country === selectedCountry)
-              .map((league) => league.league_id);
+            const countryLeagueIds = new Set(
+              leagues
+                .filter((league) => league.country === selectedCountry)
+                .map((league) => league.league_id)
+            );
 
             predictions = predictions.filter((prediction) => {
-              // Check if the prediction's league belongs to the selected country
-              const leagueForPrediction = leagues.find(
-                (league) => league.league_name === prediction.league_name
-              );
-              return (
-                leagueForPrediction &&
-                countryLeagueIds.includes(leagueForPrediction.league_id)
-              );
+              const idMatch = prediction.league_logo?.match(/\/leagues\/(\d+)\.png/);
+              const leagueId = idMatch ? Number(idMatch[1]) : null;
+              return leagueId !== null && countryLeagueIds.has(leagueId);
             });
           }
 
@@ -660,7 +657,7 @@ export default function Home() {
                   </div>
 
                   {viewMode === "table" ? (
-                    <PredictionsTable predictions={filteredPredictions} />
+                    <PredictionsTable predictions={filteredPredictions} leagues={leagues} />
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {filteredPredictions.map((prediction) => {

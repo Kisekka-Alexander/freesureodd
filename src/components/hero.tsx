@@ -15,6 +15,7 @@ export function Hero() {
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [displayMatches, setDisplayMatches] = useState<Prediction[]>([]);
   const [leagues, setLeagues] = useState<League[]>([]);
+  const [accuracyRate, setAccuracyRate] = useState<number | null>(null);
   const [isClient, setIsClient] = useState(false);
 
   // Ensure we're on the client side before doing time-based operations
@@ -114,6 +115,24 @@ export function Hero() {
       }
     };
     fetchLeagues();
+  }, []);
+
+  // Fetch overall accuracy from all predictions (no date filter)
+  useEffect(() => {
+    const fetchAccuracy = async () => {
+      try {
+        const response = await predictionsApi.getAllPredictions({
+          sort_by: "correct" as const,
+          sort_order: "asc" as const,
+        });
+        if (response.success && response.data.accuracy_percentage) {
+          setAccuracyRate(response.data.accuracy_percentage);
+        }
+      } catch (error) {
+        console.error("Error fetching accuracy:", error);
+      }
+    };
+    fetchAccuracy();
   }, []);
 
   // Load predictions when component mounts or predictions change
@@ -216,7 +235,7 @@ export function Hero() {
           <div className="hidden lg:flex flex-col gap-3 py-3 px-5 bg-white/10 rounded-2xl backdrop-blur-sm self-center border border-white/20 shadow-lg shadow-white/5">
             <div className="text-center transform hover:scale-105 transition-transform">
               <div className="text-2xl font-extrabold bg-gradient-to-r from-yellow-300 to-yellow-400 bg-clip-text text-transparent mb-0.5">
-                98%
+                {accuracyRate !== null ? `${Math.round(accuracyRate)}%` : "—"}
               </div>
               <div className="text-xs font-medium text-white/90">Accuracy</div>
             </div>
@@ -225,7 +244,9 @@ export function Hero() {
               <div className="text-xs font-medium text-white/90">Users</div>
             </div>
             <div className="text-center transform hover:scale-105 transition-transform">
-              <div className="text-2xl font-extrabold text-blue-300">15+</div>
+              <div className="text-2xl font-extrabold text-blue-300">
+                {leagues.length > 0 ? `${leagues.length}+` : "—"}
+              </div>
               <div className="text-xs font-medium text-white/90">Leagues</div>
             </div>
           </div>

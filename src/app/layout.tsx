@@ -80,28 +80,29 @@ export default function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1, user-scalable=yes"
         />
-        <PlausibleProvider
-          domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || ""}
-        />
       </head>
-      <body className={inter.className}>
-        <Providers>
-          <Header />
-          {children}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: "hsl(var(--background))",
-                color: "hsl(var(--foreground))",
-                border: "1px solid hsl(var(--border))",
-              },
-            }}
-          />
-        </Providers>
-        <Analytics />
-      </body>
+      <PlausibleProvider
+        domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || ""}
+      >
+        <body className={inter.className}>
+          <Providers>
+            <Header />
+            {children}
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: "hsl(var(--background))",
+                  color: "hsl(var(--foreground))",
+                  border: "1px solid hsl(var(--border))",
+                },
+              }}
+            />
+          </Providers>
+          <Analytics />
+        </body>
+      </PlausibleProvider>
     </html>
   );
 }
