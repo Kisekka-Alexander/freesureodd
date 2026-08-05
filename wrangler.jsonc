@@ -1,10 +1,5 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "freesureodd",
-  "keep_vars": true,
-  "compatibility_date": "2026-08-05",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": {
-    "enabled": true
-  }
+  "keep_vars": true
 }
