@@ -40,16 +40,14 @@ export function Countries({
 
   const handleCountryClick = (country: string) => {
     if (expandedCountry === country) {
-      // If the same country is clicked, collapse it
       onExpandCountry(null);
       if (selectedCountry === country) {
         onCountrySelect(null);
-        onLeagueSelect(null); // Clear any league selection when deselecting country
+        onLeagueSelect(null);
       }
     } else {
-      // Just expand the country without selecting it
       onExpandCountry(country);
-      // Don't call onCountrySelect here - only call it when a league is selected
+      onCountrySelect(country); // navigate to country page immediately
     }
   };
 

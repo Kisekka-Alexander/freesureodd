@@ -160,7 +160,7 @@ export default function LeagueDetailPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-16">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-3 md:px-6">
           <nav className="mb-8">
             <Link
               href="/leagues"
@@ -190,7 +190,7 @@ export default function LeagueDetailPage() {
 
       {/* Tabs */}
       <section className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-3 md:px-6">
           <div className="flex space-x-8">
             {[
               { id: "overview", label: "Overview", icon: "📊" },
@@ -220,7 +220,7 @@ export default function LeagueDetailPage() {
 
       {/* Content */}
       <section className="py-12">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-3 md:px-6">
           {activeTab === "overview" && (
             <div className="space-y-12">
               {/* Quick Stats */}

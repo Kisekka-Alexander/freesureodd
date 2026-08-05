@@ -164,11 +164,10 @@ export function PredictionsTable({ predictions, leagues }: PredictionsTableProps
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-      <AutoScaleContainer>
-        <table className="min-w-[1040px] table-fixed">
+      <table className="w-full table-fixed">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left p-2 md:p-3 font-semibold text-gray-700 w-[260px]">
+              <th className="text-left px-1.5 py-2 font-semibold text-gray-700 w-[35%]">
                 <div className="text-xs">
                   <div className="font-semibold text-gray-900 leading-tight">
                     Home team
@@ -176,23 +175,16 @@ export function PredictionsTable({ predictions, leagues }: PredictionsTableProps
                   <div className="text-gray-600 leading-tight">Away team</div>
                 </div>
               </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-[540px]">
+              <th className="text-center px-1 py-2 font-semibold text-gray-700 w-[33%]">
                 <div className="text-xs">Odds</div>
-                <div className="grid grid-cols-5 gap-1 text-xs font-normal text-gray-500 mt-1">
-                  <span className="text-center">1</span>
-                  <span className="text-center">X</span>
-                  <span className="text-center">2</span>
-                  <span className="text-center">1X</span>
-                  <span className="text-center">X2</span>
-                </div>
               </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-[70px]">
+              <th className="text-center px-1 py-2 font-semibold text-gray-700 w-[10%]">
                 <span className="text-xs">Pred</span>
               </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-[110px]">
-                <span className="text-xs">Status</span>
+              <th className="text-center px-1 py-2 font-semibold text-gray-700 w-[11%]">
+                <span className="text-xs">&nbsp;</span>
               </th>
-              <th className="text-center p-2 md:p-3 font-semibold text-gray-700 w-[60px]">
+              <th className="text-center px-1 py-2 font-semibold text-gray-700 w-[11%]">
                 <span className="text-xs">Score</span>
               </th>
             </tr>
@@ -206,142 +198,101 @@ export function PredictionsTable({ predictions, leagues }: PredictionsTableProps
                 }`}
               >
                 {/* Teams */}
-                <td className="p-2 md:p-3 w-[260px]">
+                <td className="px-1.5 py-2 w-[35%]">
                   <div className="min-w-0">
-                    <div className="text-[10px] font-medium text-gray-400 leading-tight truncate mb-1">
+                    <div className="text-[10px] font-medium text-gray-400 leading-tight truncate mb-0.5">
                       {deriveLeagueLabel(prediction)}
                     </div>
                       {/* Home team */}
-                      <div className="flex items-center space-x-2 mb-1.5">
+                      <div className="flex items-center space-x-1 mb-1">
                         <Image
                           src={prediction.home_team_logo}
                           alt={`${prediction.home_team} logo`}
-                          width={20}
-                          height={20}
-                          className="w-5 h-5 object-contain flex-shrink-0"
+                          width={16}
+                          height={16}
+                          className="w-4 h-4 object-contain flex-shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                           }}
                         />
-                        <div className="font-semibold text-gray-900 text-xs leading-tight truncate">
+                        <div className="font-semibold text-blue-700 text-xs leading-tight truncate">
                           {prediction.home_team}
                         </div>
                       </div>
                       {/* Away team */}
-                      <div className="flex items-center space-x-2 mb-1.5">
+                      <div className="flex items-center space-x-1 mb-1">
                         <Image
                           src={prediction.away_team_logo}
                           alt={`${prediction.away_team} logo`}
-                          width={20}
-                          height={20}
-                          className="w-5 h-5 object-contain flex-shrink-0"
+                          width={16}
+                          height={16}
+                          className="w-4 h-4 object-contain flex-shrink-0"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                           }}
                         />
-                        <div className="text-gray-600 text-xs leading-tight truncate">
+                        <div className="text-blue-500 text-xs leading-tight truncate">
                           {prediction.away_team}
                         </div>
                       </div>
-                      <div className="text-xs text-gray-400 leading-tight">
-                        <div className="truncate">
-                          {formatDateTimeAMPM(prediction.match_date)}
-                        </div>
+                      <div className="text-[10px] text-gray-400 leading-tight truncate">
+                        {formatDateTimeAMPM(prediction.match_date)}
                       </div>
                   </div>
                 </td>
-                {/* Odds */}
-                <td className="p-2 md:p-3 w-[540px]">
-                  <div className="grid grid-cols-5 gap-1 text-sm">
-                    <div className="text-center">
-                      <div className={`font-medium text-xs rounded px-1 py-1 ${
-                        prediction.prediction.predicted_outcome === "Home" 
-                          ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
-                          : "bg-gray-50"
-                      }`}>
-                        {prediction.home_odds.toFixed(2)}
+                {/* Odds — labels and values per row so double-chance rows self-label correctly */}
+                <td className="px-1 py-2 w-[33%]">
+                  {(() => {
+                    const outcome = prediction.prediction.predicted_outcome;
+                    const isDoubleChance = outcome === "Home or Draw" || outcome === "Away or Draw";
+                    const odds = isDoubleChance
+                      ? [
+                          { label: "1X", value: prediction.home_or_draw_odds, highlight: outcome === "Home or Draw" },
+                          { label: "X",  value: prediction.draw_odds,         highlight: false },
+                          { label: "X2", value: prediction.away_or_draw_odds, highlight: outcome === "Away or Draw" },
+                        ]
+                      : [
+                          { label: "1", value: prediction.home_odds, highlight: outcome === "Home" },
+                          { label: "X", value: prediction.draw_odds, highlight: outcome === "Draw" },
+                          { label: "2", value: prediction.away_odds, highlight: outcome === "Away" },
+                        ];
+                    return (
+                      <div className="grid grid-cols-3 gap-2">
+                        {odds.map((odd, i) => (
+                          <div key={i} className="text-center">
+                            <div className="text-[9px] text-gray-500 font-semibold leading-none mb-0.5">{odd.label}</div>
+                            <div className={`w-full text-center font-medium text-xs rounded font-mono py-0.5 border ${
+                              odd.highlight
+                                ? "bg-green-100 text-green-800 border-green-300 font-bold"
+                                : "bg-gray-50 border-transparent"
+                            }`}>
+                              {typeof odd.value === "number" ? odd.value.toFixed(2) : "-"}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                    <div className="text-center">
-                      <div className={`font-medium text-xs rounded px-1 py-1 ${
-                        prediction.prediction.predicted_outcome === "Draw" 
-                          ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
-                          : "bg-gray-50"
-                      }`}>
-                        {prediction.draw_odds.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className={`font-medium text-xs rounded px-1 py-1 ${
-                        prediction.prediction.predicted_outcome === "Away" 
-                          ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
-                          : "bg-gray-50"
-                      }`}>
-                        {prediction.away_odds.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      {typeof prediction.home_or_draw_odds === "number" ? (
-                        <div className={`font-medium text-xs rounded px-1 py-1 ${
-                          prediction.prediction.predicted_outcome === "Home or Draw" 
-                            ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
-                            : "bg-gray-50"
-                        }`}>
-                          {prediction.home_or_draw_odds.toFixed(2)}
-                        </div>
-                      ) : (
-                        <div className="font-medium text-xs text-gray-400">
-                          -
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-center">
-                      {typeof prediction.away_or_draw_odds === "number" ? (
-                        <div className={`font-medium text-xs rounded px-1 py-1 ${
-                          prediction.prediction.predicted_outcome === "Away or Draw" 
-                            ? "bg-green-100 text-green-800 border border-green-300 font-bold" 
-                            : "bg-gray-50"
-                        }`}>
-                          {prediction.away_or_draw_odds.toFixed(2)}
-                        </div>
-                      ) : (
-                        <div className="font-medium text-xs text-gray-400">
-                          -
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    );
+                  })()}
                 </td>
 
                 {/* Prediction */}
-                <td className="p-2 md:p-3 text-center w-[70px]">
-                  <div className="flex flex-col items-center space-y-1">
-                    <span
-                      className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${getPredictionColor(
-                        prediction.prediction.predicted_outcome,
-                        prediction.prediction.correct
-                      )}`}
-                    >
-                      {getPredictionNumber(
-                        prediction.prediction.predicted_outcome
-                      )}
-                    </span>
-                    {prediction.prediction.correct && (
-                      <div className="text-xs">
-                        {prediction.prediction.correct === "y" ? (
-                          <span className="text-green-600 font-bold">✓</span>
-                        ) : (
-                          <span className="text-red-600 font-bold">✗</span>
-                        )}
-                      </div>
+                <td className="pl-4 pr-1 py-2 text-center w-[10%]">
+                  <span
+                    className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${getPredictionColor(
+                      prediction.prediction.predicted_outcome,
+                      prediction.prediction.correct
+                    )}`}
+                  >
+                    {getPredictionNumber(
+                      prediction.prediction.predicted_outcome
                     )}
-                  </div>
+                  </span>
                 </td>
 
                 {/* Status */}
-                <td className="p-2 md:p-3 text-center w-[110px]">
+                <td className="pl-5 pr-1 py-2 text-center w-[11%]">
                   <span
-                    className={`inline-flex px-2 py-1 rounded-full text-xs font-medium uppercase ${getStatusColor(
+                    className={`inline-flex px-1 py-0.5 rounded-full text-[10px] font-medium uppercase ${getStatusColor(
                       prediction.match_status
                     )}`}
                   >
@@ -350,7 +301,7 @@ export function PredictionsTable({ predictions, leagues }: PredictionsTableProps
                 </td>
 
                 {/* Score */}
-                <td className="p-2 md:p-3 text-center w-[60px]">
+                <td className="px-1 py-2 text-center w-[11%]">
                   {prediction.fulltime_home_score !== undefined &&
                   prediction.fulltime_away_score !== undefined ? (
                     <div className="text-xs font-semibold text-gray-900">
@@ -365,7 +316,6 @@ export function PredictionsTable({ predictions, leagues }: PredictionsTableProps
             ))}
           </tbody>
         </table>
-      </AutoScaleContainer>
     </div>
   );
 }

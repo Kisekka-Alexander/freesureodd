@@ -209,9 +209,12 @@ export function Hero() {
   const featuredMatch = getFeaturedMatch();
 
   return (
-    <section className="bg-gradient-to-br from-green-600 via-blue-700 to-purple-800 text-white py-2 lg:py-3">
+    <section className="bg-gradient-to-br from-green-600 via-blue-700 to-purple-800 text-white py-3 lg:py-3">
       <div className="container mx-auto max-w-5xl px-4">
-        <div className="grid lg:grid-cols-[2fr,auto,2fr] gap-2 items-center">
+        {/* Desktop: 3-column grid | Mobile: stacked */}
+        <div className="grid lg:grid-cols-[2fr,auto,2fr] gap-3 items-center">
+
+          {/* Title */}
           <div className="text-left">
             <div className="flex items-center space-x-2 mb-1">
               <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
@@ -230,8 +233,29 @@ export function Hero() {
               </span>
               <span className="inline lg:block">⚽</span>
             </h1>
+
+            {/* Stats row — visible on mobile only */}
+            <div className="flex gap-4 mt-2 lg:hidden">
+              <div className="text-center">
+                <div className="text-lg font-extrabold bg-gradient-to-r from-yellow-300 to-yellow-400 bg-clip-text text-transparent">
+                  {accuracyRate !== null ? `${Math.round(accuracyRate)}%` : "—"}
+                </div>
+                <div className="text-[10px] font-medium text-white/80">Accuracy</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-extrabold text-green-300">50K+</div>
+                <div className="text-[10px] font-medium text-white/80">Users</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-extrabold text-blue-300">
+                  {leagues.length > 0 ? `${leagues.length}+` : "—"}
+                </div>
+                <div className="text-[10px] font-medium text-white/80">Leagues</div>
+              </div>
+            </div>
           </div>
 
+          {/* Stats column — desktop only */}
           <div className="hidden lg:flex flex-col gap-3 py-3 px-5 bg-white/10 rounded-2xl backdrop-blur-sm self-center border border-white/20 shadow-lg shadow-white/5">
             <div className="text-center transform hover:scale-105 transition-transform">
               <div className="text-2xl font-extrabold bg-gradient-to-r from-yellow-300 to-yellow-400 bg-clip-text text-transparent mb-0.5">
@@ -251,7 +275,8 @@ export function Hero() {
             </div>
           </div>
 
-          <div className="hidden lg:block">
+          {/* Featured Match card — visible on all screens */}
+          <div className="block">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 border border-white/20 shadow-lg shadow-white/5">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-semibold bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">
@@ -363,6 +388,7 @@ export function Hero() {
               )}
             </div>
           </div>
+
         </div>
       </div>
     </section>

@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Features } from "@/components/features";
 import { PredictionsTable } from "@/components/predictions-table";
 import { DateFilter } from "@/components/date-filter";
 import { PopularLeaguesSidebar } from "@/components/popular-leagues-sidebar";
@@ -297,7 +296,7 @@ export default function Home() {
       // Only auto-set view mode if it's not already set from URL parameters
       if (!searchParams.get('view')) {
         const isMobile = window.innerWidth < 768; // md breakpoint in Tailwind
-        const newViewMode = isMobile ? "cards" : "table";
+        const newViewMode = "table";
         setViewMode(newViewMode);
         updateURL({ view: newViewMode });
       }
@@ -310,7 +309,7 @@ export default function Home() {
     const handleResize = () => {
       if (!searchParams.get('view')) {
         const isMobile = window.innerWidth < 768;
-        const newViewMode = isMobile ? "cards" : "table";
+        const newViewMode = "table";
         setViewMode(newViewMode);
         updateURL({ view: newViewMode });
       }
@@ -420,7 +419,7 @@ export default function Home() {
       <main className="min-h-screen">
         <Hero />
         <section className="py-16 bg-white">
-          <div className="container mx-auto px-6">
+          <div className="container mx-auto px-3 md:px-6">
             <div className="flex justify-center items-center h-64">
               <div className="text-gray-500">Loading...</div>
             </div>
@@ -436,7 +435,7 @@ export default function Home() {
 
       {/* Predictions Section */}
       <section id="predictions" className="py-16 bg-white">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-3 md:px-6">
           {/* Main Content Layout with Sidebar */}
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Left Sidebar - Popular Leagues */}
@@ -593,7 +592,7 @@ export default function Home() {
                       </div>
                       
                       {/* AI Accuracy Badge */}
-                      {accuracyRate !== null && (
+                      {accuracyRate !== null && accuracyRate > 0 && (
                         <div className="flex items-center space-x-2">
                           <div className="bg-gradient-to-r from-green-100 to-blue-100 border border-green-200 rounded-full px-3 py-1 flex items-center space-x-1">
                             <span className="text-xs">🎯</span>
@@ -898,7 +897,29 @@ export default function Home() {
         </div>
       </section>
 
-      <Features />
+      <section className="py-16 bg-gray-50 border-t border-gray-200">
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">How It Works</h2>
+          <p className="text-gray-500 mb-10 text-sm">Our model runs before each matchday and publishes one prediction per match</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="text-3xl mb-3">📥</div>
+              <h3 className="font-semibold text-gray-900 mb-1">1. Data collection</h3>
+              <p className="text-sm text-gray-500">Odds, form, head-to-head results, and league standings are pulled from live sources before kick-off.</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="text-3xl mb-3">🤖</div>
+              <h3 className="font-semibold text-gray-900 mb-1">2. AI prediction</h3>
+              <p className="text-sm text-gray-500">A machine learning model scores each outcome (1 / X / 2) and picks the highest-confidence call.</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="text-3xl mb-3">✅</div>
+              <h3 className="font-semibold text-gray-900 mb-1">3. Verified results</h3>
+              <p className="text-sm text-gray-500">Every prediction is tracked after the final whistle. Accuracy is calculated live and shown on each page.</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

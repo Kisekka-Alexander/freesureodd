@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Features } from "@/components/features";
 import { PredictionsTable } from "@/components/predictions-table";
 import { DateFilter } from "@/components/date-filter";
 import { PopularLeaguesSidebar } from "@/components/popular-leagues-sidebar";
@@ -142,14 +141,14 @@ export default function LeaguePredictionsPage() {
   useEffect(() => {
     const setInitialViewMode = () => {
       const isMobile = window.innerWidth < 768;
-      setViewMode(isMobile ? "cards" : "table");
+      setViewMode("table");
     };
 
     setInitialViewMode();
 
     const handleResize = () => {
       const isMobile = window.innerWidth < 768;
-      setViewMode(isMobile ? "cards" : "table");
+      setViewMode("table");
     };
 
     window.addEventListener('resize', handleResize);
@@ -198,7 +197,7 @@ export default function LeaguePredictionsPage() {
       <Hero />
 
       <section id="predictions" className="py-16 bg-white">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-3 md:px-6">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="w-full lg:w-64 flex-shrink-0">
               <PopularLeaguesSidebar
@@ -283,7 +282,7 @@ export default function LeaguePredictionsPage() {
                         )}
                       </div>
                       
-                      {accuracyRate !== null && (
+                      {accuracyRate !== null && accuracyRate > 0 && (
                         <div className="flex items-center space-x-2">
                           <div className="bg-gradient-to-r from-green-100 to-blue-100 border border-green-200 rounded-full px-3 py-1 flex items-center space-x-1">
                             <span className="text-xs">🎯</span>
@@ -545,7 +544,7 @@ export default function LeaguePredictionsPage() {
         </div>
       </section>
 
-      <Features />
+
     </main>
   );
 }
