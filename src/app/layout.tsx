@@ -7,6 +7,9 @@ import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/react";
 import PlausibleProvider from "next-plausible";
 
+// All pages inherit edge runtime for Cloudflare Pages deployment
+export const runtime = "edge";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
