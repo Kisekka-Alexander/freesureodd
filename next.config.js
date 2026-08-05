@@ -26,7 +26,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Build as standalone 
+  // next-on-pages requires edge-compatible output
   output: "standalone",
   distDir: ".next",
 };

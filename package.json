@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:export": "next build",
+    "build:cf": "npx @cloudflare/next-on-pages",
+    "deploy:cf": "npm run build:cf && npx wrangler pages deploy",
     "start": "next start",
     "lint": "next lint",
     "setup": "node scripts/setup-new-project.js",
@@ -40,6 +41,7 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
