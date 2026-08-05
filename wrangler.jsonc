@@ -3,5 +3,7 @@
   "name": "freesureodd",
   "compatibility_date": "2026-08-05",
   "compatibility_flags": ["nodejs_compat"],
-  "pages_build_output_dir": ".vercel/output/static"
+  "observability": {
+    "enabled": true
+  }
 }
